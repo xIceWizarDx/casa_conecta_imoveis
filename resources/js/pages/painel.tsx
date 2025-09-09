@@ -460,10 +460,10 @@ export default function Painel() {
                     <>
                         <div className="flex flex-col gap-4">
                             <Button className="w-auto self-start" onClick={() => setHeroModalOpen(true)}>
-                                Configurar Hero Slides
+                                Slides
                             </Button>
                             <Button className="w-auto self-start" onClick={() => setFeaturedModalOpen(true)}>
-                                Configurar Imóveis em Destaque
+                                Destaques
                             </Button>
                         </div>
 
@@ -474,8 +474,14 @@ export default function Painel() {
                                         <DialogTitle>Hero Slides</DialogTitle>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
-                                            <Button className="w-auto" variant="secondary" onClick={refreshSlides} disabled={slidesLoading}>
-                                                Atualizar
+                                            <Button
+                                                className="w-auto"
+                                                variant="secondary"
+                                                onClick={refreshSlides}
+                                                disabled={slidesLoading}
+                                                title="Atualizar"
+                                            >
+                                                ↻
                                             </Button>
                                         </div>
                                     </div>
@@ -483,6 +489,7 @@ export default function Painel() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
+
                                             <Label>Título</Label>
                                             <Input
                                                 value={newSlide.title ?? ''}
@@ -622,8 +629,13 @@ export default function Painel() {
                                         </div>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide}>
-                                            {creatingSlide ? 'Adicionando…' : 'Adicionar Slide'}
+                                        <Button
+                                            className="w-auto"
+                                            onClick={submitSlide}
+                                            disabled={creatingSlide}
+                                            title="Adicionar Slide"
+                                        >
+                                            {creatingSlide ? '…' : '+'}
                                         </Button>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -695,8 +707,14 @@ export default function Painel() {
                                         <DialogTitle>Imóveis em Destaque</DialogTitle>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <span>{featuredLoading ? 'Carregando…' : `${featured.length} itens`}</span>
-                                            <Button className="w-auto" variant="secondary" onClick={refreshFeatured} disabled={featuredLoading}>
-                                                Atualizar
+                                            <Button
+                                                className="w-auto"
+                                                variant="secondary"
+                                                onClick={refreshFeatured}
+                                                disabled={featuredLoading}
+                                                title="Atualizar"
+                                            >
+                                                ↻
                                             </Button>
                                         </div>
                                     </div>
@@ -816,8 +834,9 @@ export default function Painel() {
                                                     setNewFeatured((s) => ({ ...s, features: [...(s.features ?? []), v] }));
                                                     setFeatureInput('');
                                                 }}
+                                                title="Adicionar"
                                             >
-                                                Adicionar
+                                                +
                                             </Button>
                                         </div>
                                         {(newFeatured.features ?? []).length > 0 && (
@@ -900,8 +919,13 @@ export default function Painel() {
                                         </div>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured}>
-                                            {creatingFeatured ? 'Adicionando…' : 'Adicionar Destaque'}
+                                        <Button
+                                            className="w-auto"
+                                            onClick={submitFeatured}
+                                            disabled={creatingFeatured}
+                                            title="Adicionar Destaque"
+                                        >
+                                            {creatingFeatured ? '…' : '+'}
                                         </Button>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
