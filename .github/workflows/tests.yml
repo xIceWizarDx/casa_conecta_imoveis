@@ -1,54 +1,40 @@
-@'
+# .github/workflows/tests.yml
 name: tests
 on: [push, pull_request]
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # PHP + Composer
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"      # fixa PHP compatível com seu ambiente
-          coverage: none
+          php-version: '8.2'
           tools: composer
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache/files
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          coverage: none
 
       - name: Install PHP deps
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      # .env e APP_KEY ANTES do build do Vite
-      - name: Copy .env
+      # <<< preparar Laravel ANTES do build >>>
+      - name: Copy Environment File
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Generate APP key
+      - name: Generate Application Key
         run: php artisan key:generate
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-      # Node + Vite
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"   # evita pegar Node 22 automaticamente
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install Node deps
         run: npm ci
 
-      - name: Build assets (Vite)
+      - name: Build Assets
         run: npm run build
 
-      # Testes Laravel
-      - name: Run tests
+      - name: Tests
         run: php artisan test
-'@ | Set-Content -Encoding UTF8 .github\workflows\tests.yml
