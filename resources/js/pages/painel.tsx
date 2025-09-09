@@ -459,25 +459,29 @@ export default function Painel() {
                 {tab === 'publicacoes' && (
                     <>
                         <div className="flex flex-col gap-4">
-                            <Button onClick={() => setHeroModalOpen(true)}>Configurar Hero Slides</Button>
-                            <Button onClick={() => setFeaturedModalOpen(true)}>Configurar Imóveis em Destaque</Button>
+                            <Button className="w-auto self-start" onClick={() => setHeroModalOpen(true)}>
+                                Configurar Hero Slides
+                            </Button>
+                            <Button className="w-auto self-start" onClick={() => setFeaturedModalOpen(true)}>
+                                Configurar Imóveis em Destaque
+                            </Button>
                         </div>
 
                         <Dialog open={heroModalOpen} onOpenChange={setHeroModalOpen}>
-                            <DialogContent className="max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Hero Slides</DialogTitle>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
-                                            <Button variant="secondary" onClick={refreshSlides} disabled={slidesLoading}>
+                                            <Button className="w-auto" variant="secondary" onClick={refreshSlides} disabled={slidesLoading}>
                                                 Atualizar
                                             </Button>
                                         </div>
                                     </div>
                                 </DialogHeader>
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
                                             <Label>Imagem</Label>
                                             <div className="mt-2 flex items-center gap-2">
@@ -492,6 +496,7 @@ export default function Painel() {
                                                         <Button
                                                             type="button"
                                                             variant="secondary"
+                                                            className="w-auto"
                                                             onClick={() => {
                                                                 setImagePickerFor('slide');
                                                                 setImagePickerOpen(true);
@@ -565,7 +570,7 @@ export default function Painel() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                         <div>
                                             <Label>Quartos</Label>
                                             <Input
@@ -617,7 +622,7 @@ export default function Painel() {
                                         </label>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button onClick={submitSlide} disabled={creatingSlide}>
+                                        <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide}>
                                             {creatingSlide ? 'Adicionando…' : 'Adicionar Slide'}
                                         </Button>
                                     </div>
@@ -637,20 +642,21 @@ export default function Painel() {
                                                         <div className="text-xs text-muted-foreground">{s.price}</div>
                                                     </div>
                                                     <div className="flex shrink-0 items-center gap-1">
-                                                        <Button variant="secondary" onClick={() => moveSlide(s.id, -1)} title="Subir">
+                                                        <Button className="w-auto" variant="secondary" onClick={() => moveSlide(s.id, -1)} title="Subir">
                                                             ↑
                                                         </Button>
-                                                        <Button variant="secondary" onClick={() => moveSlide(s.id, 1)} title="Descer">
+                                                        <Button className="w-auto" variant="secondary" onClick={() => moveSlide(s.id, 1)} title="Descer">
                                                             ↓
                                                         </Button>
                                                         <Button
+                                                            className="w-auto"
                                                             variant={s.is_published ? 'default' : 'secondary'}
                                                             onClick={() => toggleSlidePublish(s.id)}
                                                             title="Publicar/Despublicar"
                                                         >
                                                             {s.is_published ? 'Publicado' : 'Rascunho'}
                                                         </Button>
-                                                        <Button variant="destructive" onClick={() => deleteSlide(s.id)} title="Excluir">
+                                                        <Button className="w-auto" variant="destructive" onClick={() => deleteSlide(s.id)} title="Excluir">
                                                             Excluir
                                                         </Button>
                                                     </div>
@@ -660,7 +666,7 @@ export default function Painel() {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button variant="secondary" onClick={() => setHeroModalOpen(false)}>
+                                    <Button className="w-auto" variant="secondary" onClick={() => setHeroModalOpen(false)}>
                                         Fechar
                                     </Button>
                                 </DialogFooter>
@@ -668,20 +674,20 @@ export default function Painel() {
                         </Dialog>
 
                         <Dialog open={featuredModalOpen} onOpenChange={setFeaturedModalOpen}>
-                            <DialogContent className="max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Imóveis em Destaque</DialogTitle>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <span>{featuredLoading ? 'Carregando…' : `${featured.length} itens`}</span>
-                                            <Button variant="secondary" onClick={refreshFeatured} disabled={featuredLoading}>
+                                            <Button className="w-auto" variant="secondary" onClick={refreshFeatured} disabled={featuredLoading}>
                                                 Atualizar
                                             </Button>
                                         </div>
                                     </div>
                                 </DialogHeader>
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
                                             <Label>Imagem</Label>
                                             <div className="mt-2 flex items-center gap-2">
@@ -696,6 +702,7 @@ export default function Painel() {
                                                         <Button
                                                             type="button"
                                                             variant="secondary"
+                                                            className="w-auto"
                                                             onClick={() => {
                                                                 setImagePickerFor('featured');
                                                                 setImagePickerOpen(true);
@@ -761,7 +768,7 @@ export default function Painel() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                         <div>
                                             <Label>Quartos</Label>
                                             <Input
@@ -841,6 +848,7 @@ export default function Painel() {
                                             <Button
                                                 type="button"
                                                 variant="secondary"
+                                                className="w-auto"
                                                 onClick={() => {
                                                     const v = featureInput.trim();
                                                     if (!v) return;
@@ -877,7 +885,7 @@ export default function Painel() {
                                         )}
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button onClick={submitFeatured} disabled={creatingFeatured}>
+                                        <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured}>
                                             {creatingFeatured ? 'Adicionando…' : 'Adicionar Destaque'}
                                         </Button>
                                     </div>
@@ -897,20 +905,21 @@ export default function Painel() {
                                                         <div className="text-xs text-muted-foreground">{f.price}</div>
                                                     </div>
                                                     <div className="flex shrink-0 items-center gap-1">
-                                                        <Button variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
+                                                        <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
                                                             Subir
                                                         </Button>
-                                                        <Button variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
+                                                        <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
                                                             Descer
                                                         </Button>
                                                         <Button
+                                                            className="w-auto"
                                                             variant={f.is_published ? 'default' : 'secondary'}
                                                             onClick={() => toggleFeaturedPublish(f.id)}
                                                             title="Publicar/Despublicar"
                                                         >
                                                             {f.is_published ? 'Publicado' : 'Rascunho'}
                                                         </Button>
-                                                        <Button variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
+                                                        <Button className="w-auto" variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
                                                             Excluir
                                                         </Button>
                                                     </div>
@@ -920,7 +929,7 @@ export default function Painel() {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button variant="secondary" onClick={() => setFeaturedModalOpen(false)}>
+                                    <Button className="w-auto" variant="secondary" onClick={() => setFeaturedModalOpen(false)}>
                                         Fechar
                                     </Button>
                                 </DialogFooter>
