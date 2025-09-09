@@ -7,6 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # PHP / Composer
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -16,19 +17,29 @@ jobs:
       - name: Install PHP deps
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      # Preparar .env e APP_KEY
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
       - name: Generate APP key
         run: php artisan key:generate
 
-      # evita depender de MySQL no runner:
-      - name: Set testing env (SQLite in-memory)
+      # Forçar ambiente de teste sem MySQL
+      - name: Use SQLite in-memory for CI
         run: |
           php -r 'file_put_contents(".env", PHP_EOL."APP_ENV=testing", FILE_APPEND);'
           php -r 'file_put_contents(".env", PHP_EOL."DB_CONNECTION=sqlite", FILE_APPEND);'
           php -r 'file_put_contents(".env", PHP_EOL."DB_DATABASE=:memory:", FILE_APPEND);'
 
+      # (opcional, mas evita que algo dependa de tabelas)
+      - name: Migrate (testing)
+        run: php artisan migrate --force
+
+      # ⚠️ Gera os tipos ANTES do Vite (se falhar, você vê o erro claro aqui)
+      - name: Generate Wayfinder types
+        run: php artisan wayfinder:generate --with-form -v
+
+      # Node / Vite
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
