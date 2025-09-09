@@ -1,0 +1,183 @@
+                      <Button size="xs" variant="danger" onClick={() => removeImage(img.id)} iconName="Trash2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          )}
+
+          {/* Gerenciar anÃºncios do Hero */}
+          <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">AnÃºncios do Hero</h2>
+              {form.id && (
+                <Button variant="outline" size="sm" onClick={resetForm}>Novo</Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Imagem</label>
+                <select className="mt-1 w-full border border-border rounded-md h-10 px-2" value={form.image_id}
+                  onChange={(e) => setForm({ ...form, image_id: parseInt(e.target.value || '0', 10) })}>
+                  <option value={0}>Selecione uma imagem…€¦</option>
+                  {existing.map((img) => (
+                    <option key={img.id} value={img.id}>{img.filename}</option>
+                  ))}
+                </select>
+              </div>
+              <Input label="Título" value={form.title} onChange={(e: any) => setForm({ ...form, title: e.target.value })} required />
+              <Input label="Subtítulo" value={form.subtitle} onChange={(e: any) => setForm({ ...form, subtitle: e.target.value })} />
+              <Input label="Valor" value={form.price} onChange={(e: any) => setForm({ ...form, price: e.target.value })} required />
+              <Input type="number" label="Quartos" value={form.bedrooms} onChange={(e: any) => setForm({ ...form, bedrooms: parseInt(e.target.value || '0', 10) })} />
+              <Input type="number" label="Banheiros" value={form.bathrooms} onChange={(e: any) => setForm({ ...form, bathrooms: parseInt(e.target.value || '0', 10) })} />
+              <Input label="Ãrea (mÂ²)" value={form.area} onChange={(e: any) => setForm({ ...form, area: e.target.value })} />
+              <Input label="Setor/Bairro" value={form.neighborhood} onChange={(e: any) => setForm({ ...form, neighborhood: e.target.value })} />
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_new} onChange={(e) => setForm({ ...form, is_new: e.target.checked })} /> Novo</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} /> Publicado</label>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Button onClick={saveSlide} variant="success">{form.id ? 'Salvar alterações' : 'Publicar no Hero'}</Button>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-3">
+              {slides.map((s, idx) => (
+                <div key={s.id} className="flex items-center gap-3 border border-border rounded-md p-3">
+                  <img src={s.image_url} alt={s.title} className="w-16 h-16 object-cover rounded" />
+                  <div className="flex-1">
+                    <div className="font-semibold">{s.title} {s.is_new ? <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Novo</span> : null}</div>
+                    <div className="text-sm text-text-secondary">{s.neighborhood} â€¢ {s.bedrooms} q â€¢ {s.bathrooms} b â€¢ {s.area}</div>
+                  </div>
+                  <div className="text-sm font-semibold text-primary mr-2">{s.price}</div>
+                  <div className="flex items-center gap-2">
+                    <Button size="xs" variant="outline" onClick={() => setForm({
+                      id: s.id, image_id: s.image_id, title: s.title, subtitle: s.subtitle || '', price: s.price,
+                      bedrooms: s.bedrooms || 0, bathrooms: s.bathrooms || 0, area: s.area || '', neighborhood: s.neighborhood || '',
+                      is_new: !!s.is_new, is_published: !!s.is_published,
+                    })}>Editar</Button>
+                    <Button size="xs" variant={s.is_published ? 'warning' : 'success'} onClick={() => publishToggle(s.id)}>{s.is_published ? 'Despublicar' : 'Publicar'}</Button>
+                    <Button size="xs" variant="danger" onClick={() => removeSlide(s.id)}>Excluir</Button>
+                    <Button size="xs" variant="outline" onClick={() => moveSlide(idx, -1)}>â†‘</Button>
+                    <Button size="xs" variant="outline" onClick={() => moveSlide(idx, 1)}>â†“</Button>
+                  </div>
+                </div>
+              ))}
+              {slides.length === 0 && (
+                <div className="text-sm text-text-secondary">Nenhum anÃºncio cadastrado.</div>
+              )}
+            </div>
+          </div>
+
+          \r\n{/* Imóveis em Destaque */}
+          <div className="bg-white rounded-xl shadow-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Imóveis em Destaque</h2>
+              {featuredForm.id && (
+                <Button variant="outline" size="sm" onClick={resetFeaturedForm}>Novo</Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Lista de destaques */}
+              <div className="lg:col-span-2 grid gap-3">
+                {featured.map((f, idx) => (
+                  <div key={f.id} className="flex items-center gap-3 border border-border rounded-md p-3">
+                    <img src={f.image_url} alt={f.title} className="w-16 h-16 object-cover rounded" />
+                    <div className="flex-1">
+                      <div className="font-semibold flex items-center gap-2">{f.title} {f.is_new ? <span className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">Novo</span> : null} <span className={`text-xs px-2 py-0.5 rounded ${f.is_published ? 'bg-success text-success-foreground' : 'bg-muted text-text-secondary'}`}>{f.is_published ? 'Publicado' : 'Rascunho'}</span></div>
+                      <div className="text-xs text-text-secondary">{f.neighborhood}  •  {f.bedrooms} q  •  {f.bathrooms} b  •  {f.area}</div>
+                    </div>
+                    <div className="text-sm font-semibold text-primary mr-2 min-w-[110px] text-right">{f.price}</div>
+                    <div className="flex items-center gap-2">
+                      <Button size="xs" variant="outline" onClick={() => setFeaturedForm({
+                        id: f.id, image_id: f.image_id, title: f.title, neighborhood: f.neighborhood || '', price: f.price,
+                        bedrooms: f.bedrooms || 0, bathrooms: f.bathrooms || 0, area: f.area || '', type: f.type || '', features: f.features || [], price_range: f.price_range || '', is_new: !!f.is_new, is_published: !!f.is_published
+                      })}>Editar</Button>
+                      <Button size="xs" variant={f.is_published ? 'warning' : 'success'} onClick={() => publishToggleFeatured(f.id)}>{f.is_published ? 'Despublicar' : 'Publicar'}</Button>
+                      <Button size="xs" variant="danger" onClick={() => removeFeatured(f.id)}>Excluir</Button>
+                      <Button size="xs" variant="outline" onClick={() => moveFeatured(idx, -1)}>?</Button>
+                      <Button size="xs" variant="outline" onClick={() => moveFeatured(idx, 1)}>?</Button>
+                    </div>
+                  </div>
+                ))}
+                {featured.length === 0 && (
+                  <div className="text-sm text-text-secondary">Nenhum destaque cadastrado.</div>
+                )}
+              </div>
+
+              {/* Formulário de destaque */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-xl shadow-card p-4 sticky top-24">
+                  <h3 className="text-base font-semibold mb-3">{featuredForm.id ? 'Editar Destaque' : 'Novo Destaque'}</h3>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="text-sm font-medium">Imagem</label>
+                      <select className="mt-1 w-full border border-border rounded-md h-10 px-2" value={featuredForm.image_id}
+                        onChange={(e) => setFeaturedForm({ ...featuredForm, image_id: parseInt((e.target as any).value || '0', 10) })}>
+                        <option value={0}>Selecione uma imagem…</option>
+                        {existing.map((img) => (
+                          <option key={img.id} value={img.id}>{img.filename}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <Input label="Título" value={featuredForm.title} onChange={(e: any) => setFeaturedForm({ ...featuredForm, title: e.target.value })} required />
+                    <Input label="Setor/Bairro" value={featuredForm.neighborhood} onChange={(e: any) => setFeaturedForm({ ...featuredForm, neighborhood: e.target.value })} />
+                    <Input label="Valor" value={featuredForm.price} onChange={(e: any) => setFeaturedForm({ ...featuredForm, price: e.target.value })} required />
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input type="number" label="Quartos" value={featuredForm.bedrooms} onChange={(e: any) => setFeaturedForm({ ...featuredForm, bedrooms: parseInt(e.target.value || '0', 10) })} />
+                      <Input type="number" label="Banheiros" value={featuredForm.bathrooms} onChange={(e: any) => setFeaturedForm({ ...featuredForm, bathrooms: parseInt(e.target.value || '0', 10) })} />
+                      <Input label="Área (m²)" value={featuredForm.area} onChange={(e: any) => setFeaturedForm({ ...featuredForm, area: e.target.value })} />
+                    </div>
+                    <Input label="Tipo (casa, apto, cobertura...)" value={featuredForm.type} onChange={(e: any) => setFeaturedForm({ ...featuredForm, type: e.target.value })} />
+                    <Input label="Faça de preço (ex.: 1200000-1800000)" value={featuredForm.price_range} onChange={(e: any) => setFeaturedForm({ ...featuredForm, price_range: e.target.value })} />
+                    <Input label="Features (separe por vírgula)" value={featuredForm.features?.join(', ')} onChange={(e: any) => setFeaturedForm({ ...featuredForm, features: (e.target.value || '').split(',').map((s: string) => s.trim()).filter(Boolean) })} />
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={featuredForm.is_new} onChange={(e) => setFeaturedForm({ ...featuredForm, is_new: (e.target as any).checked })} /> Novo</label>
+                      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={featuredForm.is_published} onChange={(e) => setFeaturedForm({ ...featuredForm, is_published: (e.target as any).checked })} /> Publicado</label>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <Button onClick={saveFeatured} variant="success">{featuredForm.id ? 'Salvar alterações' : 'Publicar Destaque'}</Button>
+                    {featuredForm.id && <Button variant="outline" onClick={resetFeaturedForm}>Cancelar</Button>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {viewer && (
+            <ImageViewer image={viewer} onClose={() => setViewer(null)} />
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function ImageViewer({ image, onClose }: { image: ImageItem; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-card max-w-4xl w-full p-3">
+          <div className="flex items-center justify-between px-1 py-2 border-b border-border">
+            <div className="text-sm font-medium">
+              {image.original_name || image.filename}
+            </div>
+            <Button variant="outline" size="xs" onClick={onClose} iconName="X">Fechar</Button>
+          </div>
+          <div className="max-h-[80vh] w-full overflow-auto p-2">
+            <img src={image.url} alt={image.filename} className="mx-auto h-auto max-h-[75vh] w-auto max-w-full rounded-md" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
