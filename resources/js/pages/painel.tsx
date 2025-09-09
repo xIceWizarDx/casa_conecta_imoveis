@@ -555,6 +555,7 @@ export default function Painel() {
                                             placeholder="Ex: R$ 1.250.000,00"
                                         />
                                     </div>
+
                                 </div>
                                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                                     <div>
