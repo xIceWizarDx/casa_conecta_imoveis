@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import HeaderStandalone from '@/main/components/ui/HeaderStandalone';
@@ -107,6 +107,9 @@ export default function Painel() {
     const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
     const [editingFeatured, setEditingFeatured] = useState<Partial<FeaturedProperty>>({});
     const [savingFeatured, setSavingFeatured] = useState(false);
+
+    const [heroModalOpen, setHeroModalOpen] = useState(false);
+    const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
 
     // Image picker dialog
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
@@ -455,451 +458,474 @@ export default function Painel() {
                 {/* Hero Slides */}
                 {tab === 'publicacoes' && (
                     <>
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Hero Slides</CardTitle>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
-                                        <Button variant="secondary" onClick={refreshSlides} disabled={slidesLoading}>
-                                            Atualizar
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-                                    <div>
-                                        <Label>Imagem</Label>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Dialog
-                                                open={imagePickerOpen && imagePickerFor === 'slide'}
-                                                onOpenChange={(o) => {
-                                                    setImagePickerOpen(o);
-                                                    if (!o) setImagePickerFor(null);
-                                                }}
-                                            >
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        type="button"
-                                                        variant="secondary"
-                                                        onClick={() => {
-                                                            setImagePickerFor('slide');
-                                                            setImagePickerOpen(true);
-                                                        }}
-                                                    >
-                                                        Selecionar da galeria
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>Escolher imagem</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                        {images.map((img) => (
-                                                            <button
-                                                                key={img.id}
-                                                                type="button"
-                                                                className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                onClick={() => {
-                                                                    setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                                                    setImagePickerOpen(false);
-                                                                    setImagePickerFor(null);
-                                                                }}
-                                                            >
-                                                                <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
-                                            {newSlide.image_id && (
-                                                <img
-                                                    src={images.find((i) => i.id === newSlide.image_id)?.url}
-                                                    alt="Selecionada"
-                                                    className="h-10 w-14 rounded object-cover"
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Label>Título</Label>
-                                        <Input
-                                            value={newSlide.title ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, title: e.target.value }))}
-                                            placeholder="Ex: Casa moderna no Setor Marista"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Subtítulo</Label>
-                                        <Input
-                                            value={newSlide.subtitle ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, subtitle: e.target.value }))}
-                                            placeholder="Ex: Próximo ao Flamboyant"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Bairro</Label>
-                                        <Input
-                                            value={newSlide.neighborhood ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, neighborhood: e.target.value }))}
-                                            placeholder="Ex: Setor Marista"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Preço</Label>
-                                        <Input
-                                            value={newSlide.price ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: R$ 1.250.000,00"
-                                        />
-                                    </div>
+                        <div className="flex flex-col gap-4">
+                            <Button onClick={() => setHeroModalOpen(true)}>Configurar Hero Slides</Button>
+                            <Button onClick={() => setFeaturedModalOpen(true)}>Configurar Imóveis em Destaque</Button>
+                        </div>
 
-                                </div>
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                                    <div>
-                                        <Label>Quartos</Label>
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            value={newSlide.bedrooms ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, bedrooms: Number(e.target.value || 0) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 3"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Banheiros</Label>
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            value={newSlide.bathrooms ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, bathrooms: Number(e.target.value || 0) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 2"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Área</Label>
-                                        <Input
-                                            value={newSlide.area ?? ''}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 120 m²"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!newSlide.is_new}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, is_new: e.target.checked }))}
-                                        />
-                                        Novo
-                                    </label>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!newSlide.is_published}
-                                            onChange={(e) => setNewSlide((s) => ({ ...s, is_published: e.target.checked }))}
-                                        />
-                                        Publicado
-                                    </label>
-                                </div>
-                                <div className="flex items-end gap-2">
-                                    <Button onClick={submitSlide} disabled={creatingSlide}>
-                                        {creatingSlide ? 'Adicionando…' : 'Adicionar Slide'}
-                                    </Button>
-                                </div>
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                                    {slides.map((s) => (
-                                        <div key={s.id} className="overflow-hidden rounded-md border">
-                                            {s.image_url ? (
-                                                <img src={s.image_url} alt={s.title} className="h-40 w-full object-cover" />
-                                            ) : (
-                                                <div className="h-40 w-full bg-muted" />
-                                            )}
-                                            <div className="flex items-center justify-between gap-2 p-2">
-                                                <div className="min-w-0">
-                                                    <div className="truncate font-medium" title={s.title}>
-                                                        {s.title}
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">{s.price}</div>
-                                                </div>
-                                                <div className="flex shrink-0 items-center gap-1">
-                                                    <Button variant="secondary" onClick={() => moveSlide(s.id, -1)} title="Subir">
-                                                        ↑
-                                                    </Button>
-                                                    <Button variant="secondary" onClick={() => moveSlide(s.id, 1)} title="Descer">
-                                                        ↓
-                                                    </Button>
-                                                    <Button
-                                                        variant={s.is_published ? 'default' : 'secondary'}
-                                                        onClick={() => toggleSlidePublish(s.id)}
-                                                        title="Publicar/Despublicar"
-                                                    >
-                                                        {s.is_published ? 'Publicado' : 'Rascunho'}
-                                                    </Button>
-                                                    <Button variant="destructive" onClick={() => deleteSlide(s.id)} title="Excluir">
-                                                        Excluir
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Imóveis em Destaque */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Imóveis em Destaque</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                                    <div>
-                                        <Label>Imagem</Label>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Dialog
-                                                open={imagePickerOpen && imagePickerFor === 'featured'}
-                                                onOpenChange={(o) => {
-                                                    setImagePickerOpen(o);
-                                                    if (!o) setImagePickerFor(null);
-                                                }}
-                                            >
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        type="button"
-                                                        variant="secondary"
-                                                        onClick={() => {
-                                                            setImagePickerFor('featured');
-                                                            setImagePickerOpen(true);
-                                                        }}
-                                                    >
-                                                        Selecionar da galeria
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>Escolher imagem</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                        {images.map((img) => (
-                                                            <button
-                                                                key={img.id}
-                                                                type="button"
-                                                                className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                onClick={() => {
-                                                                    setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                                                                    setImagePickerOpen(false);
-                                                                    setImagePickerFor(null);
-                                                                }}
-                                                            >
-                                                                <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
-                                            {newFeatured.image_id && (
-                                                <img
-                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url}
-                                                    alt="Selecionada"
-                                                    className="h-10 w-14 rounded object-cover"
-                                                />
-                                            )}
+                        <Dialog open={heroModalOpen} onOpenChange={setHeroModalOpen}>
+                            <DialogContent className="max-w-5xl">
+                                <DialogHeader>
+                                    <div className="flex items-center justify-between">
+                                        <DialogTitle>Hero Slides</DialogTitle>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
+                                            <Button variant="secondary" onClick={refreshSlides} disabled={slidesLoading}>
+                                                Atualizar
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label>Título</Label>
-                                        <Input
-                                            value={newFeatured.title ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, title: e.target.value }))}
-                                            placeholder="Ex: Apartamento premium Jardim Goiás"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Bairro</Label>
-                                        <Input
-                                            value={newFeatured.neighborhood ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, neighborhood: e.target.value }))}
-                                            placeholder="Ex: Jardim Goiás"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Preço</Label>
-                                        <Input
-                                            value={newFeatured.price ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: R$ 950.000,00"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-                                    <div>
-                                        <Label>Quartos</Label>
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            value={newFeatured.bedrooms ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, bedrooms: Number(e.target.value || 0) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 3"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Banheiros</Label>
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            value={newFeatured.bathrooms ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, bathrooms: Number(e.target.value || 0) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 2"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Área</Label>
-                                        <Input
-                                            value={newFeatured.area ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
-                                            inputMode="numeric"
-                                            placeholder="Ex: 120 m²"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Tipo</Label>
-                                        <select
-                                            className="mt-1 w-full rounded-md border bg-background p-2"
-                                            value={newFeatured.type ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, type: e.target.value }))}
-                                        >
-                                            <option value="">Selecione…</option>
-                                            <option value="casa">Casa</option>
-                                            <option value="apartamento">Apartamento</option>
-                                            <option value="sobrado">Sobrado</option>
-                                            <option value="cobertura">Cobertura</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <Label>Faixa de preço</Label>
-                                        <Input
-                                            value={newFeatured.price_range ?? ''}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, price_range: e.target.value }))}
-                                            placeholder="Ex: 800000-1200000"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!newFeatured.is_new}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, is_new: e.target.checked }))}
-                                        />
-                                        Novo
-                                    </label>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!newFeatured.is_published}
-                                            onChange={(e) => setNewFeatured((s) => ({ ...s, is_published: e.target.checked }))}
-                                        />
-                                        Publicado
-                                    </label>
-                                </div>
-                                <div>
-                                    <Label>Características (features)</Label>
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <Input value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
-                                            onClick={() => {
-                                                const v = featureInput.trim();
-                                                if (!v) return;
-                                                setNewFeatured((s) => ({ ...s, features: [...(s.features ?? []), v] }));
-                                                setFeatureInput('');
-                                            }}
-                                        >
-                                            Adicionar
-                                        </Button>
-                                    </div>
-                                    {(newFeatured.features ?? []).length > 0 && (
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                            {(newFeatured.features ?? []).map((f, idx) => (
-                                                <span
-                                                    key={`${f}-${idx}`}
-                                                    className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs"
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                                        <div>
+                                            <Label>Imagem</Label>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Dialog
+                                                    open={imagePickerOpen && imagePickerFor === 'slide'}
+                                                    onOpenChange={(o) => {
+                                                        setImagePickerOpen(o);
+                                                        if (!o) setImagePickerFor(null);
+                                                    }}
                                                 >
-                                                    {f}
-                                                    <button
-                                                        type="button"
-                                                        className="text-muted-foreground hover:text-foreground"
-                                                        onClick={() =>
-                                                            setNewFeatured((s) => ({
-                                                                ...s,
-                                                                features: (s.features ?? []).filter((_, i) => i !== idx),
-                                                            }))
-                                                        }
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex items-end gap-2">
-                                    <Button onClick={submitFeatured} disabled={creatingFeatured}>
-                                        {creatingFeatured ? 'Adicionando…' : 'Adicionar Destaque'}
-                                    </Button>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                                    {featured.map((f) => (
-                                        <div key={f.id} className="overflow-hidden rounded-md border">
-                                            {f.image_url ? (
-                                                <img src={f.image_url} alt={f.title} className="h-40 w-full object-cover" />
-                                            ) : (
-                                                <div className="h-40 w-full bg-muted" />
-                                            )}
-                                            <div className="flex items-center justify-between gap-2 p-2">
-                                                <div className="min-w-0">
-                                                    <div className="truncate font-medium" title={f.title}>
-                                                        {f.title}
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">{f.price}</div>
-                                                </div>
-                                                <div className="flex shrink-0 items-center gap-1">
-                                                    <Button variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
-                                                        Subir
-                                                    </Button>
-                                                    <Button variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
-                                                        Descer
-                                                    </Button>
-                                                    <Button
-                                                        variant={f.is_published ? 'default' : 'secondary'}
-                                                        onClick={() => toggleFeaturedPublish(f.id)}
-                                                        title="Publicar/Despublicar"
-                                                    >
-                                                        {f.is_published ? 'Publicado' : 'Rascunho'}
-                                                    </Button>
-                                                    <Button variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
-                                                        Excluir
-                                                    </Button>
-                                                </div>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="secondary"
+                                                            onClick={() => {
+                                                                setImagePickerFor('slide');
+                                                                setImagePickerOpen(true);
+                                                            }}
+                                                        >
+                                                            Selecionar da galeria
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-3xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Escolher imagem</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                                            {images.map((img) => (
+                                                                <button
+                                                                    key={img.id}
+                                                                    type="button"
+                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
+                                                                    onClick={() => {
+                                                                        setNewSlide((s) => ({ ...s, image_id: img.id }));
+                                                                        setImagePickerOpen(false);
+                                                                        setImagePickerFor(null);
+                                                                    }}
+                                                                >
+                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                                {newSlide.image_id && (
+                                                    <img
+                                                        src={images.find((i) => i.id === newSlide.image_id)?.url}
+                                                        alt="Selecionada"
+                                                        className="h-10 w-14 rounded object-cover"
+                                                    />
+                                                )}
                                             </div>
                                         </div>
-                                    ))}
+                                        <div>
+                                            <Label>Título</Label>
+                                            <Input
+                                                value={newSlide.title ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, title: e.target.value }))}
+                                                placeholder="Ex: Casa moderna no Setor Marista"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Subtítulo</Label>
+                                            <Input
+                                                value={newSlide.subtitle ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, subtitle: e.target.value }))}
+                                                placeholder="Ex: Próximo ao Flamboyant"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Bairro</Label>
+                                            <Input
+                                                value={newSlide.neighborhood ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, neighborhood: e.target.value }))}
+                                                placeholder="Ex: Setor Marista"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Preço</Label>
+                                            <Input
+                                                value={newSlide.price ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: R$ 1.250.000,00"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                        <div>
+                                            <Label>Quartos</Label>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={newSlide.bedrooms ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, bedrooms: Number(e.target.value || 0) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 3"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Banheiros</Label>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={newSlide.bathrooms ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, bathrooms: Number(e.target.value || 0) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 2"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Área</Label>
+                                            <Input
+                                                value={newSlide.area ?? ''}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 120 m²"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!newSlide.is_new}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, is_new: e.target.checked }))}
+                                            />
+                                            Novo
+                                        </label>
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!newSlide.is_published}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, is_published: e.target.checked }))}
+                                            />
+                                            Publicado
+                                        </label>
+                                    </div>
+                                    <div className="flex items-end gap-2">
+                                        <Button onClick={submitSlide} disabled={creatingSlide}>
+                                            {creatingSlide ? 'Adicionando…' : 'Adicionar Slide'}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                                        {slides.map((s) => (
+                                            <div key={s.id} className="overflow-hidden rounded-md border">
+                                                {s.image_url ? (
+                                                    <img src={s.image_url} alt={s.title} className="h-40 w-full object-cover" />
+                                                ) : (
+                                                    <div className="h-40 w-full bg-muted" />
+                                                )}
+                                                <div className="flex items-center justify-between gap-2 p-2">
+                                                    <div className="min-w-0">
+                                                        <div className="truncate font-medium" title={s.title}>
+                                                            {s.title}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">{s.price}</div>
+                                                    </div>
+                                                    <div className="flex shrink-0 items-center gap-1">
+                                                        <Button variant="secondary" onClick={() => moveSlide(s.id, -1)} title="Subir">
+                                                            ↑
+                                                        </Button>
+                                                        <Button variant="secondary" onClick={() => moveSlide(s.id, 1)} title="Descer">
+                                                            ↓
+                                                        </Button>
+                                                        <Button
+                                                            variant={s.is_published ? 'default' : 'secondary'}
+                                                            onClick={() => toggleSlidePublish(s.id)}
+                                                            title="Publicar/Despublicar"
+                                                        >
+                                                            {s.is_published ? 'Publicado' : 'Rascunho'}
+                                                        </Button>
+                                                        <Button variant="destructive" onClick={() => deleteSlide(s.id)} title="Excluir">
+                                                            Excluir
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                                <DialogFooter>
+                                    <Button variant="secondary" onClick={() => setHeroModalOpen(false)}>
+                                        Fechar
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={featuredModalOpen} onOpenChange={setFeaturedModalOpen}>
+                            <DialogContent className="max-w-5xl">
+                                <DialogHeader>
+                                    <div className="flex items-center justify-between">
+                                        <DialogTitle>Imóveis em Destaque</DialogTitle>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span>{featuredLoading ? 'Carregando…' : `${featured.length} itens`}</span>
+                                            <Button variant="secondary" onClick={refreshFeatured} disabled={featuredLoading}>
+                                                Atualizar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                                        <div>
+                                            <Label>Imagem</Label>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Dialog
+                                                    open={imagePickerOpen && imagePickerFor === 'featured'}
+                                                    onOpenChange={(o) => {
+                                                        setImagePickerOpen(o);
+                                                        if (!o) setImagePickerFor(null);
+                                                    }}
+                                                >
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="secondary"
+                                                            onClick={() => {
+                                                                setImagePickerFor('featured');
+                                                                setImagePickerOpen(true);
+                                                            }}
+                                                        >
+                                                            Selecionar da galeria
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-3xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Escolher imagem</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                                            {images.map((img) => (
+                                                                <button
+                                                                    key={img.id}
+                                                                    type="button"
+                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
+                                                                    onClick={() => {
+                                                                        setNewFeatured((s) => ({ ...s, image_id: img.id }));
+                                                                        setImagePickerOpen(false);
+                                                                        setImagePickerFor(null);
+                                                                    }}
+                                                                >
+                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                                {newFeatured.image_id && (
+                                                    <img
+                                                        src={images.find((i) => i.id === newFeatured.image_id)?.url}
+                                                        alt="Selecionada"
+                                                        className="h-10 w-14 rounded object-cover"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label>Título</Label>
+                                            <Input
+                                                value={newFeatured.title ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, title: e.target.value }))}
+                                                placeholder="Ex: Apartamento premium Jardim Goiás"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Bairro</Label>
+                                            <Input
+                                                value={newFeatured.neighborhood ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, neighborhood: e.target.value }))}
+                                                placeholder="Ex: Jardim Goiás"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Preço</Label>
+                                            <Input
+                                                value={newFeatured.price ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: R$ 950.000,00"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                                        <div>
+                                            <Label>Quartos</Label>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={newFeatured.bedrooms ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, bedrooms: Number(e.target.value || 0) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 3"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Banheiros</Label>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={newFeatured.bathrooms ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, bathrooms: Number(e.target.value || 0) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 2"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Área</Label>
+                                            <Input
+                                                value={newFeatured.area ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
+                                                inputMode="numeric"
+                                                placeholder="Ex: 120 m²"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Tipo</Label>
+                                            <select
+                                                className="mt-1 w-full rounded-md border bg-background p-2"
+                                                value={newFeatured.type ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, type: e.target.value }))}
+                                            >
+                                                <option value="">Selecione…</option>
+                                                <option value="casa">Casa</option>
+                                                <option value="apartamento">Apartamento</option>
+                                                <option value="sobrado">Sobrado</option>
+                                                <option value="cobertura">Cobertura</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <Label>Faixa de preço</Label>
+                                            <Input
+                                                value={newFeatured.price_range ?? ''}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, price_range: e.target.value }))}
+                                                placeholder="Ex: 800000-1200000"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!newFeatured.is_new}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, is_new: e.target.checked }))}
+                                            />
+                                            Novo
+                                        </label>
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!newFeatured.is_published}
+                                                onChange={(e) => setNewFeatured((s) => ({ ...s, is_published: e.target.checked }))}
+                                            />
+                                            Publicado
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <Label>Características (features)</Label>
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <Input value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={() => {
+                                                    const v = featureInput.trim();
+                                                    if (!v) return;
+                                                    setNewFeatured((s) => ({ ...s, features: [...(s.features ?? []), v] }));
+                                                    setFeatureInput('');
+                                                }}
+                                            >
+                                                Adicionar
+                                            </Button>
+                                        </div>
+                                        {(newFeatured.features ?? []).length > 0 && (
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {(newFeatured.features ?? []).map((f, idx) => (
+                                                    <span
+                                                        key={`${f}-${idx}`}
+                                                        className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs"
+                                                    >
+                                                        {f}
+                                                        <button
+                                                            type="button"
+                                                            className="text-muted-foreground hover:text-foreground"
+                                                            onClick={() =>
+                                                                setNewFeatured((s) => ({
+                                                                    ...s,
+                                                                    features: (s.features ?? []).filter((_, i) => i !== idx),
+                                                                }))
+                                                            }
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-end gap-2">
+                                        <Button onClick={submitFeatured} disabled={creatingFeatured}>
+                                            {creatingFeatured ? 'Adicionando…' : 'Adicionar Destaque'}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                                        {featured.map((f) => (
+                                            <div key={f.id} className="overflow-hidden rounded-md border">
+                                                {f.image_url ? (
+                                                    <img src={f.image_url} alt={f.title} className="h-40 w-full object-cover" />
+                                                ) : (
+                                                    <div className="h-40 w-full bg-muted" />
+                                                )}
+                                                <div className="flex items-center justify-between gap-2 p-2">
+                                                    <div className="min-w-0">
+                                                        <div className="truncate font-medium" title={f.title}>
+                                                            {f.title}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">{f.price}</div>
+                                                    </div>
+                                                    <div className="flex shrink-0 items-center gap-1">
+                                                        <Button variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
+                                                            Subir
+                                                        </Button>
+                                                        <Button variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
+                                                            Descer
+                                                        </Button>
+                                                        <Button
+                                                            variant={f.is_published ? 'default' : 'secondary'}
+                                                            onClick={() => toggleFeaturedPublish(f.id)}
+                                                            title="Publicar/Despublicar"
+                                                        >
+                                                            {f.is_published ? 'Publicado' : 'Rascunho'}
+                                                        </Button>
+                                                        <Button variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
+                                                            Excluir
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="secondary" onClick={() => setFeaturedModalOpen(false)}>
+                                        Fechar
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </>
                 )}
             </div>
