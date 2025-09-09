@@ -50,6 +50,8 @@ jobs:
 
       - name: Build assets (Vite)
         run: npm run build
+        env:
+          WAYFINDER_DISABLE: '1'
 
       - name: Run tests
         run: php artisan test
