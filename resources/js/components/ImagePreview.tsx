@@ -77,7 +77,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="default"
                                     onClick={handleWhatsAppClick}
-                                    className="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
                                 >
                                     <Icon iconNode={MessageCircle} size={16} className="mr-2" />
                                     Detalhes
@@ -85,7 +85,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="outline"
                                     onClick={() => window.open('tel:+5562999999999')}
-                                    className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
+                                    className="border-2 border-white text-white bg-transparent hover:bg-white/10 hover:text-white font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
                                     Ligar
