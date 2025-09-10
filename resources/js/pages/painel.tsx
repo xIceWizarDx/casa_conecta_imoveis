@@ -1,3 +1,4 @@
+import ImagePreview from '@/components/ImagePreview';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -534,10 +535,15 @@ export default function Painel() {
                                                     </DialogContent>
                                                 </Dialog>
                                                 {newSlide.image_id && (
-                                                    <img
-                                                        src={images.find((i) => i.id === newSlide.image_id)?.url}
-                                                        alt="Selecionada"
-                                                        className="h-10 w-14 rounded object-cover"
+                                                    <ImagePreview
+                                                        src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
+                                                        titulo={newSlide.title}
+                                                        subtitulo={newSlide.subtitle}
+                                                        preco={newSlide.price}
+                                                        quartos={newSlide.bedrooms}
+                                                        banheiros={newSlide.bathrooms}
+                                                        area={newSlide.area}
+                                                        bairro={newSlide.neighborhood}
                                                     />
                                                 )}
                                             </div>
@@ -628,12 +634,7 @@ export default function Painel() {
                                         </label>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button
-                                            className="w-auto"
-                                            onClick={submitSlide}
-                                            disabled={creatingSlide}
-                                            title="Adicionar Slide"
-                                        >
+                                        <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
                                             {creatingSlide ? '…' : '+'}
                                         </Button>
                                     </div>
@@ -653,10 +654,20 @@ export default function Painel() {
                                                         <div className="text-xs text-muted-foreground">{s.price}</div>
                                                     </div>
                                                     <div className="flex shrink-0 items-center gap-1">
-                                                        <Button className="w-auto" variant="secondary" onClick={() => moveSlide(s.id, -1)} title="Subir">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="secondary"
+                                                            onClick={() => moveSlide(s.id, -1)}
+                                                            title="Subir"
+                                                        >
                                                             ↑
                                                         </Button>
-                                                        <Button className="w-auto" variant="secondary" onClick={() => moveSlide(s.id, 1)} title="Descer">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="secondary"
+                                                            onClick={() => moveSlide(s.id, 1)}
+                                                            title="Descer"
+                                                        >
                                                             ↓
                                                         </Button>
                                                         <Button
@@ -667,7 +678,12 @@ export default function Painel() {
                                                         >
                                                             {s.is_published ? 'Publicado' : 'Rascunho'}
                                                         </Button>
-                                                        <Button className="w-auto" variant="destructive" onClick={() => deleteSlide(s.id)} title="Excluir">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="destructive"
+                                                            onClick={() => deleteSlide(s.id)}
+                                                            title="Excluir"
+                                                        >
                                                             Excluir
                                                         </Button>
                                                     </div>
@@ -751,10 +767,14 @@ export default function Painel() {
                                                     </DialogContent>
                                                 </Dialog>
                                                 {newFeatured.image_id && (
-                                                    <img
-                                                        src={images.find((i) => i.id === newFeatured.image_id)?.url}
-                                                        alt="Selecionada"
-                                                        className="h-10 w-14 rounded object-cover"
+                                                    <ImagePreview
+                                                        src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
+                                                        titulo={newFeatured.title}
+                                                        preco={newFeatured.price}
+                                                        quartos={newFeatured.bedrooms}
+                                                        banheiros={newFeatured.bathrooms}
+                                                        area={newFeatured.area}
+                                                        bairro={newFeatured.neighborhood}
                                                     />
                                                 )}
                                             </div>
@@ -903,12 +923,7 @@ export default function Painel() {
                                         )}
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button
-                                            className="w-auto"
-                                            onClick={submitFeatured}
-                                            disabled={creatingFeatured}
-                                            title="Adicionar Destaque"
-                                        >
+                                        <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured} title="Adicionar Destaque">
                                             {creatingFeatured ? '…' : '+'}
                                         </Button>
                                     </div>
@@ -928,10 +943,20 @@ export default function Painel() {
                                                         <div className="text-xs text-muted-foreground">{f.price}</div>
                                                     </div>
                                                     <div className="flex shrink-0 items-center gap-1">
-                                                        <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="secondary"
+                                                            onClick={() => moveFeatured(f.id, -1)}
+                                                            title="Subir"
+                                                        >
                                                             ↑
                                                         </Button>
-                                                        <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="secondary"
+                                                            onClick={() => moveFeatured(f.id, 1)}
+                                                            title="Descer"
+                                                        >
                                                             ↓
                                                         </Button>
                                                         <Button
@@ -942,7 +967,12 @@ export default function Painel() {
                                                         >
                                                             {f.is_published ? 'Publicado' : 'Rascunho'}
                                                         </Button>
-                                                        <Button className="w-auto" variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
+                                                        <Button
+                                                            className="w-auto"
+                                                            variant="destructive"
+                                                            onClick={() => deleteFeatured(f.id)}
+                                                            title="Excluir"
+                                                        >
                                                             Excluir
                                                         </Button>
                                                     </div>
