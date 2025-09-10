@@ -22,10 +22,10 @@ export default function ImagePreview({
     area,
     bairro,
 }: ImagePreviewProps) {
-    const [zoom, setZoom] = useState(0.5);
+    const [zoom, setZoom] = useState(1);
 
     const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
-    const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.25));
+    const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
 
     const handleWhatsAppClick = () => {
         const message = encodeURIComponent(
@@ -35,10 +35,10 @@ export default function ImagePreview({
     };
 
     return (
-        <div className="relative aspect-video w-full overflow-hidden rounded-md flex items-center justify-start">
+        <div className="relative aspect-video w-full overflow-hidden rounded-md">
             <div
-                className="h-full w-full transition-transform ml-4"
-                style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}
+                className="h-full w-full transition-transform"
+                style={{ transform: `scale(${zoom})`, transformOrigin: 'center' }}
             >
                 <HeroSlide
                     image={src}
