@@ -165,7 +165,7 @@ const HeroCarousel = () => {
                           onClick={() => handleWhatsAppClick(property)}
                           className="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
                         >
-                          Ver Detalhes
+                          Detalhes
                         </Button>
                         <Button
                           variant="outline"
@@ -174,7 +174,7 @@ const HeroCarousel = () => {
                           onClick={() => window.open('tel:+5562999999999')}
                           className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
                         >
-                          Ligar Agora
+                          Ligar
                         </Button>
                       </div>
                     </div>
