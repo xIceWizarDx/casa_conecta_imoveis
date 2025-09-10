@@ -621,25 +621,25 @@ export default function Painel() {
                                                 </DialogContent>
                                             </Dialog>
                                         </div>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            'mt-4 aspect-video w-full overflow-hidden',
-                                            (!(newSlide.image_id > 0)) && 'border-2 border-dashed',
-                                        )}
-                                    >
-                                        {newSlide.image_id && (
-                                            <ImagePreview
-                                                src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
-                                                titulo={newSlide.title}
-                                                subtitulo={newSlide.subtitle}
-                                                preco={newSlide.price}
-                                                quartos={newSlide.bedrooms}
-                                                banheiros={newSlide.bathrooms}
-                                                area={newSlide.area}
-                                                bairro={newSlide.neighborhood}
-                                            />
-                                        )}
+                                        <div
+                                            className={cn(
+                                                'mt-4 aspect-video w-full overflow-hidden',
+                                                !newSlide.image_id && 'border-2 border-dashed',
+                                            )}
+                                        >
+                                            {newSlide.image_id && (
+                                                <ImagePreview
+                                                    src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
+                                                    titulo={newSlide.title}
+                                                    subtitulo={newSlide.subtitle}
+                                                    preco={newSlide.price}
+                                                    quartos={newSlide.bedrooms}
+                                                    banheiros={newSlide.bathrooms}
+                                                    area={newSlide.area}
+                                                    bairro={newSlide.neighborhood}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-end gap-2">
                                         <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
@@ -918,24 +918,24 @@ export default function Painel() {
                                                 </DialogContent>
                                             </Dialog>
                                         </div>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            'mt-4 aspect-video w-full overflow-hidden',
-                                            (!(newFeatured.image_id > 0)) && 'border-2 border-dashed',
-                                        )}
-                                    >
-                                        {newFeatured.image_id && (
-                                            <ImagePreview
-                                                src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
-                                                titulo={newFeatured.title}
-                                                preco={newFeatured.price}
-                                                quartos={newFeatured.bedrooms}
-                                                banheiros={newFeatured.bathrooms}
-                                                area={newFeatured.area}
-                                                bairro={newFeatured.neighborhood}
-                                            />
-                                        )}
+                                        <div
+                                            className={cn(
+                                                'mt-4 aspect-video w-full overflow-hidden',
+                                                !newFeatured.image_id && 'border-2 border-dashed',
+                                            )}
+                                        >
+                                            {newFeatured.image_id && (
+                                                <ImagePreview
+                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
+                                                    titulo={newFeatured.title}
+                                                    preco={newFeatured.price}
+                                                    quartos={newFeatured.bedrooms}
+                                                    banheiros={newFeatured.bathrooms}
+                                                    area={newFeatured.area}
+                                                    bairro={newFeatured.neighborhood}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-end gap-2">
                                         <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured} title="Adicionar Destaque">
