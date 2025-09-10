@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
-import HeroSlide from './HeroSlide';
+import Image from '../../../components/AppImage';
+import Button from '../../../components/ui/Button';
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -108,18 +109,79 @@ const HeroCarousel = () => {
               index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
-            <HeroSlide
-              image={property?.image}
-              title={property?.title}
-              subtitle={property?.subtitle}
-              price={property?.price}
-              bedrooms={property?.bedrooms}
-              bathrooms={property?.bathrooms}
-              area={property?.area}
-              neighborhood={property?.neighborhood}
-              onWhatsAppClick={() => handleWhatsAppClick(property)}
-              onCallClick={() => window.open('tel:+5562999999999')}
-            />
+            <div className="relative w-full h-full">
+              <Image
+                src={property?.image}
+                alt={property?.title}
+                className="w-full h-full object-cover object-center"
+                loading={index === 0 ? 'eager' : 'lazy'}
+              />
+              <div className="absolute inset-0 hero-overlay" />
+
+              {/* Volta a posição anterior (centrado verticalmente) */}
+              <div className="absolute inset-0 flex items-center">
+                <div className="container-responsive">
+                  <div className="max-w-3xl text-white animate-fade-in-up">
+                    <div className="mb-4">
+                      <span className="inline-flex items-center px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-primary-foreground">
+                        <Icon name="MapPin" size={16} className="mr-2" />
+                        {property?.neighborhood}
+                      </span>
+                    </div>
+                    
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-balance text-shadow leading-tight">
+                      {property?.title}
+                    </h1>
+                    
+                    <p className="text-xl sm:text-2xl mb-8 text-gray-100 text-shadow max-w-2xl">
+                      {property?.subtitle}
+                    </p>
+                    
+                    <div className="flex flex-wrap items-center gap-4 mb-10">
+                      <div className="flex items-center space-x-2 bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
+                        <Icon name="Bed" size={20} color="white" />
+                        <span className="text-sm font-semibold">{property?.bedrooms} quartos</span>
+                      </div>
+                      <div className="flex items-center space-x-2 bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
+                        <Icon name="Bath" size={20} color="white" />
+                        <span className="text-sm font-semibold">{property?.bathrooms} banheiros</span>
+                      </div>
+                      <div className="flex items-center space-x-2 bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
+                        <Icon name="Square" size={20} color="white" />
+                        <span className="text-sm font-semibold">{property?.area}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                      {/* Preço sem contorno */}
+                      <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary">
+                        {property?.price}
+                      </div>
+                      <div className="flex flex-wrap gap-4">
+                        <Button
+                          variant="default"
+                          iconName="MessageCircle"
+                          iconPosition="left"
+                          onClick={() => handleWhatsAppClick(property)}
+                          className="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                        >
+                          Detalhes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          iconName="Phone"
+                          iconPosition="left"
+                          onClick={() => window.open('tel:+5562999999999')}
+                          className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
+                        >
+                          Ligar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
