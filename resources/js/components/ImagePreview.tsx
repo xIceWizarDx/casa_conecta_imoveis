@@ -31,7 +31,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
             <div className="hero-overlay absolute inset-0" />
 
             <div className="absolute inset-0 flex items-center">
-                <div className="container-responsive pl-8 sm:pl-12">
+                <div className="container-responsive pl-32 sm:pl-48">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
                         {bairro && (
                             <div className="mb-4">
