@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import HeaderStandalone from '@/main/components/ui/HeaderStandalone';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -594,7 +595,7 @@ export default function Painel() {
                                                             setImagePickerOpen(true);
                                                         }}
                                                     >
-                                                        Selecionar da galeria
+                                                        Galeria
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className="sm:max-w-3xl">
@@ -620,7 +621,12 @@ export default function Painel() {
                                                 </DialogContent>
                                             </Dialog>
                                         </div>
-                                        <div className="mt-4 aspect-video w-full border-2 border-dashed">
+                                        <div
+                                            className={cn(
+                                                'mt-4 aspect-video w-full overflow-hidden',
+                                                !newSlide.image_id && 'border-2 border-dashed',
+                                            )}
+                                        >
                                             {newSlide.image_id && (
                                                 <ImagePreview
                                                     src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
@@ -722,65 +728,7 @@ export default function Painel() {
                                     </div>
                                 </DialogHeader>
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                        <div>
-                                            <Label>Imagem</Label>
-                                            <div className="mt-2 flex items-center gap-2">
-                                                <Dialog
-                                                    open={imagePickerOpen && imagePickerFor === 'featured'}
-                                                    onOpenChange={(o) => {
-                                                        setImagePickerOpen(o);
-                                                        if (!o) setImagePickerFor(null);
-                                                    }}
-                                                >
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="secondary"
-                                                            className="w-auto"
-                                                            onClick={() => {
-                                                                setImagePickerFor('featured');
-                                                                setImagePickerOpen(true);
-                                                            }}
-                                                        >
-                                                            Galeria
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-3xl">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Escolher imagem</DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                            {images.map((img) => (
-                                                                <button
-                                                                    key={img.id}
-                                                                    type="button"
-                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                    onClick={() => {
-                                                                        setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                                                                        setImagePickerOpen(false);
-                                                                        setImagePickerFor(null);
-                                                                    }}
-                                                                >
-                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
-                                                {newFeatured.image_id && (
-                                                    <ImagePreview
-                                                        src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
-                                                        titulo={newFeatured.title}
-                                                        preco={newFeatured.price}
-                                                        quartos={newFeatured.bedrooms}
-                                                        banheiros={newFeatured.bathrooms}
-                                                        area={newFeatured.area}
-                                                        bairro={newFeatured.neighborhood}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                         <div>
                                             <Label>Título</Label>
                                             <Input
@@ -926,7 +874,7 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <div className="mt-2 flex items-center gap-2">
+                                        <div className="mt-2">
                                             <Dialog
                                                 open={imagePickerOpen && imagePickerFor === 'featured'}
                                                 onOpenChange={(o) => {
@@ -944,7 +892,7 @@ export default function Painel() {
                                                             setImagePickerOpen(true);
                                                         }}
                                                     >
-                                                        Selecionar da galeria
+                                                        Galeria
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className="sm:max-w-3xl">
@@ -969,11 +917,22 @@ export default function Painel() {
                                                     </div>
                                                 </DialogContent>
                                             </Dialog>
+                                        </div>
+                                        <div
+                                            className={cn(
+                                                'mt-4 aspect-video w-full overflow-hidden',
+                                                !newFeatured.image_id && 'border-2 border-dashed',
+                                            )}
+                                        >
                                             {newFeatured.image_id && (
-                                                <img
-                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url}
-                                                    alt="Selecionada"
-                                                    className="h-10 w-14 rounded object-cover"
+                                                <ImagePreview
+                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
+                                                    titulo={newFeatured.title}
+                                                    preco={newFeatured.price}
+                                                    quartos={newFeatured.bedrooms}
+                                                    banheiros={newFeatured.bathrooms}
+                                                    area={newFeatured.area}
+                                                    bairro={newFeatured.neighborhood}
                                                 />
                                             )}
                                         </div>
