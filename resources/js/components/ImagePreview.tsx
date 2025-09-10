@@ -29,8 +29,8 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
             <img src={src} alt={titulo ?? ''} className="h-full w-full object-cover transition-transform" style={{ transform: `scale(${zoom})` }} />
             <div className="hero-overlay absolute inset-0" />
 
-            <div className="absolute inset-0 flex items-center">
-                <div className="container-responsive pl-32 sm:pl-48">
+            <div className="absolute inset-0 flex items-center justify-start">
+                <div className="px-8">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
                         {bairro && (
                             <div className="mb-4">
@@ -71,7 +71,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                         )}
 
                         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                            {preco && <div className="text-3xl font-bold text-[#22c55e] sm:text-4xl lg:text-5xl">{preco}</div>}
+                            {preco && <div className="text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">{preco}</div>}
                             <div className="flex flex-wrap gap-4">
                                 <Button
                                     variant="default"
@@ -84,7 +84,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="outline"
                                     onClick={() => window.open('tel:+5562999999999')}
-                                    className="border-2 border-white px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-gray-900"
+                                    className="border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-gray-900"
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
                                     Ligar
