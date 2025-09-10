@@ -25,6 +25,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
 
+    return (
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
             <img src={src} alt={titulo ?? ''} className="h-full w-full object-cover transition-transform" style={{ transform: `scale(${zoom})` }} />
             <div className="hero-overlay absolute inset-0" />
@@ -76,7 +77,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="default"
                                     onClick={handleWhatsAppClick}
-                                    className="bg-accent px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent/90 hover:shadow-xl"
+                                    className="bg-[#22c55e] px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#22c55e]/90 hover:shadow-xl"
                                 >
                                     <Icon iconNode={MessageCircle} size={16} className="mr-2" />
                                     Detalhes
@@ -84,7 +85,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="outline"
                                     onClick={() => window.open('tel:+5562999999999')}
-                                    className="border-2 border-white px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-gray-900"
+                                    className="border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-gray-900"
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
                                     Ligar
