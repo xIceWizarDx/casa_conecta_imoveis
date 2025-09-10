@@ -32,9 +32,9 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
 
             <div className="absolute inset-0 flex items-center">
                 <div className="container-responsive">
-                    <div className="max-w-3xl text-white">
+                    <div className="mx-auto text-center text-white">
                         {bairro && (
-                            <div className="mb-4">
+                            <div className="mb-4 flex justify-center">
                                 <span className="inline-flex items-center rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-foreground backdrop-blur-sm">
                                     <Icon iconNode={MapPin} size={16} className="mr-2" />
                                     {bairro}
@@ -43,10 +43,10 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                         )}
 
                         {titulo && (
-                            <h1 className="text-shadow mb-6 text-4xl leading-tight font-bold text-balance sm:text-5xl lg:text-6xl">{titulo}</h1>
+                            <h1 className="text-shadow mb-6 text-2xl leading-tight font-bold text-balance sm:text-3xl lg:text-4xl">{titulo}</h1>
                         )}
 
-                        {subtitulo && <p className="text-shadow mb-8 max-w-2xl text-xl text-gray-100 sm:text-2xl">{subtitulo}</p>}
+                        {subtitulo && <p className="text-shadow mx-auto mb-8 max-w-2xl text-xl text-gray-100 sm:text-2xl">{subtitulo}</p>}
 
                         {(quartos || banheiros || area) && (
                             <div className="mb-10 flex flex-wrap items-center gap-4">
@@ -71,9 +71,9 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                             </div>
                         )}
 
-                        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+                        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
                             {preco && <div className="text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">{preco}</div>}
-                            <div className="flex flex-wrap gap-4">
+                            <div className="flex flex-wrap justify-center gap-4">
                                 <Button
                                     variant="default"
                                     onClick={handleWhatsAppClick}
