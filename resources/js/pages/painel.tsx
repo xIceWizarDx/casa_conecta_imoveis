@@ -490,65 +490,6 @@ export default function Painel() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
-                                            <Label>Imagem</Label>
-                                            <div className="mt-2 flex items-center gap-2">
-                                                <Dialog
-                                                    open={imagePickerOpen && imagePickerFor === 'slide'}
-                                                    onOpenChange={(o) => {
-                                                        setImagePickerOpen(o);
-                                                        if (!o) setImagePickerFor(null);
-                                                    }}
-                                                >
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="secondary"
-                                                            className="w-auto"
-                                                            onClick={() => {
-                                                                setImagePickerFor('slide');
-                                                                setImagePickerOpen(true);
-                                                            }}
-                                                        >
-                                                            Galeria
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-3xl">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Escolher imagem</DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                            {images.map((img) => (
-                                                                <button
-                                                                    key={img.id}
-                                                                    type="button"
-                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                    onClick={() => {
-                                                                        setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                                                        setImagePickerOpen(false);
-                                                                        setImagePickerFor(null);
-                                                                    }}
-                                                                >
-                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
-                                                {newSlide.image_id && (
-                                                    <ImagePreview
-                                                        src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
-                                                        titulo={newSlide.title}
-                                                        subtitulo={newSlide.subtitle}
-                                                        preco={newSlide.price}
-                                                        quartos={newSlide.bedrooms}
-                                                        banheiros={newSlide.bathrooms}
-                                                        area={newSlide.area}
-                                                        bairro={newSlide.neighborhood}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
                                             <Label>Título</Label>
                                             <Input
                                                 value={newSlide.title ?? ''}
@@ -635,7 +576,7 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <div className="mt-2 flex items-center gap-2">
+                                        <div className="mt-2">
                                             <Dialog
                                                 open={imagePickerOpen && imagePickerFor === 'slide'}
                                                 onOpenChange={(o) => {
@@ -678,11 +619,18 @@ export default function Painel() {
                                                     </div>
                                                 </DialogContent>
                                             </Dialog>
+                                        </div>
+                                        <div className="mt-4 aspect-video w-full border-2 border-dashed">
                                             {newSlide.image_id && (
-                                                <img
-                                                    src={images.find((i) => i.id === newSlide.image_id)?.url}
-                                                    alt="Selecionada"
-                                                    className="h-10 w-14 rounded object-cover"
+                                                <ImagePreview
+                                                    src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
+                                                    titulo={newSlide.title}
+                                                    subtitulo={newSlide.subtitle}
+                                                    preco={newSlide.price}
+                                                    quartos={newSlide.bedrooms}
+                                                    banheiros={newSlide.bathrooms}
+                                                    area={newSlide.area}
+                                                    bairro={newSlide.neighborhood}
                                                 />
                                             )}
                                         </div>
@@ -834,7 +782,6 @@ export default function Painel() {
                                             </div>
                                         </div>
                                         <div>
-
                                             <Label>Título</Label>
                                             <Input
                                                 value={newFeatured.title ?? ''}
