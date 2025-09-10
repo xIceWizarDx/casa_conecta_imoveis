@@ -76,7 +76,11 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="default"
                                     onClick={handleWhatsAppClick}
+<<<<<<< HEAD
                                     className="bg-accent px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent/90 hover:shadow-xl"
+=======
+                                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+>>>>>>> 0e407507131c0e80615b7ca2da4ad7de9d82d446
                                 >
                                     <Icon iconNode={MessageCircle} size={16} className="mr-2" />
                                     Detalhes
@@ -84,7 +88,11 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="outline"
                                     onClick={() => window.open('tel:+5562999999999')}
+<<<<<<< HEAD
                                     className="border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-gray-900"
+=======
+                                    className="border-2 border-white text-white bg-transparent hover:bg-white/10 hover:text-white font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
+>>>>>>> 0e407507131c0e80615b7ca2da4ad7de9d82d446
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
                                     Ligar
