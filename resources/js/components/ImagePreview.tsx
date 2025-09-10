@@ -25,13 +25,12 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
 
-    return (
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
             <img src={src} alt={titulo ?? ''} className="h-full w-full object-cover transition-transform" style={{ transform: `scale(${zoom})` }} />
             <div className="hero-overlay absolute inset-0" />
 
             <div className="absolute inset-0 flex items-center">
-                <div className="container-responsive pl-12 sm:pl-24">
+                <div className="container-responsive pl-32 sm:pl-48">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
                         {bairro && (
                             <div className="mb-4">
