@@ -1,3 +1,4 @@
+import ImagePreview from '@/components/ImagePreview';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -489,7 +490,65 @@ export default function Painel() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
-
+                                            <Label>Imagem</Label>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Dialog
+                                                    open={imagePickerOpen && imagePickerFor === 'slide'}
+                                                    onOpenChange={(o) => {
+                                                        setImagePickerOpen(o);
+                                                        if (!o) setImagePickerFor(null);
+                                                    }}
+                                                >
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="secondary"
+                                                            className="w-auto"
+                                                            onClick={() => {
+                                                                setImagePickerFor('slide');
+                                                                setImagePickerOpen(true);
+                                                            }}
+                                                        >
+                                                            Galeria
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-3xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Escolher imagem</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                                            {images.map((img) => (
+                                                                <button
+                                                                    key={img.id}
+                                                                    type="button"
+                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
+                                                                    onClick={() => {
+                                                                        setNewSlide((s) => ({ ...s, image_id: img.id }));
+                                                                        setImagePickerOpen(false);
+                                                                        setImagePickerFor(null);
+                                                                    }}
+                                                                >
+                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                                {newSlide.image_id && (
+                                                    <ImagePreview
+                                                        src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
+                                                        titulo={newSlide.title}
+                                                        subtitulo={newSlide.subtitle}
+                                                        preco={newSlide.price}
+                                                        quartos={newSlide.bedrooms}
+                                                        banheiros={newSlide.bathrooms}
+                                                        area={newSlide.area}
+                                                        bairro={newSlide.neighborhood}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
                                             <Label>Título</Label>
                                             <Input
                                                 value={newSlide.title ?? ''}
@@ -629,12 +688,7 @@ export default function Painel() {
                                         </div>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button
-                                            className="w-auto"
-                                            onClick={submitSlide}
-                                            disabled={creatingSlide}
-                                            title="Adicionar Slide"
-                                        >
+                                        <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
                                             {creatingSlide ? '…' : '+'}
                                         </Button>
                                     </div>
@@ -722,6 +776,65 @@ export default function Painel() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
+                                            <Label>Imagem</Label>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Dialog
+                                                    open={imagePickerOpen && imagePickerFor === 'featured'}
+                                                    onOpenChange={(o) => {
+                                                        setImagePickerOpen(o);
+                                                        if (!o) setImagePickerFor(null);
+                                                    }}
+                                                >
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="secondary"
+                                                            className="w-auto"
+                                                            onClick={() => {
+                                                                setImagePickerFor('featured');
+                                                                setImagePickerOpen(true);
+                                                            }}
+                                                        >
+                                                            Galeria
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-3xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Escolher imagem</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                                            {images.map((img) => (
+                                                                <button
+                                                                    key={img.id}
+                                                                    type="button"
+                                                                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
+                                                                    onClick={() => {
+                                                                        setNewFeatured((s) => ({ ...s, image_id: img.id }));
+                                                                        setImagePickerOpen(false);
+                                                                        setImagePickerFor(null);
+                                                                    }}
+                                                                >
+                                                                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                                {newFeatured.image_id && (
+                                                    <ImagePreview
+                                                        src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
+                                                        titulo={newFeatured.title}
+                                                        preco={newFeatured.price}
+                                                        quartos={newFeatured.bedrooms}
+                                                        banheiros={newFeatured.bathrooms}
+                                                        area={newFeatured.area}
+                                                        bairro={newFeatured.neighborhood}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+
                                             <Label>Título</Label>
                                             <Input
                                                 value={newFeatured.title ?? ''}
@@ -919,12 +1032,7 @@ export default function Painel() {
                                         </div>
                                     </div>
                                     <div className="flex items-end gap-2">
-                                        <Button
-                                            className="w-auto"
-                                            onClick={submitFeatured}
-                                            disabled={creatingFeatured}
-                                            title="Adicionar Destaque"
-                                        >
+                                        <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured} title="Adicionar Destaque">
                                             {creatingFeatured ? '…' : '+'}
                                         </Button>
                                     </div>
@@ -950,7 +1058,7 @@ export default function Painel() {
                                                             onClick={() => moveFeatured(f.id, -1)}
                                                             title="Subir"
                                                         >
-                                                            Subir
+                                                            ↑
                                                         </Button>
                                                         <Button
                                                             className="w-auto"
@@ -958,7 +1066,7 @@ export default function Painel() {
                                                             onClick={() => moveFeatured(f.id, 1)}
                                                             title="Descer"
                                                         >
-                                                            Descer
+                                                            ↓
                                                         </Button>
                                                         <Button
                                                             className="w-auto"
