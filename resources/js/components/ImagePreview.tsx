@@ -31,11 +31,11 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
             <div className="hero-overlay absolute inset-0" />
 
             <div className="absolute inset-0 flex items-center">
-                <div className="container-responsive pl-32 sm:pl-48">
+                <div className="container-responsive pl-12 sm:pl-24">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
                         {bairro && (
                             <div className="mb-4">
-                                <span className="inline-flex items-center rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary-foreground backdrop-blur-sm">
+                                <span className="inline-flex items-center rounded-full bg-[#22c55e]/20 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
                                     <Icon iconNode={MapPin} size={16} className="mr-2" />
                                     {bairro}
                                 </span>
@@ -72,7 +72,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                         )}
 
                         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                            {preco && <div className="text-3xl font-bold text-primary text-[#22c55e] sm:text-4xl lg:text-5xl">{preco}</div>}
+                            {preco && <div className="text-3xl font-bold text-[#22c55e] sm:text-4xl lg:text-5xl">{preco}</div>}
                             <div className="flex flex-wrap gap-4">
                                 <Button
                                     variant="default"
