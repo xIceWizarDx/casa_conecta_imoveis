@@ -170,8 +170,6 @@ const FeaturedProperties = ({ filters }) => {
   const filteredProperties = filterProperties(list);
   const displayedProperties = showMore ? filteredProperties : filteredProperties?.slice(0, 6);
 
-  const hasFilters = Object.values(filters || {}).some(Boolean);
-
   const toggleFavorite = (propertyId) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
@@ -190,27 +188,29 @@ const FeaturedProperties = ({ filters }) => {
   };
 
   return (
-    <>
-      <div className="text-center mb-12">
-        {hasFilters ? (
-          filteredProperties?.length > 0 && (
-            <p className="text-sm text-primary font-medium">
+    <section id="listagem" className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Imóveis em Destaque
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia, 
+            próximos ao Flamboyant Shopping e principais centros comerciais
+          </p>
+          {filteredProperties?.length > 0 && (
+            <p className="text-sm text-primary font-medium mt-2">
               {filteredProperties?.length} {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
             </p>
-          )
-        ) : (
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            {remote?.length ? 'Propriedades Encontradas' : 'Imóveis em Destaque'}
-          </h2>
-        )}
-      </div>
+          )}
+        </div>
 
-      {filteredProperties?.length === 0 ? (
-        <div className="text-center py-12">
-          <Icon name="Search" size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Nenhum imóvel encontrado
-          </h3>
+        {filteredProperties?.length === 0 ? (
+          <div className="text-center py-12">
+            <Icon name="Search" size={48} className="mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Nenhum imóvel encontrado
+            </h3>
             <p className="text-gray-600 mb-6">
               Tente ajustar os filtros ou entre em contato conosco para mais opções
             </p>
@@ -340,7 +340,8 @@ const FeaturedProperties = ({ filters }) => {
             )}
           </>
         )}
-    </>
+      </div>
+    </section>
   );
 };
 
