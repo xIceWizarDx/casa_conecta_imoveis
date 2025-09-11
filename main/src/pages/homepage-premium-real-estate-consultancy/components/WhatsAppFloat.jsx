@@ -25,20 +25,14 @@ const WhatsAppFloat = () => {
     if (!isVisible) return null;
 
     return (
-        <div className="whatsapp-float group relative animate-[float_4s_ease-in-out_infinite]">
+        <div className="whatsapp-float">
             <button
                 onClick={handleWhatsAppClick}
-                className="relative rounded-full border-2 border-accent bg-transparent p-4 text-accent shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl"
+                className="group relative animate-[float_4s_ease-in-out_infinite] rounded-full border-2 border-accent bg-transparent p-4 text-accent shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl"
                 aria-label="Falar no WhatsApp"
             >
-                {/* Pulse ring */}
-                <span className="absolute inset-0 rounded-full bg-accent opacity-20 animate-ping" />
-
                 {/* WhatsApp Icon */}
                 <Icon name="MessageCircle" size={28} color="#25D366" />
-
-                {/* Notification badge */}
-                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 animate-pulse" />
 
                 {/* Tooltip */}
                 <div className="pointer-events-none absolute top-1/2 right-full mr-4 -translate-y-1/2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
