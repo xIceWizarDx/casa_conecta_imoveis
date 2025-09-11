@@ -521,7 +521,7 @@ export default function Painel() {
                                     </div>
                                 </DialogHeader>
                                 <DialogDescription id="hero-slides-desc">
-                                    Preencha os dados e selecione uma imagem para criar ou editar um slide do hero.
+                                    Gerencie os slides do destaque principal.
                                 </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -638,7 +638,7 @@ export default function Painel() {
                                                         <DialogTitle>Escolher imagem</DialogTitle>
                                                     </DialogHeader>
                                                     <DialogDescription id="hero-gallery-desc">
-                                                        Clique em uma imagem para anexá-la ao slide.
+                                                        Escolha uma imagem para o slide.
                                                     </DialogDescription>
                                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                                                         {images.map((img) => (
@@ -768,7 +768,7 @@ export default function Painel() {
                                     </div>
                                 </DialogHeader>
                                 <DialogDescription id="featured-desc">
-                                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
+                                    Configure os campos e selecione uma imagem para publicar um imóvel em destaque.
                                 </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -943,7 +943,7 @@ export default function Painel() {
                                                         <DialogTitle>Escolher imagem</DialogTitle>
                                                     </DialogHeader>
                                                     <DialogDescription id="featured-gallery-desc">
-                                                        Selecione uma imagem para o imóvel destacado.
+                                                        Escolha uma imagem para o imóvel destacado.
                                                     </DialogDescription>
                                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                                                         {images.map((img) => (
