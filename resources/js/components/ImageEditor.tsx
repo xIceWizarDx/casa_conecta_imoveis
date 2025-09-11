@@ -1,14 +1,16 @@
 import { ReactNode } from 'react';
 import { useImageEditor } from '@/hooks/useImageEditor';
+import { cn } from '@/lib/utils';
 import ImageFilters from './ImageFilters';
 
 interface ImageEditorProps {
     src: string;
     onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
+    sizeClass?: string;
 }
 
-export default function ImageEditor({ src, onExport, children }: ImageEditorProps) {
+export default function ImageEditor({ src, onExport, children, sizeClass = 'w-80' }: ImageEditorProps) {
     const {
         imgRef,
         containerRef,
@@ -24,7 +26,10 @@ export default function ImageEditor({ src, onExport, children }: ImageEditorProp
     } = useImageEditor({ src, onExport });
 
     return (
-        <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-md">
+        <div
+            ref={containerRef}
+            className={cn('relative aspect-square overflow-hidden rounded-md mx-auto', sizeClass)}
+        >
             <img
                 ref={imgRef}
                 src={src}
