@@ -4,8 +4,6 @@ import HeroCarousel from './components/HeroCarousel';
 import PropertyFilters from './components/PropertyFilters';
 import FeaturedProperties from './components/FeaturedProperties';
 import ExpertiseSection from './components/ExpertiseSection';
-import TestimonialsSection from './components/TestimonialsSection';
-import ConsultationHub from './components/ConsultationHub';
 import NeighborhoodMap from './components/NeighborhoodMap';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import Footer from '../../components/Footer';
@@ -81,19 +79,6 @@ const HomepagePremiumRealEstateConsultancy = () => {
           </div>
         </section>
         
-        {/* Testimonials - Enhanced presentation */}
-        <section className="section-spacing">
-          <div className="container-responsive">
-            <TestimonialsSection />
-          </div>
-        </section>
-        
-        {/* Consultation Hub - Call-to-action section */}
-        <section className="section-spacing bg-gray-50">
-          <div className="container-responsive">
-            <ConsultationHub />
-          </div>
-        </section>
         
         {/* Neighborhood Map - Interactive section */}
         <section className="section-spacing">
