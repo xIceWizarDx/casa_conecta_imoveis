@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet';
 import Header from '../../components/ui/Header';
 import HeroSection from './components/HeroSection';
 import TimelineSection from './components/TimelineSection';
-import TeamSection from './components/TeamSection';
 import ServicePhilosophySection from './components/ServicePhilosophySection';
 import CredentialsSection from './components/CredentialsSection';
 import ClientSuccessSection from './components/ClientSuccessSection';
@@ -41,7 +40,6 @@ const AboutBrandStoryCredentials = () => {
         <main>
           <HeroSection />
           <TimelineSection />
-          <TeamSection />
           <ServicePhilosophySection />
           <CredentialsSection />
           <ClientSuccessSection />

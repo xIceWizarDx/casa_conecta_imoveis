@@ -57,30 +57,6 @@ const ExpertiseSection = () => {
     }
   ];
 
-  const teamMembers = [
-    {
-      name: "Carlos Eduardo Silva",
-      role: "Corretor Sênior",
-      creci: "CRECI/GO 12.345",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      specialties: ["Imóveis de Luxo", "Setor Bueno", "Jardim Goiás"]
-    },
-    {
-      name: "Marina Santos",
-      role: "Consultora Imobiliária",
-      creci: "CRECI/GO 67.890",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
-      specialties: ["Apartamentos", "Alto da Glória", "Financiamento"]
-    },
-    {
-      name: "Roberto Mendes",
-      role: "Diretor Comercial",
-      creci: "CRECI/GO 11.111",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      specialties: ["Investimentos", "Coberturas", "Negociação"]
-    }
-  ];
-
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -158,49 +134,6 @@ const ExpertiseSection = () => {
           </div>
         </div>
 
-        {/* Team Section */}
-        <div className="text-center mb-12">
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            Nossa Equipe Especializada
-          </h3>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Profissionais certificados e experientes, prontos para atender você com excelência
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {teamMembers?.map((member, index) => (
-            <div key={index} className="text-center group">
-              <div className="relative mb-6">
-                <div className="w-32 h-32 mx-auto overflow-hidden rounded-2xl">
-                  <Image
-                    src={member?.image}
-                    alt={member?.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold">
-                  {member?.creci}
-                </div>
-              </div>
-              
-              <h4 className="text-xl font-bold text-gray-900 mb-1">
-                {member?.name}
-              </h4>
-              <p className="text-primary font-medium mb-3">
-                {member?.role}
-              </p>
-              
-              <div className="flex flex-wrap justify-center gap-2">
-                {member?.specialties?.map((specialty, idx) => (
-                  <span key={idx} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
-                    {specialty}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
