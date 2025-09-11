@@ -53,7 +53,7 @@ const HomepagePremiumRealEstateConsultancy = () => {
         </section>
 
         {/* Expertise Section - Professional spacing */}
-        <section className="section-spacing bg-gray-50">
+        <section className="section-spacing bg-white">
           <div className="container-responsive">
             <ExpertiseSection />
           </div>

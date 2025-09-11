@@ -219,7 +219,7 @@ const FeaturedProperties = () => {
   };
 
   return (
-    <section id="listagem" className="py-16 bg-gray-50">
+    <section id="listagem" className="py-16 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -236,7 +236,7 @@ const FeaturedProperties = () => {
         )}
       </div>
 
-        <div className="mb-12 w-full bg-gray-50 p-6 rounded-2xl">
+        <div className="mb-12 w-full bg-white border border-gray-200 p-6 rounded-2xl">
           <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -425,12 +425,12 @@ const FeaturedProperties = () => {
                     
                     <div className="flex flex-wrap gap-1 mb-4">
                       {property?.features?.slice(0, 2)?.map((feature, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                        <span key={index} className="bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
                           {feature}
                         </span>
                       ))}
                       {property?.features?.length > 2 && (
-                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                        <span className="bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
                           +{property?.features?.length - 2} mais
                         </span>
                       )}
