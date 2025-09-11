@@ -84,7 +84,7 @@ const NeighborhoodMap = () => {
   };
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -153,7 +153,7 @@ const NeighborhoodMap = () => {
             </div>
 
             {/* Price Information */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className=" rounded-lg p-4 mb-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-gray-500 mb-1">Preço Médio</div>
