@@ -1,6 +1,7 @@
 import { Bath, Bed, MapPin, MessageCircle, Phone, Square } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type WheelEvent } from 'react';
 import { Icon } from './icon';
+import ImageFilters from './ImageFilters';
 import { Button } from './ui/button';
 
 interface ImagePreviewProps {
@@ -16,17 +17,37 @@ interface ImagePreviewProps {
 
 export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, banheiros, area, bairro }: ImagePreviewProps) {
     const [zoom, setZoom] = useState(1);
+    const [brightness, setBrightness] = useState(100);
+    const [contrast, setContrast] = useState(100);
+    const [saturation, setSaturation] = useState(100);
 
     const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
     const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
+
+    const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setZoom((z) => {
+            const newZoom = e.deltaY < 0 ? z + 0.25 : z - 0.25;
+            return Math.min(Math.max(newZoom, 0.5), 3);
+        });
+    };
 
     const handleWhatsAppClick = () => {
         const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`);
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
     return (
-        <div className="relative aspect-video w-full overflow-hidden rounded-md">
-            <img src={src} alt={titulo ?? ''} className="h-full w-full object-cover transition-transform" style={{ transform: `scale(${zoom})` }} />
+        <div className="relative aspect-video w-full overflow-hidden rounded-md" onWheel={handleWheel}>
+            <img
+                src={src}
+                alt={titulo ?? ''}
+                className="h-full w-full object-cover transition-transform"
+                style={{
+                    transform: `scale(${zoom})`,
+                    transformOrigin: 'center',
+                    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`,
+                }}
+            />
             <div className="hero-overlay absolute inset-0" />
 
             <div className="absolute inset-0 flex items-center justify-start pl-16">
@@ -76,7 +97,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="default"
                                     onClick={handleWhatsAppClick}
-                                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                                    className="bg-green-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-green-600 hover:shadow-xl"
                                 >
                                     <Icon iconNode={MessageCircle} size={16} className="mr-2" />
                                     Detalhes
@@ -84,7 +105,7 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                                 <Button
                                     variant="outline"
                                     onClick={() => window.open('tel:+5562999999999')}
-                                    className="border-2 border-white text-white bg-transparent hover:bg-white/10 hover:text-white font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
+                                    className="border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:text-white"
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
                                     Ligar
@@ -103,6 +124,14 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                     +
                 </button>
             </div>
+            <ImageFilters
+                brightness={brightness}
+                contrast={contrast}
+                saturation={saturation}
+                setBrightness={setBrightness}
+                setContrast={setContrast}
+                setSaturation={setSaturation}
+            />
         </div>
     );
 }
