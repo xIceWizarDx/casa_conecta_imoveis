@@ -99,6 +99,7 @@ export default function Painel() {
     const [editingSlideId, setEditingSlideId] = useState<number | null>(null);
     const [editingSlide, setEditingSlide] = useState<Partial<HeroSlide>>({});
     const [savingSlide, setSavingSlide] = useState(false);
+    const [editedSlideBlob, setEditedSlideBlob] = useState<Blob | null>(null);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
@@ -109,6 +110,7 @@ export default function Painel() {
     const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
     const [editingFeatured, setEditingFeatured] = useState<Partial<FeaturedProperty>>({});
     const [savingFeatured, setSavingFeatured] = useState(false);
+    const [editedFeaturedBlob, setEditedFeaturedBlob] = useState<Blob | null>(null);
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
@@ -227,8 +229,15 @@ export default function Painel() {
         }
         setCreatingSlide(true);
         try {
+            let image_id = newSlide.image_id;
+            if (editedSlideBlob) {
+                const fd = new FormData();
+                fd.append('images[]', editedSlideBlob, 'preview-editada.png');
+                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+                if (uploaded[0]?.id) image_id = uploaded[0].id;
+            }
             const body = JSON.stringify({
-                image_id: newSlide.image_id,
+                image_id,
                 title: newSlide.title,
                 subtitle: newSlide.subtitle ?? null,
                 price: newSlide.price,
@@ -244,6 +253,7 @@ export default function Painel() {
                 headers: { 'Content-Type': 'application/json' },
             });
             setNewSlide({});
+            setEditedSlideBlob(null);
             await refreshSlides();
             setNotice({ type: 'success', title: 'Slide adicionado' });
         } finally {
@@ -308,8 +318,15 @@ export default function Painel() {
         }
         setCreatingFeatured(true);
         try {
+            let image_id = newFeatured.image_id;
+            if (editedFeaturedBlob) {
+                const fd = new FormData();
+                fd.append('images[]', editedFeaturedBlob, 'preview-editada.png');
+                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+                if (uploaded[0]?.id) image_id = uploaded[0].id;
+            }
             const body = JSON.stringify({
-                image_id: newFeatured.image_id,
+                image_id,
                 title: newFeatured.title,
                 neighborhood: newFeatured.neighborhood ?? null,
                 price: newFeatured.price,
@@ -327,6 +344,7 @@ export default function Painel() {
                 headers: { 'Content-Type': 'application/json' },
             });
             setNewFeatured({});
+            setEditedFeaturedBlob(null);
             await refreshFeatured();
             setNotice({ type: 'success', title: 'Destaque adicionado' });
         } finally {
@@ -637,6 +655,7 @@ export default function Painel() {
                                                     banheiros={newSlide.bathrooms}
                                                     area={newSlide.area}
                                                     bairro={newSlide.neighborhood}
+                                                    onExport={setEditedSlideBlob}
                                                 />
                                             )}
                                         </div>
@@ -933,6 +952,7 @@ export default function Painel() {
                                                     banheiros={newFeatured.bathrooms}
                                                     area={newFeatured.area}
                                                     bairro={newFeatured.neighborhood}
+                                                    onExport={setEditedFeaturedBlob}
                                                 />
                                             )}
                                         </div>

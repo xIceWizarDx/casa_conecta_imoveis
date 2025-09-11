@@ -1,8 +1,9 @@
 import { Bath, Bed, MapPin, MessageCircle, Phone, Square } from 'lucide-react';
-import { useState, type WheelEvent } from 'react';
+import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { Icon } from './icon';
 import ImageFilters from './ImageFilters';
 import { Button } from './ui/button';
+import { exportEditedImage } from '../utils/exportEditedImage';
 
 interface ImagePreviewProps {
     src: string;
@@ -13,13 +14,16 @@ interface ImagePreviewProps {
     banheiros?: number | string | null;
     area?: string | null;
     bairro?: string | null;
+    onExport?: (blob: Blob | null) => void;
 }
 
-export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, banheiros, area, bairro }: ImagePreviewProps) {
+export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, banheiros, area, bairro, onExport }: ImagePreviewProps) {
     const [zoom, setZoom] = useState(1);
     const [brightness, setBrightness] = useState(100);
     const [contrast, setContrast] = useState(100);
     const [saturation, setSaturation] = useState(100);
+    const imgRef = useRef<HTMLImageElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
     const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
@@ -36,9 +40,34 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
         const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`);
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
+
+    useEffect(() => {
+        if (!onExport || !imgRef.current || !containerRef.current) return;
+        const img = imgRef.current;
+        const container = containerRef.current;
+        const hasEdits = zoom !== 1 || brightness !== 100 || contrast !== 100 || saturation !== 100;
+        const exportAndSend = () => {
+            if (!hasEdits) {
+                onExport(null);
+                return;
+            }
+            exportEditedImage(img, container, { zoom, brightness, contrast, saturation })
+                .then((blob) => onExport(blob))
+                .catch(() => onExport(null));
+        };
+        if (img.complete) {
+            exportAndSend();
+        } else {
+            img.onload = exportAndSend;
+            return () => {
+                img.onload = null;
+            };
+        }
+    }, [zoom, brightness, contrast, saturation, src, onExport]);
     return (
-        <div className="relative aspect-video w-full overflow-hidden rounded-md" onWheel={handleWheel}>
+        <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-md" onWheel={handleWheel}>
             <img
+                ref={imgRef}
                 src={src}
                 alt={titulo ?? ''}
                 className="h-full w-full object-cover transition-transform"
