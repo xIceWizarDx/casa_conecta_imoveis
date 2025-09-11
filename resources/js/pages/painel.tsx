@@ -242,7 +242,8 @@ export default function Painel() {
             let image_id = selectedSlideImage.id;
             if (editedSlideBlob) {
                 const fd = new FormData();
-                fd.append('images[]', editedSlideBlob, 'preview-editada.png');
+                fd.append('images[]', editedSlideBlob, 'preview.png');
+                fd.append('origin', 'processed');
                 const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
                 if (uploaded[0]?.id) image_id = uploaded[0].id;
             }
@@ -332,7 +333,8 @@ export default function Painel() {
             let image_id = selectedFeaturedImage.id;
             if (editedFeaturedBlob) {
                 const fd = new FormData();
-                fd.append('images[]', editedFeaturedBlob, 'preview-editada.png');
+                fd.append('images[]', editedFeaturedBlob, 'preview.png');
+                fd.append('origin', 'processed');
                 const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
                 if (uploaded[0]?.id) image_id = uploaded[0].id;
             }

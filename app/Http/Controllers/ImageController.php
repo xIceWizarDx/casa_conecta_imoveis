@@ -11,7 +11,7 @@ class ImageController extends Controller
 {
     public function index(): JsonResponse
     {
-        $images = Image::query()->latest('id')->get();
+        $images = Image::query()->where('origin', 'upload')->latest('id')->get();
         return response()->json($images);
     }
 
@@ -20,10 +20,12 @@ class ImageController extends Controller
         $validated = $request->validate([
             'images'   => ['required', 'array', 'max:20'],
             'images.*' => ['file', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'], // 5MB por arquivo
+            'origin'   => ['sometimes', 'in:upload,processed'],
         ]);
 
         $saved = [];
         $disk = 'public';
+        $origin = $validated['origin'] ?? 'upload';
 
         foreach ($request->file('images', []) as $file) {
             $path = $file->store('images', $disk);
@@ -52,6 +54,7 @@ class ImageController extends Controller
                 'mime_type'     => $mime,
                 'width'         => $width,
                 'height'        => $height,
+                'origin'        => $origin,
             ]);
 
             $saved[] = $image;
