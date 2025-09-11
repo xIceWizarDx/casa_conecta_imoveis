@@ -59,18 +59,19 @@ const PropertyFilters = ({ onFiltersChange }) => {
   const hasActiveFilters = Object.values(activeFilters)?.some(filter => filter !== '');
 
   return (
-    <>
-      <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-          Encontre Seu Imóvel Ideal
-        </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Use nossos filtros inteligentes para descobrir propriedades premium nos melhores bairros de Goiânia
-        </p>
-      </div>
+    <section className="bg-white py-8 border-b border-gray-200">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+            Encontre Seu Imóvel Ideal
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Use nossos filtros inteligentes para descobrir propriedades premium nos melhores bairros de Goiânia
+          </p>
+        </div>
 
-      <div className="bg-gray-50 rounded-2xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gray-50 rounded-2xl p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Neighborhood Filter */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -191,8 +192,9 @@ const PropertyFilters = ({ onFiltersChange }) => {
               </Button>
             </div>
           </div>
-          </div>
-      </>
+        </div>
+      </div>
+    </section>
   );
 };
 
