@@ -1,8 +1,11 @@
-import ImagePreview from '@/components/ImagePreview';
+import ImageEditor from '@/components/ImageEditor';
+import ImageGallery from '@/components/ImageGallery';
+import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
+import SlideCard from '@/components/SlideCard';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -94,28 +97,28 @@ export default function Painel() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [creatingSlide, setCreatingSlide] = useState(false);
     const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
+    const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
     const [imagesLoading, setImagesLoading] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
     const [editingSlideId, setEditingSlideId] = useState<number | null>(null);
     const [editingSlide, setEditingSlide] = useState<Partial<HeroSlide>>({});
     const [savingSlide, setSavingSlide] = useState(false);
+    const [editedSlideBlob, setEditedSlideBlob] = useState<Blob | null>(null);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
     const [creatingFeatured, setCreatingFeatured] = useState(false);
     const [newFeatured, setNewFeatured] = useState<Partial<FeaturedProperty>>({ features: [] });
+    const [selectedFeaturedImage, setSelectedFeaturedImage] = useState<Image | null>(null);
     const [featureInput, setFeatureInput] = useState('');
     const [featuredLoading, setFeaturedLoading] = useState(false);
     const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
     const [editingFeatured, setEditingFeatured] = useState<Partial<FeaturedProperty>>({});
     const [savingFeatured, setSavingFeatured] = useState(false);
+    const [editedFeaturedBlob, setEditedFeaturedBlob] = useState<Blob | null>(null);
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
-
-    // Image picker dialog
-    const [imagePickerOpen, setImagePickerOpen] = useState(false);
-    const [imagePickerFor, setImagePickerFor] = useState<'slide' | 'featured' | null>(null);
 
     // Notices
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; title: string; message?: string } | null>(null);
@@ -221,14 +224,21 @@ export default function Painel() {
     };
 
     const submitSlide = async () => {
-        if (!newSlide.image_id || !newSlide.title || !newSlide.price) {
+        if (!selectedSlideImage?.id || !newSlide.title || !newSlide.price) {
             alert('Selecione uma imagem, título e preço.');
             return;
         }
         setCreatingSlide(true);
         try {
+            let image_id = selectedSlideImage.id;
+            if (editedSlideBlob) {
+                const fd = new FormData();
+                fd.append('images[]', editedSlideBlob, 'preview-editada.png');
+                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+                if (uploaded[0]?.id) image_id = uploaded[0].id;
+            }
             const body = JSON.stringify({
-                image_id: newSlide.image_id,
+                image_id,
                 title: newSlide.title,
                 subtitle: newSlide.subtitle ?? null,
                 price: newSlide.price,
@@ -244,6 +254,8 @@ export default function Painel() {
                 headers: { 'Content-Type': 'application/json' },
             });
             setNewSlide({});
+            setSelectedSlideImage(null);
+            setEditedSlideBlob(null);
             await refreshSlides();
             setNotice({ type: 'success', title: 'Slide adicionado' });
         } finally {
@@ -302,14 +314,21 @@ export default function Painel() {
     };
 
     const submitFeatured = async () => {
-        if (!newFeatured.image_id || !newFeatured.title || !newFeatured.price) {
+        if (!selectedFeaturedImage?.id || !newFeatured.title || !newFeatured.price) {
             alert('Selecione uma imagem, título e preço.');
             return;
         }
         setCreatingFeatured(true);
         try {
+            let image_id = selectedFeaturedImage.id;
+            if (editedFeaturedBlob) {
+                const fd = new FormData();
+                fd.append('images[]', editedFeaturedBlob, 'preview-editada.png');
+                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+                if (uploaded[0]?.id) image_id = uploaded[0].id;
+            }
             const body = JSON.stringify({
-                image_id: newFeatured.image_id,
+                image_id,
                 title: newFeatured.title,
                 neighborhood: newFeatured.neighborhood ?? null,
                 price: newFeatured.price,
@@ -326,7 +345,9 @@ export default function Painel() {
                 body,
                 headers: { 'Content-Type': 'application/json' },
             });
-            setNewFeatured({});
+            setNewFeatured({ features: [] });
+            setSelectedFeaturedImage(null);
+            setEditedFeaturedBlob(null);
             await refreshFeatured();
             setNotice({ type: 'success', title: 'Destaque adicionado' });
         } finally {
@@ -469,8 +490,14 @@ export default function Painel() {
                             </Button>
                         </div>
 
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                            {slides.map((s) => (
+                                <SlideCard key={s.id} slide={s} onMove={moveSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
+                            ))}
+                        </div>
+
                         <Dialog open={heroModalOpen} onOpenChange={setHeroModalOpen}>
-                            <DialogContent className="w-full sm:max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="hero-slides-desc">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Hero Slides</DialogTitle>
@@ -488,6 +515,9 @@ export default function Painel() {
                                         </div>
                                     </div>
                                 </DialogHeader>
+                                <DialogDescription id="hero-slides-desc">
+                                    Preencha os dados e selecione uma imagem para criar ou editar um slide do hero.
+                                </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
@@ -577,67 +607,25 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <div className="mt-2">
-                                            <Dialog
-                                                open={imagePickerOpen && imagePickerFor === 'slide'}
-                                                onOpenChange={(o) => {
-                                                    setImagePickerOpen(o);
-                                                    if (!o) setImagePickerFor(null);
-                                                }}
-                                            >
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        type="button"
-                                                        variant="secondary"
-                                                        className="w-auto"
-                                                        onClick={() => {
-                                                            setImagePickerFor('slide');
-                                                            setImagePickerOpen(true);
-                                                        }}
-                                                    >
-                                                        Galeria
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>Escolher imagem</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                        {images.map((img) => (
-                                                            <button
-                                                                key={img.id}
-                                                                type="button"
-                                                                className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                onClick={() => {
-                                                                    setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                                                    setImagePickerOpen(false);
-                                                                    setImagePickerFor(null);
-                                                                }}
-                                                            >
-                                                                <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
+                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem na galeria abaixo.</p>
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
-                                                !newSlide.image_id && 'border-2 border-dashed',
+                                                !selectedSlideImage && 'border-2 border-dashed',
                                             )}
                                         >
-                                            {newSlide.image_id && (
-                                                <ImagePreview
-                                                    src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
-                                                    titulo={newSlide.title}
-                                                    subtitulo={newSlide.subtitle}
-                                                    preco={newSlide.price}
-                                                    quartos={newSlide.bedrooms}
-                                                    banheiros={newSlide.bathrooms}
-                                                    area={newSlide.area}
-                                                    bairro={newSlide.neighborhood}
-                                                />
+                                            {selectedSlideImage && (
+                                                <ImageEditor src={selectedSlideImage.url} onExport={setEditedSlideBlob}>
+                                                    <ImagePreviewOverlay
+                                                        titulo={newSlide.title}
+                                                        subtitulo={newSlide.subtitle}
+                                                        preco={newSlide.price}
+                                                        quartos={newSlide.bedrooms}
+                                                        banheiros={newSlide.bathrooms}
+                                                        area={newSlide.area}
+                                                        bairro={newSlide.neighborhood}
+                                                    />
+                                                </ImageEditor>
                                             )}
                                         </div>
                                     </div>
@@ -645,59 +633,6 @@ export default function Painel() {
                                         <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
                                             {creatingSlide ? '…' : '+'}
                                         </Button>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                                        {slides.map((s) => (
-                                            <div key={s.id} className="overflow-hidden rounded-md border">
-                                                {s.image_url ? (
-                                                    <img src={s.image_url} alt={s.title} className="h-40 w-full object-cover" />
-                                                ) : (
-                                                    <div className="h-40 w-full bg-muted" />
-                                                )}
-                                                <div className="flex items-center justify-between gap-2 p-2">
-                                                    <div className="min-w-0">
-                                                        <div className="truncate font-medium" title={s.title}>
-                                                            {s.title}
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground">{s.price}</div>
-                                                    </div>
-                                                    <div className="flex shrink-0 items-center gap-1">
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="secondary"
-                                                            onClick={() => moveSlide(s.id, -1)}
-                                                            title="Subir"
-                                                        >
-                                                            ↑
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="secondary"
-                                                            onClick={() => moveSlide(s.id, 1)}
-                                                            title="Descer"
-                                                        >
-                                                            ↓
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant={s.is_published ? 'default' : 'secondary'}
-                                                            onClick={() => toggleSlidePublish(s.id)}
-                                                            title="Publicar/Despublicar"
-                                                        >
-                                                            {s.is_published ? 'Publicado' : 'Rascunho'}
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="destructive"
-                                                            onClick={() => deleteSlide(s.id)}
-                                                            title="Excluir"
-                                                        >
-                                                            Excluir
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
                                     </div>
                                 </div>
                                 <DialogFooter>
@@ -709,7 +644,7 @@ export default function Painel() {
                         </Dialog>
 
                         <Dialog open={featuredModalOpen} onOpenChange={setFeaturedModalOpen}>
-                            <DialogContent className="w-full sm:max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Imóveis em Destaque</DialogTitle>
@@ -727,6 +662,9 @@ export default function Painel() {
                                         </div>
                                     </div>
                                 </DialogHeader>
+                                <DialogDescription id="featured-desc">
+                                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
+                                </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                         <div>
@@ -874,66 +812,24 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <div className="mt-2">
-                                            <Dialog
-                                                open={imagePickerOpen && imagePickerFor === 'featured'}
-                                                onOpenChange={(o) => {
-                                                    setImagePickerOpen(o);
-                                                    if (!o) setImagePickerFor(null);
-                                                }}
-                                            >
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        type="button"
-                                                        variant="secondary"
-                                                        className="w-auto"
-                                                        onClick={() => {
-                                                            setImagePickerFor('featured');
-                                                            setImagePickerOpen(true);
-                                                        }}
-                                                    >
-                                                        Galeria
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>Escolher imagem</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                                                        {images.map((img) => (
-                                                            <button
-                                                                key={img.id}
-                                                                type="button"
-                                                                className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
-                                                                onClick={() => {
-                                                                    setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                                                                    setImagePickerOpen(false);
-                                                                    setImagePickerFor(null);
-                                                                }}
-                                                            >
-                                                                <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
+                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem na galeria abaixo.</p>
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
-                                                !newFeatured.image_id && 'border-2 border-dashed',
+                                                !selectedFeaturedImage && 'border-2 border-dashed',
                                             )}
                                         >
-                                            {newFeatured.image_id && (
-                                                <ImagePreview
-                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
-                                                    titulo={newFeatured.title}
-                                                    preco={newFeatured.price}
-                                                    quartos={newFeatured.bedrooms}
-                                                    banheiros={newFeatured.bathrooms}
-                                                    area={newFeatured.area}
-                                                    bairro={newFeatured.neighborhood}
-                                                />
+                                            {selectedFeaturedImage && (
+                                                <ImageEditor src={selectedFeaturedImage.url} onExport={setEditedFeaturedBlob}>
+                                                    <ImagePreviewOverlay
+                                                        titulo={newFeatured.title}
+                                                        preco={newFeatured.price}
+                                                        quartos={newFeatured.bedrooms}
+                                                        banheiros={newFeatured.bathrooms}
+                                                        area={newFeatured.area}
+                                                        bairro={newFeatured.neighborhood}
+                                                    />
+                                                </ImageEditor>
                                             )}
                                         </div>
                                     </div>
@@ -1003,6 +899,19 @@ export default function Painel() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
+
+                        <ImageGallery
+                            images={images}
+                            onSelect={(img) => {
+                                if (heroModalOpen) {
+                                    setSelectedSlideImage(img);
+                                    setNewSlide((s) => ({ ...s, image_id: img.id }));
+                                } else if (featuredModalOpen) {
+                                    setSelectedFeaturedImage(img);
+                                    setNewFeatured((s) => ({ ...s, image_id: img.id }));
+                                }
+                            }}
+                        />
                     </>
                 )}
             </div>
