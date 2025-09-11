@@ -244,56 +244,6 @@ const NeighborhoodMap = () => {
           </div>
         </div>
 
-        {/* Additional Info Section */}
-        <div className="mt-12 bg-white rounded-2xl p-8">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Por Que Nossa Expertise em Goiânia Faz a Diferença?
-            </h3>
-            <p className="text-gray-600 max-w-3xl mx-auto">
-              Conhecemos cada rua, cada empreendimento e cada oportunidade. Nossa experiência local 
-              garante que você tome a melhor decisão de investimento.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="TrendingUp" size={32} className="text-primary" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">
-                Análise de Valorização
-              </h4>
-              <p className="text-gray-600 text-sm">
-                Identificamos bairros com maior potencial de crescimento e valorização imobiliária
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="Shield" size={32} className="text-primary" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">
-                Segurança e Infraestrutura
-              </h4>
-              <p className="text-gray-600 text-sm">
-                Avaliamos segurança, infraestrutura e qualidade de vida de cada região
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon name="Users" size={32} className="text-primary" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">
-                Perfil da Vizinhança
-              </h4>
-              <p className="text-gray-600 text-sm">
-                Conhecemos o perfil dos moradores e a dinâmica social de cada bairro
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
