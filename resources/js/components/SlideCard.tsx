@@ -10,18 +10,18 @@ export type Slide = {
 
 interface SlideCardProps {
     slide: Slide;
-    onMove: (id: number, dir: -1 | 1) => void;
+    onEdit: (slide: Slide) => void;
     onToggle: (id: number) => void;
     onDelete: (id: number) => void;
 }
 
-export default function SlideCard({ slide, onMove, onToggle, onDelete }: SlideCardProps) {
+export default function SlideCard({ slide, onEdit, onToggle, onDelete }: SlideCardProps) {
     return (
         <div className="overflow-hidden rounded-md border">
             {slide.image_url ? (
-                <img src={slide.image_url} alt={slide.title} className="h-40 w-full object-cover" />
+                <img src={slide.image_url} alt={slide.title} className="aspect-square w-full object-cover" />
             ) : (
-                <div className="h-40 w-full bg-muted" />
+                <div className="aspect-square w-full bg-muted" />
             )}
             <div className="flex items-center justify-between gap-2 p-2">
                 <div className="min-w-0">
@@ -31,11 +31,8 @@ export default function SlideCard({ slide, onMove, onToggle, onDelete }: SlideCa
                     <div className="text-xs text-muted-foreground">{slide.price}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                    <Button className="w-auto" variant="secondary" onClick={() => onMove(slide.id, -1)} title="Subir">
-                        ↑
-                    </Button>
-                    <Button className="w-auto" variant="secondary" onClick={() => onMove(slide.id, 1)} title="Descer">
-                        ↓
+                    <Button className="w-auto" variant="secondary" onClick={() => onEdit(slide)}>
+                        Editar
                     </Button>
                     <Button
                         className="w-auto"

@@ -100,9 +100,6 @@ export default function Painel() {
     const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
     const [imagesLoading, setImagesLoading] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
-    const [editingSlideId, setEditingSlideId] = useState<number | null>(null);
-    const [editingSlide, setEditingSlide] = useState<Partial<HeroSlide>>({});
-    const [savingSlide, setSavingSlide] = useState(false);
     const [editedSlideBlob, setEditedSlideBlob] = useState<Blob | null>(null);
 
     // Destaques
@@ -249,15 +246,23 @@ export default function Painel() {
                 is_new: !!newSlide.is_new,
                 is_published: !!newSlide.is_published,
             });
-            await apiFetch(HeroActions.store(), {
-                body,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            if (newSlide.id) {
+                await apiFetch(HeroActions.update({ heroSlide: newSlide.id }), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                setNotice({ type: 'success', title: 'Slide atualizado' });
+            } else {
+                await apiFetch(HeroActions.store(), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                setNotice({ type: 'success', title: 'Slide adicionado' });
+            }
             setNewSlide({});
             setSelectedSlideImage(null);
             setEditedSlideBlob(null);
             await refreshSlides();
-            setNotice({ type: 'success', title: 'Slide adicionado' });
         } finally {
             setCreatingSlide(false);
         }
@@ -274,43 +279,15 @@ export default function Painel() {
         await refreshSlides();
     };
 
-    const moveSlide = async (id: number, dir: -1 | 1) => {
-        const idx = slides.findIndex((s) => s.id === id);
-        if (idx < 0) return;
-        const target = idx + dir;
-        if (target < 0 || target >= slides.length) return;
-        const next = slides.slice();
-        const [item] = next.splice(idx, 1);
-        next.splice(target, 0, item);
-        setSlides(next);
-        const ids = next.map((s) => s.id);
-        await apiFetch(HeroActions.reorder.patch(), {
-            body: JSON.stringify({ ids }),
-            headers: { 'Content-Type': 'application/json' },
-        });
-        await refreshSlides();
-    };
-
-    const startEditSlide = (s: HeroSlide) => {
-        setEditingSlideId(s.id);
-        setEditingSlide({ title: s.title, price: s.price });
-    };
-
-    const saveEditSlide = async () => {
-        if (!editingSlideId) return;
-        setSavingSlide(true);
-        try {
-            await apiFetch(HeroActions.update({ heroSlide: editingSlideId }), {
-                body: JSON.stringify({ title: editingSlide.title, price: editingSlide.price }),
-                headers: { 'Content-Type': 'application/json' },
-            });
-            setEditingSlideId(null);
-            setEditingSlide({});
-            await refreshSlides();
-            setNotice({ type: 'success', title: 'Slide atualizado' });
-        } finally {
-            setSavingSlide(false);
-        }
+    const editSlide = (slide: HeroSlide) => {
+        setNewSlide(slide);
+        setSelectedSlideImage(
+            slide.image_id && slide.image_url
+                ? { id: slide.image_id, url: slide.image_url, original_name: '', filename: '' }
+                : null,
+        );
+        setEditedSlideBlob(null);
+        setHeroModalOpen(true);
     };
 
     const submitFeatured = async () => {
@@ -492,7 +469,7 @@ export default function Painel() {
 
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                             {slides.map((s) => (
-                                <SlideCard key={s.id} slide={s} onMove={moveSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
+                                <SlideCard key={s.id} slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
                             ))}
                         </div>
 
