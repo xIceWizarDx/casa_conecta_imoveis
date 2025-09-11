@@ -145,7 +145,7 @@ const ProcessTransparencySection = () => {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   activeStep === index
                     ? 'bg-primary text-white shadow-lg'
-                    : 'bg-gray-50 text-text-secondary hover:bg-primary/10 hover:text-primary'
+                    : 'bg-white border border-gray-200 text-text-secondary hover:bg-primary/10 hover:text-primary'
                 }`}
               >
                 <span className="text-sm">{step?.step}</span>
@@ -155,7 +155,7 @@ const ProcessTransparencySection = () => {
           </div>
 
           {/* Active Step Content */}
-          <div className="bg-gray-50 rounded-2xl p-8">
+          <div className="bg-white border border-gray-200 rounded-2xl p-8">
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Step Info */}
               <div className="text-center lg:text-left">
@@ -212,7 +212,7 @@ const ProcessTransparencySection = () => {
           </h3>
           <div className="grid lg:grid-cols-3 gap-6">
             {legalRequirements?.map((category, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl p-6">
+              <div key={index} className="bg-white border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-text-primary mb-4 flex items-center">
                   <Icon name="FileCheck" size={20} className="mr-2 text-primary" />
                   {category?.category}

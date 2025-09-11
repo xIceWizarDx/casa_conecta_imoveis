@@ -92,7 +92,7 @@ const ExpertiseSection = () => {
         </div>
 
         {/* Process Section */}
-        <div className="bg-gray-50 rounded-3xl p-8 lg:p-12 mb-16">
+        <div className="bg-white border border-gray-200 rounded-3xl p-8 lg:p-12 mb-16">
           <div className="text-center mb-12">
             <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
               Nosso Processo Personalizado

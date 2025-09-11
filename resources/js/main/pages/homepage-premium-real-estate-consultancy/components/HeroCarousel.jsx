@@ -100,7 +100,7 @@ const HeroCarousel = () => {
   };
 
   return (
-    <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
+    <section className="relative w-full hero-carousel bg-white overflow-hidden">
       <div className="relative w-full h-full">
         {(heroProperties?.length ? heroProperties : heroPropertiesStatic).map((property, index) => (
           <div

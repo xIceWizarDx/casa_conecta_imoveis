@@ -49,7 +49,7 @@ const WhatsAppFloat = () => {
         </div>
         
         {/* Tooltip */}
-        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white text-gray-900 border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           Fale Conosco - Resposta Rápida
           <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
         </div>

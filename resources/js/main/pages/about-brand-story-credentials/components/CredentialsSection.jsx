@@ -135,7 +135,7 @@ const CredentialsSection = () => {
           </h3>
           <div className="grid lg:grid-cols-3 gap-6">
             {associations?.map((assoc, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow duration-300">
+              <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow duration-300">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
                     src={assoc?.logo}
@@ -160,7 +160,7 @@ const CredentialsSection = () => {
           </h3>
           <div className="space-y-6">
             {recognitions?.map((recognition, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl p-6 flex items-start space-x-4">
+              <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <Icon name="Trophy" size={24} color="#F59E0B" />
@@ -187,7 +187,7 @@ const CredentialsSection = () => {
           <h3 className="text-2xl font-bold text-text-primary mb-8 text-center">
             Educação Continuada
           </h3>
-          <div className="bg-gray-50 rounded-xl p-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
             <div className="space-y-4">
               {continuingEducation?.map((course, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-white rounded-lg">

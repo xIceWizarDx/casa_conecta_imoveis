@@ -40,7 +40,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-white text-gray-900 border-t border-gray-200">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-12">
@@ -53,28 +53,28 @@ const Footer = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">Casa Conecta</h3>
-                  <p className="text-sm text-gray-400">Imóveis Premium</p>
+                  <p className="text-sm text-gray-700">Imóveis Premium</p>
                 </div>
               </div>
               
-              <p className="text-gray-300 mb-6 text-sm leading-relaxed">
+              <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                 Mais que uma imobiliária, somos consultores especializados em conectar você ao imóvel dos seus sonhos em Goiânia.
               </p>
               
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Icon name="MapPin" size={16} className="text-primary" />
-                  <span className="text-sm text-gray-300">Goiânia - GO</span>
+                  <span className="text-sm text-gray-600">Goiânia - GO</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Icon name="Phone" size={16} className="text-primary" />
-                  <a href="tel:+5562999999999" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  <a href="tel:+5562999999999" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                     (62) 99999-9999
                   </a>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Icon name="Mail" size={16} className="text-primary" />
-                  <a href="mailto:contato@casaconecta.com.br" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  <a href="mailto:contato@casaconecta.com.br" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                     contato@casaconecta.com.br
                   </a>
                 </div>
@@ -89,7 +89,7 @@ const Footer = () => {
                   <li key={link?.path}>
                     <Link 
                       to={link?.path}
-                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                      className="text-gray-600 hover:text-gray-900 transition-colors text-sm"
                     >
                       {link?.name}
                     </Link>
@@ -98,7 +98,7 @@ const Footer = () => {
                 <li>
                   <a 
                     href="#listagem"
-                    className="text-gray-300 hover:text-white transition-colors text-sm"
+                    className="text-gray-600 hover:text-gray-900 transition-colors text-sm"
                   >
                     Imóveis
                   </a>
@@ -109,7 +109,7 @@ const Footer = () => {
               <ul className="space-y-2">
                 {services?.map((service) => (
                   <li key={service}>
-                    <span className="text-gray-300 text-sm">{service}</span>
+                    <span className="text-gray-600 text-sm">{service}</span>
                   </li>
                 ))}
               </ul>
@@ -123,7 +123,7 @@ const Footer = () => {
                   <li key={neighborhood}>
                     <button
                       onClick={() => handleNeighborhoodClick(neighborhood)}
-                      className="text-gray-300 hover:text-white transition-colors text-sm text-left"
+                      className="text-gray-600 hover:text-gray-900 transition-colors text-sm text-left"
                     >
                       {neighborhood}
                     </button>
@@ -156,7 +156,7 @@ const Footer = () => {
 
               <div className="mb-6">
                 <h5 className="text-md font-semibold mb-3">Horário de Atendimento</h5>
-                <div className="text-sm text-gray-300 space-y-1">
+                <div className="text-sm text-gray-600 space-y-1">
                   <p>Segunda a Sexta: 8h às 18h</p>
                   <p>Sábado: 8h às 14h</p>
                   <p>WhatsApp: 24h</p>
@@ -167,7 +167,7 @@ const Footer = () => {
                 <h5 className="text-md font-semibold mb-3">Certificações</h5>
                 <div className="flex items-center space-x-2">
                   <Icon name="Award" size={16} className="text-primary" />
-                  <span className="text-sm text-gray-300">CRECI/GO Certificado</span>
+                  <span className="text-sm text-gray-600">CRECI/GO Certificado</span>
                 </div>
               </div>
             </div>
@@ -175,26 +175,26 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 py-6">
+        <div className="border-t border-gray-200 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-700">
               © {currentYear} Casa Conecta Imóveis. Todos os direitos reservados.
             </div>
             
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">
+            <div className="flex items-center space-x-6 text-sm text-gray-700">
+              <a href="#" className="hover:text-gray-900 transition-colors">
                 Política de Privacidade
               </a>
-              <a href="#" className="hover:text-white transition-colors">
+              <a href="#" className="hover:text-gray-900 transition-colors">
                 Termos de Uso
               </a>
-              <a href="#" className="hover:text-white transition-colors">
+              <a href="#" className="hover:text-gray-900 transition-colors">
                 Cookies
               </a>
             </div>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-gray-800 text-center">
+          <div className="mt-4 pt-4 border-t border-gray-200 text-center">
             <p className="text-xs text-gray-500">
               CRECI/GO 12.345 - Responsável Técnico: Carlos Eduardo Silva
             </p>
