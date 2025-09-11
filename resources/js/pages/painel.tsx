@@ -94,6 +94,7 @@ export default function Painel() {
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [creatingSlide, setCreatingSlide] = useState(false);
     const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
+    const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
     const [imagesLoading, setImagesLoading] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
     const [editingSlideId, setEditingSlideId] = useState<number | null>(null);
@@ -105,6 +106,7 @@ export default function Painel() {
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
     const [creatingFeatured, setCreatingFeatured] = useState(false);
     const [newFeatured, setNewFeatured] = useState<Partial<FeaturedProperty>>({ features: [] });
+    const [selectedFeaturedImage, setSelectedFeaturedImage] = useState<Image | null>(null);
     const [featureInput, setFeatureInput] = useState('');
     const [featuredLoading, setFeaturedLoading] = useState(false);
     const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
@@ -223,13 +225,13 @@ export default function Painel() {
     };
 
     const submitSlide = async () => {
-        if (!newSlide.image_id || !newSlide.title || !newSlide.price) {
+        if (!selectedSlideImage?.id || !newSlide.title || !newSlide.price) {
             alert('Selecione uma imagem, título e preço.');
             return;
         }
         setCreatingSlide(true);
         try {
-            let image_id = newSlide.image_id;
+            let image_id = selectedSlideImage.id;
             if (editedSlideBlob) {
                 const fd = new FormData();
                 fd.append('images[]', editedSlideBlob, 'preview-editada.png');
@@ -253,6 +255,7 @@ export default function Painel() {
                 headers: { 'Content-Type': 'application/json' },
             });
             setNewSlide({});
+            setSelectedSlideImage(null);
             setEditedSlideBlob(null);
             await refreshSlides();
             setNotice({ type: 'success', title: 'Slide adicionado' });
@@ -312,13 +315,13 @@ export default function Painel() {
     };
 
     const submitFeatured = async () => {
-        if (!newFeatured.image_id || !newFeatured.title || !newFeatured.price) {
+        if (!selectedFeaturedImage?.id || !newFeatured.title || !newFeatured.price) {
             alert('Selecione uma imagem, título e preço.');
             return;
         }
         setCreatingFeatured(true);
         try {
-            let image_id = newFeatured.image_id;
+            let image_id = selectedFeaturedImage.id;
             if (editedFeaturedBlob) {
                 const fd = new FormData();
                 fd.append('images[]', editedFeaturedBlob, 'preview-editada.png');
@@ -343,7 +346,8 @@ export default function Painel() {
                 body,
                 headers: { 'Content-Type': 'application/json' },
             });
-            setNewFeatured({});
+            setNewFeatured({ features: [] });
+            setSelectedFeaturedImage(null);
             setEditedFeaturedBlob(null);
             await refreshFeatured();
             setNotice({ type: 'success', title: 'Destaque adicionado' });
@@ -627,6 +631,7 @@ export default function Painel() {
                                                                 type="button"
                                                                 className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
                                                                 onClick={() => {
+                                                                    setSelectedSlideImage(img);
                                                                     setNewSlide((s) => ({ ...s, image_id: img.id }));
                                                                     setImagePickerOpen(false);
                                                                     setImagePickerFor(null);
@@ -642,12 +647,12 @@ export default function Painel() {
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
-                                                !newSlide.image_id && 'border-2 border-dashed',
+                                                !selectedSlideImage && 'border-2 border-dashed',
                                             )}
                                         >
-                                            {newSlide.image_id && (
+                                            {selectedSlideImage && (
                                                 <ImagePreview
-                                                    src={images.find((i) => i.id === newSlide.image_id)?.url ?? ''}
+                                                    src={selectedSlideImage.url}
                                                     titulo={newSlide.title}
                                                     subtitulo={newSlide.subtitle}
                                                     preco={newSlide.price}
@@ -925,6 +930,7 @@ export default function Painel() {
                                                                 type="button"
                                                                 className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
                                                                 onClick={() => {
+                                                                    setSelectedFeaturedImage(img);
                                                                     setNewFeatured((s) => ({ ...s, image_id: img.id }));
                                                                     setImagePickerOpen(false);
                                                                     setImagePickerFor(null);
@@ -940,12 +946,12 @@ export default function Painel() {
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
-                                                !newFeatured.image_id && 'border-2 border-dashed',
+                                                !selectedFeaturedImage && 'border-2 border-dashed',
                                             )}
                                         >
-                                            {newFeatured.image_id && (
+                                            {selectedFeaturedImage && (
                                                 <ImagePreview
-                                                    src={images.find((i) => i.id === newFeatured.image_id)?.url ?? ''}
+                                                    src={selectedFeaturedImage.url}
                                                     titulo={newFeatured.title}
                                                     preco={newFeatured.price}
                                                     quartos={newFeatured.bedrooms}
