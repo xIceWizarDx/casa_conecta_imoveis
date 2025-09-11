@@ -10,6 +10,10 @@ interface ImageFiltersProps {
 }
 
 export default function ImageFilters({ brightness, contrast, saturation, setBrightness, setContrast, setSaturation }: ImageFiltersProps) {
+    const presets = {
+        dark: { brightness: 80, contrast: 110, saturation: 90, label: 'Escuro suave' },
+    } as const;
+
     const resetFilters = () => {
         setBrightness(100);
         setContrast(100);
@@ -18,6 +22,22 @@ export default function ImageFilters({ brightness, contrast, saturation, setBrig
 
     return (
         <div className="absolute bottom-4 left-4 rounded-md bg-black/50 p-4 text-white backdrop-blur-sm">
+            <div className="mb-2 flex gap-2">
+                {Object.values(presets).map((preset) => (
+                    <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                            setBrightness(preset.brightness);
+                            setContrast(preset.contrast);
+                            setSaturation(preset.saturation);
+                        }}
+                        className="rounded bg-white/10 px-2 py-1 text-sm hover:bg-white/20"
+                    >
+                        {preset.label}
+                    </button>
+                ))}
+            </div>
             <div className="flex flex-col gap-2">
                 <label className="flex items-center gap-2">
                     <span className="w-24 text-sm">Brilho</span>
