@@ -267,7 +267,7 @@ const FeaturedProperties = () => {
       </div>
 
       <div className="mb-12 w-full bg-gray-50 p-6 rounded-2xl">
-        <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               <Icon name="MapPin" size={16} className="mr-2 inline" />
@@ -322,8 +322,8 @@ const FeaturedProperties = () => {
             </select>
           </div>
 
-          <div className="flex items-end">
-            <Button className="w-full h-full" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
+          <div className="flex items-end justify-center">
+            <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
               Buscar Imóveis
             </Button>
           </div>
