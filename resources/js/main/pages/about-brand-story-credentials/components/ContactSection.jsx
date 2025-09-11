@@ -118,7 +118,8 @@ const ContactSection = () => {
                     key={index}
                     className={`p-6 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
                       method?.highlight
-                        ? 'border-primary bg-primary/5 hover:bg-primary/10' :'border-border bg-surface hover:border-primary/50'
+                        ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                        : 'border-border bg-gray-50 hover:border-primary/50'
                     }`}
                     onClick={method?.onClick}
                   >
@@ -152,7 +153,7 @@ const ContactSection = () => {
             </div>
 
             {/* Office Information */}
-            <div className="bg-surface rounded-xl p-6">
+            <div className="bg-gray-50 rounded-xl p-6">
               <h4 className="font-semibold text-text-primary mb-4 flex items-center">
                 <Icon name="MapPin" size={20} className="mr-2 text-primary" />
                 Nosso Escritório
@@ -171,7 +172,7 @@ const ContactSection = () => {
 
           {/* Contact Form */}
           <div>
-            <div className="bg-surface rounded-xl p-8">
+            <div className="bg-gray-50 rounded-xl p-8">
               <h3 className="text-2xl font-bold text-text-primary mb-6">
                 Solicite uma Consulta
               </h3>
