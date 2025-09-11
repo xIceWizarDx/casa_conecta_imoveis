@@ -44,19 +44,18 @@ const HomepagePremiumRealEstateConsultancy = () => {
             <FeaturedProperties />
           </div>
         </section>
-        
-        {/* Expertise Section - Professional spacing */}
-        <section className="section-spacing bg-gray-50">
-          <div className="container-responsive">
-            <ExpertiseSection />
-          </div>
-        </section>
-        
-        
+
         {/* Neighborhood Map - Interactive section */}
         <section className="section-spacing">
           <div className="container-responsive">
             <NeighborhoodMap />
+          </div>
+        </section>
+
+        {/* Expertise Section - Professional spacing */}
+        <section className="section-spacing bg-gray-50">
+          <div className="container-responsive">
+            <ExpertiseSection />
           </div>
         </section>
       </main>
