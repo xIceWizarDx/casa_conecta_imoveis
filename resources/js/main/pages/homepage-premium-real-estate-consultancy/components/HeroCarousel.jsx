@@ -6,7 +6,6 @@ import Button from '../../../components/ui/Button';
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroProperties, setHeroProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -29,23 +28,70 @@ const HeroCarousel = () => {
           setHeroProperties(mapped);
         }
       } catch {}
-      setLoading(false);
     })();
   }, []);
+
+  const heroPropertiesStatic = [
+    {
+      id: 1,
+      title: "Casa de Luxo no Setor Bueno",
+      subtitle: "Sua nova casa nos melhores bairros de Goiânia",
+      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+      price: "R$ 1.850.000",
+      bedrooms: 4,
+      bathrooms: 3,
+      area: "320m²",
+      neighborhood: "Setor Bueno"
+    },
+    {
+      id: 2,
+      title: "Apartamento Premium Jardim Goiás",
+      subtitle: "Viva com sofisticação próximo ao Flamboyant",
+      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+      price: "R$ 1.200.000",
+      bedrooms: 3,
+      bathrooms: 2,
+      area: "180m²",
+      neighborhood: "Jardim Goiás"
+    },
+    {
+      id: 3,
+      title: "Cobertura Alto da Glória",
+      subtitle: "Exclusividade e vista panorâmica da cidade",
+      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+      price: "R$ 2.400.000",
+      bedrooms: 5,
+      bathrooms: 4,
+      area: "450m²",
+      neighborhood: "Alto da Glória"
+    },
+    {
+      id: 4,
+      title: "Casa Moderna Setor Marista",
+      subtitle: "Arquitetura contemporânea em localização privilegiada",
+      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+      price: "R$ 1.650.000",
+      bedrooms: 4,
+      bathrooms: 3,
+      area: "280m²",
+      neighborhood: "Setor Marista"
+    }
+  ];
+
   useEffect(() => {
-    if (!heroProperties.length) return;
+    const list = heroProperties?.length ? heroProperties : heroPropertiesStatic;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroProperties.length);
+      setCurrentSlide((prev) => (list.length ? (prev + 1) % list.length : 0));
     }, 6000);
     return () => clearInterval(interval);
-  }, [heroProperties.length]);
+  }, [heroProperties?.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroProperties.length);
+    setCurrentSlide((prev) => (prev + 1) % heroProperties?.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroProperties.length) % heroProperties.length);
+    setCurrentSlide((prev) => (prev - 1 + heroProperties?.length) % heroProperties?.length);
   };
 
   const handleWhatsAppClick = (property) => {
@@ -53,13 +99,10 @@ const HeroCarousel = () => {
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
-  if (loading) return <div className="w-full h-[400px] bg-gray-900" />;
-  if (!heroProperties.length) return null;
-
   return (
     <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
       <div className="relative w-full h-full">
-        {heroProperties.map((property, index) => (
+        {(heroProperties?.length ? heroProperties : heroPropertiesStatic).map((property, index) => (
           <div
             key={property?.id}
             className={`absolute inset-0 transition-all duration-1000 ${
