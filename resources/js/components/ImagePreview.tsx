@@ -29,8 +29,8 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
             <img src={src} alt={titulo ?? ''} className="h-full w-full object-cover transition-transform" style={{ transform: `scale(${zoom})` }} />
             <div className="hero-overlay absolute inset-0" />
 
-            <div className="absolute inset-0 flex items-center justify-center">
-                <div className="px-8 mx-auto">
+            <div className="absolute inset-0 flex items-center justify-start pl-16">
+                <div className="px-8">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
                         {bairro && (
                             <div className="mb-4">
