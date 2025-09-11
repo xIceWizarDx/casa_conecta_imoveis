@@ -9,6 +9,7 @@ import ClientSuccessSection from './components/ClientSuccessSection';
 import ProcessTransparencySection from './components/ProcessTransparencySection';
 import NeighborhoodExpertiseSection from './components/NeighborhoodExpertiseSection';
 import ContactSection from './components/ContactSection';
+import Footer from '../../components/Footer';
 
 const AboutBrandStoryCredentials = () => {
   useEffect(() => {
@@ -60,55 +61,7 @@ const AboutBrandStoryCredentials = () => {
         </button>
 
         {/* Footer */}
-        <footer className="bg-text-primary text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-4 gap-8">
-              <div className="lg:col-span-2">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Casa Conecta</h3>
-                    <p className="text-sm opacity-80">Imóveis Premium</p>
-                  </div>
-                </div>
-                <p className="text-sm opacity-80 mb-4 max-w-md">
-                  Conectando famílias aos seus lares ideais em Goiânia há mais de 6 anos. 
-                  Consultoria especializada em imóveis premium com atendimento personalizado.
-                </p>
-                <div className="text-xs opacity-60">
-                  CRECI-GO 12345 | CNPJ: 12.345.678/0001-90
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-4">Contato</h4>
-                <div className="space-y-2 text-sm opacity-80">
-                  <div>(62) 99999-9999</div>
-                  <div>contato@casaconecta.com.br</div>
-                  <div>Rua T-25, 123 - Setor Bueno</div>
-                  <div>Goiânia - GO</div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-4">Horários</h4>
-                <div className="space-y-2 text-sm opacity-80">
-                  <div>Segunda a Sexta: 8h às 18h</div>
-                  <div>Sábado: 8h às 12h</div>
-                  <div className="text-primary font-medium">WhatsApp: 24/7</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm opacity-60">
-              <p>&copy; {new Date()?.getFullYear()} Casa Conecta Imóveis. Todos os direitos reservados.</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

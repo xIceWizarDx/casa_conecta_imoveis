@@ -6,6 +6,7 @@ import CategoryFilter from './components/CategoryFilter';
 import FAQItem from './components/FAQItem';
 import ConsultationSection from './components/ConsultationSection';
 import Icon from '../../components/AppIcon';
+import Footer from '../../components/Footer';
 
 const FAQPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -621,31 +622,7 @@ Nosso compromisso não termina na entrega das chaves. Queremos que você tenha u
         <Icon name="MessageCircle" size={24} />
       </button>
       {/* Footer */}
-      <footer className="bg-text-primary text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <Icon name="Home" size={24} color="white" strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold">Casa Conecta</h3>
-                <p className="text-sm opacity-80">Imóveis Premium</p>
-              </div>
-            </div>
-            <p className="text-sm opacity-80 mb-4">
-              Especialistas em imóveis premium nos melhores bairros de Goiânia
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm opacity-70">
-              <span>CRECI-GO: 123456</span>
-              <span className="hidden sm:block">•</span>
-              <span>© {new Date()?.getFullYear()} Casa Conecta Imóveis</span>
-              <span className="hidden sm:block">•</span>
-              <span>Todos os direitos reservados</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

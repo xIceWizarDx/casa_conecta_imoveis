@@ -8,7 +8,7 @@ import TestimonialsSection from './components/TestimonialsSection';
 import ConsultationHub from './components/ConsultationHub';
 import NeighborhoodMap from './components/NeighborhoodMap';
 import WhatsAppFloat from './components/WhatsAppFloat';
-import Footer from './components/Footer';
+import Footer from '../../components/Footer';
 
 const HomepagePremiumRealEstateConsultancy = () => {
   const [filters, setFilters] = useState({
