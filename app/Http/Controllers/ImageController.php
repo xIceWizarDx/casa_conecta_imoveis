@@ -11,14 +11,7 @@ class ImageController extends Controller
 {
     public function index(): JsonResponse
     {
-        try {
-            $images = Image::query()->where('origin', 'upload')->latest('id')->get();
-        } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Images table missing `origin` column. Run migrations.'
-            ], 500);
-        }
-
+        $images = Image::query()->where('origin', 'upload')->latest('id')->get();
         return response()->json($images);
     }
 
