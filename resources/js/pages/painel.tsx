@@ -2,7 +2,15 @@ import ImagePreview from '@/components/ImagePreview';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -492,7 +500,7 @@ export default function Painel() {
                         </div>
 
                         <Dialog open={heroModalOpen} onOpenChange={setHeroModalOpen}>
-                            <DialogContent className="w-full sm:max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="hero-slides-desc">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Hero Slides</DialogTitle>
@@ -510,6 +518,9 @@ export default function Painel() {
                                         </div>
                                     </div>
                                 </DialogHeader>
+                                <DialogDescription id="hero-slides-desc">
+                                    Preencha os dados e selecione uma imagem para criar ou editar um slide do hero.
+                                </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                         <div>
@@ -620,10 +631,13 @@ export default function Painel() {
                                                         Galeria
                                                     </Button>
                                                 </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
+                                                <DialogContent className="sm:max-w-3xl" aria-describedby="hero-gallery-desc">
                                                     <DialogHeader>
                                                         <DialogTitle>Escolher imagem</DialogTitle>
                                                     </DialogHeader>
+                                                    <DialogDescription id="hero-gallery-desc">
+                                                        Clique em uma imagem para anexá-la ao slide.
+                                                    </DialogDescription>
                                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                                                         {images.map((img) => (
                                                             <button
@@ -733,7 +747,7 @@ export default function Painel() {
                         </Dialog>
 
                         <Dialog open={featuredModalOpen} onOpenChange={setFeaturedModalOpen}>
-                            <DialogContent className="w-full sm:max-w-5xl">
+                            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Imóveis em Destaque</DialogTitle>
@@ -751,6 +765,9 @@ export default function Painel() {
                                         </div>
                                     </div>
                                 </DialogHeader>
+                                <DialogDescription id="featured-desc">
+                                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
+                                </DialogDescription>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                         <div>
@@ -919,10 +936,13 @@ export default function Painel() {
                                                         Galeria
                                                     </Button>
                                                 </DialogTrigger>
-                                                <DialogContent className="sm:max-w-3xl">
+                                                <DialogContent className="sm:max-w-3xl" aria-describedby="featured-gallery-desc">
                                                     <DialogHeader>
                                                         <DialogTitle>Escolher imagem</DialogTitle>
                                                     </DialogHeader>
+                                                    <DialogDescription id="featured-gallery-desc">
+                                                        Selecione uma imagem para o imóvel destacado.
+                                                    </DialogDescription>
                                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                                                         {images.map((img) => (
                                                             <button
