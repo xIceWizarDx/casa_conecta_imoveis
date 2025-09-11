@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import HeroCarousel from './components/HeroCarousel';
-import PropertyFilters from './components/PropertyFilters';
 import FeaturedProperties from './components/FeaturedProperties';
 import ExpertiseSection from './components/ExpertiseSection';
 import NeighborhoodMap from './components/NeighborhoodMap';
@@ -9,12 +8,6 @@ import WhatsAppFloat from './components/WhatsAppFloat';
 import Footer from '../../components/Footer';
 
 const HomepagePremiumRealEstateConsultancy = () => {
-  const [filters, setFilters] = useState({
-    neighborhood: '',
-    priceRange: '',
-    propertyType: ''
-  });
-
   useEffect(() => {
     // Smooth scroll behavior for anchor links
     const handleAnchorClick = (e) => {
@@ -35,19 +28,6 @@ const HomepagePremiumRealEstateConsultancy = () => {
     return () => document.removeEventListener('click', handleAnchorClick);
   }, []);
 
-  const handleFiltersChange = (newFilters) => {
-    setFilters(newFilters);
-    
-    // Smooth scroll to properties section when filters are applied
-    const propertiesSection = document.getElementById('listagem');
-    if (propertiesSection) {
-      propertiesSection?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -58,17 +38,10 @@ const HomepagePremiumRealEstateConsultancy = () => {
         {/* Hero Carousel - Full viewport section */}
         <HeroCarousel />
         
-        {/* Property Filters - Properly spaced section */}
-        <section className="section-spacing bg-surface">
-          <div className="container-responsive">
-            <PropertyFilters onFiltersChange={handleFiltersChange} />
-          </div>
-        </section>
-        
         {/* Featured Properties - Well organized section */}
         <section className="section-spacing">
           <div className="container-responsive">
-            <FeaturedProperties filters={filters} />
+            <FeaturedProperties />
           </div>
         </section>
         

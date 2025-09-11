@@ -3,9 +3,20 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const FeaturedProperties = ({ filters }) => {
+const FeaturedProperties = () => {
   const [showMore, setShowMore] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
+
+  const [filters, setFilters] = useState({
+    neighborhood: '',
+    priceRange: '',
+    propertyType: ''
+  });
+  const [formFilters, setFormFilters] = useState({
+    neighborhood: '',
+    priceRange: '',
+    propertyType: ''
+  });
 
   const [remote, setRemote] = useState([]);
 
@@ -34,6 +45,56 @@ const FeaturedProperties = ({ filters }) => {
       } catch {}
     })();
   }, []);
+
+  const neighborhoods = [
+    { value: '', label: 'Todos os Bairros' },
+    { value: 'setor-bueno', label: 'Setor Bueno' },
+    { value: 'jardim-goias', label: 'Jardim Goiás' },
+    { value: 'alto-da-gloria', label: 'Alto da Glória' },
+    { value: 'setor-marista', label: 'Setor Marista' },
+    { value: 'setor-oeste', label: 'Setor Oeste' },
+    { value: 'park-lozandes', label: 'Park Lozandes' },
+  ];
+
+  const priceRanges = [
+    { value: '', label: 'Qualquer Valor' },
+    { value: '800000-1200000', label: 'R$ 800.000 - R$ 1.200.000' },
+    { value: '1200000-1800000', label: 'R$ 1.200.000 - R$ 1.800.000' },
+    { value: '1800000-2500000', label: 'R$ 1.800.000 - R$ 2.500.000' },
+    { value: '2500000-3000000', label: 'R$ 2.500.000 - R$ 3.000.000' },
+    { value: '3000000+', label: 'Acima de R$ 3.000.000' },
+  ];
+
+  const propertyTypes = [
+    { value: '', label: 'Todos os Tipos' },
+    { value: 'casa', label: 'Casa' },
+    { value: 'apartamento', label: 'Apartamento' },
+    { value: 'cobertura', label: 'Cobertura' },
+    { value: 'sobrado', label: 'Sobrado' },
+    { value: 'terreno', label: 'Terreno' },
+  ];
+
+  const handleFilterChange = (type, value) => {
+    setFormFilters(prev => ({ ...prev, [type]: value }));
+  };
+
+  const applyFilters = () => {
+    setFilters(formFilters);
+  };
+
+  const clearFilters = () => {
+    const cleared = { neighborhood: '', priceRange: '', propertyType: '' };
+    setFormFilters(cleared);
+    setFilters(cleared);
+  };
+
+  const removeFilter = (type) => {
+    const updated = { ...formFilters, [type]: '' };
+    setFormFilters(updated);
+    setFilters(prev => ({ ...prev, [type]: '' }));
+  };
+
+  const hasActiveFilters = Object.values(filters).some(f => f !== '');
 
   const allPropertiesStatic = [
     {
@@ -153,14 +214,14 @@ const FeaturedProperties = ({ filters }) => {
   const list = remote?.length ? remote : allPropertiesStatic;
 
   const filterProperties = (properties) => {
-    return properties?.filter(property => {
-      if (filters?.neighborhood && property?.neighborhood?.toLowerCase()?.replace(/\s+/g, '-') !== filters?.neighborhood) {
+    return properties?.filter((property) => {
+      if (filters.neighborhood && property?.neighborhood?.toLowerCase()?.replace(/\s+/g, '-') !== filters.neighborhood) {
         return false;
       }
-      if (filters?.priceRange && property?.priceRange !== filters?.priceRange) {
+      if (filters.priceRange && property?.priceRange !== filters.priceRange) {
         return false;
       }
-      if (filters?.propertyType && property?.type !== filters?.propertyType) {
+      if (filters.propertyType && property?.type !== filters.propertyType) {
         return false;
       }
       return true;
@@ -198,14 +259,115 @@ const FeaturedProperties = ({ filters }) => {
             Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia, 
             próximos ao Flamboyant Shopping e principais centros comerciais
           </p>
-          {filteredProperties?.length > 0 && (
-            <p className="text-sm text-primary font-medium mt-2">
-              {filteredProperties?.length} {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
-            </p>
-          )}
+        {filteredProperties?.length > 0 && (
+          <p className="text-sm text-primary font-medium mt-2">
+            {filteredProperties?.length} {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+          </p>
+        )}
+      </div>
+
+      <div className="mb-12 bg-gray-50 p-6 rounded-2xl">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              <Icon name="MapPin" size={16} className="mr-2 inline" />
+              Bairro
+            </label>
+            <select
+              value={formFilters.neighborhood}
+              onChange={(e) => handleFilterChange('neighborhood', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+            >
+              {neighborhoods.map((neighborhood) => (
+                <option key={neighborhood.value} value={neighborhood.value}>
+                  {neighborhood.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              <Icon name="DollarSign" size={16} className="mr-2 inline" />
+              Faixa de Preço
+            </label>
+            <select
+              value={formFilters.priceRange}
+              onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+            >
+              {priceRanges.map((range) => (
+                <option key={range.value} value={range.value}>
+                  {range.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              <Icon name="Home" size={16} className="mr-2 inline" />
+              Tipo de Imóvel
+            </label>
+            <select
+              value={formFilters.propertyType}
+              onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+            >
+              {propertyTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <Button variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
+              Buscar Imóveis
+            </Button>
+          </div>
         </div>
 
-        {filteredProperties?.length === 0 ? (
+        {hasActiveFilters && (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {filters.neighborhood && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {neighborhoods.find((n) => n.value === filters.neighborhood)?.label}
+                  <button onClick={() => removeFilter('neighborhood')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.priceRange && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {priceRanges.find((p) => p.value === filters.priceRange)?.label}
+                  <button onClick={() => removeFilter('priceRange')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.propertyType && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {propertyTypes.find((t) => t.value === filters.propertyType)?.label}
+                  <button onClick={() => removeFilter('propertyType')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button variant="outline" iconName="RotateCcw" iconPosition="left" onClick={clearFilters}>
+                Limpar Filtros
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {filteredProperties?.length === 0 ? (
           <div className="text-center py-12">
             <Icon name="Search" size={48} className="mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
