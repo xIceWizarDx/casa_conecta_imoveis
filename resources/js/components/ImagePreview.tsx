@@ -1,5 +1,5 @@
 import { Bath, Bed, MapPin, MessageCircle, Phone, Square } from 'lucide-react';
-import { useEffect, useRef, useState, type WheelEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
 import ImageFilters from './ImageFilters';
 import { Button } from './ui/button';
@@ -28,18 +28,25 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
     const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
     const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
 
-    const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setZoom((z) => {
-            const newZoom = e.deltaY < 0 ? z + 0.25 : z - 0.25;
-            return Math.min(Math.max(newZoom, 0.5), 3);
-        });
-    };
-
     const handleWhatsAppClick = () => {
         const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`);
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const wheelHandler = (e: WheelEvent) => {
+            e.preventDefault();
+            setZoom((z) => Math.min(Math.max(z + (e.deltaY < 0 ? 0.25 : -0.25), 0.5), 3));
+        };
+
+        container.addEventListener('wheel', wheelHandler, { passive: false });
+        return () => {
+            container.removeEventListener('wheel', wheelHandler);
+        };
+    }, []);
 
     useEffect(() => {
         if (!onExport || !imgRef.current || !containerRef.current) return;
@@ -55,17 +62,22 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                 .then((blob) => onExport(blob))
                 .catch(() => onExport(null));
         };
+        let timeout: ReturnType<typeof setTimeout>;
+        const run = () => {
+            timeout = setTimeout(exportAndSend, 300);
+        };
         if (img.complete) {
-            exportAndSend();
+            run();
         } else {
-            img.onload = exportAndSend;
-            return () => {
-                img.onload = null;
-            };
+            img.onload = run;
         }
+        return () => {
+            clearTimeout(timeout);
+            img.onload = null;
+        };
     }, [zoom, brightness, contrast, saturation, src, onExport]);
     return (
-        <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-md" onWheel={handleWheel}>
+        <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-md">
             <img
                 ref={imgRef}
                 src={src}
