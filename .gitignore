@@ -3,3 +3,6 @@
 /public/hot
 /.vscode
 /.github
+.env
+.env.*
+
