@@ -1,12 +1,8 @@
 import { Bath, Bed, MapPin, MessageCircle, Phone, Square } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
-import ImageFilters from './ImageFilters';
 import { Button } from './ui/button';
-import { exportEditedImage } from '../utils/exportEditedImage';
 
-interface ImagePreviewProps {
-    src: string;
+interface OverlayProps {
     titulo?: string | null;
     subtitulo?: string | null;
     preco?: string | null;
@@ -14,83 +10,25 @@ interface ImagePreviewProps {
     banheiros?: number | string | null;
     area?: string | null;
     bairro?: string | null;
-    onExport?: (blob: Blob | null) => void;
 }
 
-export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, banheiros, area, bairro, onExport }: ImagePreviewProps) {
-    const [zoom, setZoom] = useState(1);
-    const [brightness, setBrightness] = useState(100);
-    const [contrast, setContrast] = useState(100);
-    const [saturation, setSaturation] = useState(100);
-    const imgRef = useRef<HTMLImageElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
-    const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
-
+export default function ImagePreviewOverlay({
+    titulo,
+    subtitulo,
+    preco,
+    quartos,
+    banheiros,
+    area,
+    bairro,
+}: OverlayProps) {
     const handleWhatsAppClick = () => {
         const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`);
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        const wheelHandler = (e: WheelEvent) => {
-            e.preventDefault();
-            setZoom((z) => Math.min(Math.max(z + (e.deltaY < 0 ? 0.25 : -0.25), 0.5), 3));
-        };
-
-        container.addEventListener('wheel', wheelHandler, { passive: false });
-        return () => {
-            container.removeEventListener('wheel', wheelHandler);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!onExport || !imgRef.current || !containerRef.current) return;
-        const img = imgRef.current;
-        const container = containerRef.current;
-        const hasEdits = zoom !== 1 || brightness !== 100 || contrast !== 100 || saturation !== 100;
-        const exportAndSend = () => {
-            if (!hasEdits) {
-                onExport(null);
-                return;
-            }
-            exportEditedImage(img, container, { zoom, brightness, contrast, saturation })
-                .then((blob) => onExport(blob))
-                .catch(() => onExport(null));
-        };
-        let timeout: ReturnType<typeof setTimeout>;
-        const run = () => {
-            timeout = setTimeout(exportAndSend, 300);
-        };
-        if (img.complete) {
-            run();
-        } else {
-            img.onload = run;
-        }
-        return () => {
-            clearTimeout(timeout);
-            img.onload = null;
-        };
-    }, [zoom, brightness, contrast, saturation, src, onExport]);
     return (
-        <div ref={containerRef} className="relative aspect-video w-full overflow-hidden rounded-md">
-            <img
-                ref={imgRef}
-                src={src}
-                alt={titulo ?? ''}
-                className="h-full w-full object-cover transition-transform"
-                style={{
-                    transform: `scale(${zoom})`,
-                    transformOrigin: 'center',
-                    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`,
-                }}
-            />
+        <>
             <div className="hero-overlay absolute inset-0" />
-
             <div className="absolute inset-0 flex items-center justify-start pl-16">
                 <div className="px-8">
                     <div className="animate-fade-in-up max-w-3xl origin-left scale-50 transform text-white">
@@ -156,23 +94,6 @@ export default function ImagePreview({ src, titulo, subtitulo, preco, quartos, b
                     </div>
                 </div>
             </div>
-
-            <div className="absolute top-4 right-4 flex gap-1">
-                <button type="button" onClick={zoomOut} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
-                    -
-                </button>
-                <button type="button" onClick={zoomIn} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
-                    +
-                </button>
-            </div>
-            <ImageFilters
-                brightness={brightness}
-                contrast={contrast}
-                saturation={saturation}
-                setBrightness={setBrightness}
-                setContrast={setContrast}
-                setSaturation={setSaturation}
-            />
-        </div>
+        </>
     );
 }

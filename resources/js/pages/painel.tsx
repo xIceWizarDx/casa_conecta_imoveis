@@ -1,4 +1,5 @@
-import ImagePreview from '@/components/ImagePreview';
+import ImageEditor from '@/components/ImageEditor';
+import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -665,17 +666,17 @@ export default function Painel() {
                                             )}
                                         >
                                             {selectedSlideImage && (
-                                                <ImagePreview
-                                                    src={selectedSlideImage.url}
-                                                    titulo={newSlide.title}
-                                                    subtitulo={newSlide.subtitle}
-                                                    preco={newSlide.price}
-                                                    quartos={newSlide.bedrooms}
-                                                    banheiros={newSlide.bathrooms}
-                                                    area={newSlide.area}
-                                                    bairro={newSlide.neighborhood}
-                                                    onExport={setEditedSlideBlob}
-                                                />
+                                                <ImageEditor src={selectedSlideImage.url} onExport={setEditedSlideBlob}>
+                                                    <ImagePreviewOverlay
+                                                        titulo={newSlide.title}
+                                                        subtitulo={newSlide.subtitle}
+                                                        preco={newSlide.price}
+                                                        quartos={newSlide.bedrooms}
+                                                        banheiros={newSlide.bathrooms}
+                                                        area={newSlide.area}
+                                                        bairro={newSlide.neighborhood}
+                                                    />
+                                                </ImageEditor>
                                             )}
                                         </div>
                                     </div>
@@ -970,16 +971,16 @@ export default function Painel() {
                                             )}
                                         >
                                             {selectedFeaturedImage && (
-                                                <ImagePreview
-                                                    src={selectedFeaturedImage.url}
-                                                    titulo={newFeatured.title}
-                                                    preco={newFeatured.price}
-                                                    quartos={newFeatured.bedrooms}
-                                                    banheiros={newFeatured.bathrooms}
-                                                    area={newFeatured.area}
-                                                    bairro={newFeatured.neighborhood}
-                                                    onExport={setEditedFeaturedBlob}
-                                                />
+                                                <ImageEditor src={selectedFeaturedImage.url} onExport={setEditedFeaturedBlob}>
+                                                    <ImagePreviewOverlay
+                                                        titulo={newFeatured.title}
+                                                        preco={newFeatured.price}
+                                                        quartos={newFeatured.bedrooms}
+                                                        banheiros={newFeatured.bathrooms}
+                                                        area={newFeatured.area}
+                                                        bairro={newFeatured.neighborhood}
+                                                    />
+                                                </ImageEditor>
                                             )}
                                         </div>
                                     </div>
