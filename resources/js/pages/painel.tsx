@@ -606,7 +606,8 @@ export default function Painel() {
                                                 <ImageEditor
                                                     src={selectedSlideImage.url}
                                                     onExport={setEditedSlideBlob}
-                                                    sizeClass="w-full max-w-[600px]"
+                                                    sizeClass="h-full w-full"
+                                                    aspectClass="aspect-video"
                                                 >
                                                     <ImagePreviewOverlay
                                                         titulo={newSlide.title}
@@ -826,7 +827,8 @@ export default function Painel() {
                                                 <ImageEditor
                                                     src={selectedFeaturedImage.url}
                                                     onExport={setEditedFeaturedBlob}
-                                                    sizeClass="w-full max-w-[600px]"
+                                                    sizeClass="h-full w-full"
+                                                    aspectClass="aspect-video"
                                                 >
                                                     <ImagePreviewOverlay
                                                         titulo={newFeatured.title}
