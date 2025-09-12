@@ -91,6 +91,8 @@ const ProcessTransparencySection = () => {
     }
   ];
 
+  const currentStep = processSteps[activeStep];
+
   const legalRequirements = [
     {
       category: "Documentação Pessoal",
@@ -155,52 +157,26 @@ const ProcessTransparencySection = () => {
           </div>
 
           {/* Active Step Content */}
-          <div className=" rounded-2xl p-8">
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Step Info */}
-              <div className="text-center lg:text-left">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto lg:mx-0 mb-4">
-                  <Icon name={processSteps?.[activeStep]?.icon} size={32} color="var(--color-primary)" />
+          <div className="mx-auto max-w-4xl">
+            <div className="grid md:grid-cols-[240px_1fr] gap-8 p-8 rounded-2xl shadow-md bg-white">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <Icon name={currentStep.icon} size={56} className="text-green-500" />
+                <div className="text-sm font-medium text-green-600">
+                  Etapa {activeStep + 1}
                 </div>
-                <div className="text-3xl font-bold text-primary mb-2">
-                  Etapa {processSteps?.[activeStep]?.step}
-                </div>
-                <h3 className="text-xl font-semibold text-text-primary mb-3">
-                  {processSteps?.[activeStep]?.title}
-                </h3>
-                <div className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                  <Icon name="Clock" size={14} className="mr-1" />
-                  {processSteps?.[activeStep]?.duration}
-                </div>
-                <p className="text-text-secondary">
-                  {processSteps?.[activeStep]?.description}
+                <h4 className="text-2xl font-bold">{currentStep.title}</h4>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                  <Icon name="Clock" size={16} /> {currentStep.duration}
                 </p>
               </div>
-
-              {/* Step Details */}
-              <div className="lg:col-span-2">
-                <h4 className="font-semibold text-text-primary mb-4">O que fazemos nesta etapa:</h4>
-                <ul className="space-y-3 mb-6">
-                  {processSteps?.[activeStep]?.details?.map((detail, index) => (
-                    <li key={index} className="flex items-start space-x-3">
-                      <Icon name="Check" size={16} color="var(--color-primary)" className="flex-shrink-0 mt-1" />
-                      <span className="text-text-secondary text-sm">{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <h4 className="font-semibold text-text-primary mb-4">Entregáveis:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {processSteps?.[activeStep]?.deliverables?.map((deliverable, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 bg-white text-text-primary text-sm font-medium rounded-full border border-border"
-                    >
-                      {deliverable}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <ul className="space-y-2">
+                {currentStep.details.map((detail, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <Icon name="Check" size={20} className="text-green-500 mt-1" />
+                    <span className="text-gray-700">{detail}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
