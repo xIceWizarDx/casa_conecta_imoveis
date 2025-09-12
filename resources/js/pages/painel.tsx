@@ -282,9 +282,7 @@ export default function Painel() {
     const editSlide = (slide: HeroSlide) => {
         setNewSlide(slide);
         setSelectedSlideImage(
-            slide.image_id && slide.image_url
-                ? { id: slide.image_id, url: slide.image_url, original_name: '', filename: '' }
-                : null,
+            slide.image_id && slide.image_url ? { id: slide.image_id, url: slide.image_url, original_name: '', filename: '' } : null,
         );
         setEditedSlideBlob(null);
         setHeroModalOpen(true);
@@ -387,7 +385,7 @@ export default function Painel() {
             <Head title="Painel" />
             <HeaderStandalone />
 
-            <div className="container-responsive section-spacing flex flex-col gap-6 pt-24">
+            <div className="container-responsive section-spacing flex flex-col gap-6 pt-6">
                 {notice && (
                     <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
                         <AlertTitle>{notice.title}</AlertTitle>
@@ -876,20 +874,21 @@ export default function Painel() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-
-                        <ImageGallery
-                            images={images}
-                            onSelect={(img) => {
-                                if (heroModalOpen) {
-                                    setSelectedSlideImage(img);
-                                    setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                } else if (featuredModalOpen) {
-                                    setSelectedFeaturedImage(img);
-                                    setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                                }
-                            }}
-                        />
                     </>
+                )}
+                {(tab === 'images' || heroModalOpen || featuredModalOpen) && (
+                    <ImageGallery
+                        images={images}
+                        onSelect={(img) => {
+                            if (heroModalOpen) {
+                                setSelectedSlideImage(img);
+                                setNewSlide((s) => ({ ...s, image_id: img.id }));
+                            } else if (featuredModalOpen) {
+                                setSelectedFeaturedImage(img);
+                                setNewFeatured((s) => ({ ...s, image_id: img.id }));
+                            }
+                        }}
+                    />
                 )}
             </div>
         </div>

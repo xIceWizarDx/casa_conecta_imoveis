@@ -19,10 +19,10 @@ export default function ImageGallery({ images, onSelect }: ImageGalleryProps) {
                 <button
                     key={img.id}
                     type="button"
-                    className="overflow-hidden rounded-md border focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="overflow-hidden rounded-md border focus:ring-2 focus:ring-ring focus:outline-none"
                     onClick={() => onSelect(img)}
                 >
-                    <img src={img.url} alt={img.original_name} className="h-28 w-full object-cover" />
+                    <img src={img.url} alt={img.original_name} className="aspect-square w-full object-cover" />
                 </button>
             ))}
         </div>
