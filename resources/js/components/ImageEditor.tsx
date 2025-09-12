@@ -8,14 +8,21 @@ interface ImageEditorProps {
     onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
     sizeClass?: string;
+    aspectClass?: string;
 }
 
-export default function ImageEditor({ src, onExport, children, sizeClass = 'w-full max-w-[600px]' }: ImageEditorProps) {
+export default function ImageEditor({
+    src,
+    onExport,
+    children,
+    sizeClass = 'w-full max-w-[600px]',
+    aspectClass = 'aspect-square',
+}: ImageEditorProps) {
     const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
         useImageEditor({ src, onExport });
 
     return (
-        <div ref={containerRef} className={cn('relative mx-auto aspect-square overflow-hidden rounded-md', sizeClass)}>
+        <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, aspectClass)}>
             <img
                 ref={imgRef}
                 src={src}
