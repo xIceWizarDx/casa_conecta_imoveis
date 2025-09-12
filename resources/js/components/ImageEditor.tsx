@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
 import { useImageEditor } from '@/hooks/useImageEditor';
 import { cn } from '@/lib/utils';
+import { ReactNode } from 'react';
 import ImageFilters from './ImageFilters';
 
 interface ImageEditorProps {
@@ -10,26 +10,12 @@ interface ImageEditorProps {
     sizeClass?: string;
 }
 
-export default function ImageEditor({ src, onExport, children, sizeClass = 'w-80' }: ImageEditorProps) {
-    const {
-        imgRef,
-        containerRef,
-        zoom,
-        brightness,
-        contrast,
-        saturation,
-        setBrightness,
-        setContrast,
-        setSaturation,
-        zoomIn,
-        zoomOut,
-    } = useImageEditor({ src, onExport });
+export default function ImageEditor({ src, onExport, children, sizeClass = 'w-full max-w-[600px]' }: ImageEditorProps) {
+    const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
+        useImageEditor({ src, onExport });
 
     return (
-        <div
-            ref={containerRef}
-            className={cn('relative aspect-square overflow-hidden rounded-md mx-auto', sizeClass)}
-        >
+        <div ref={containerRef} className={cn('relative mx-auto aspect-square overflow-hidden rounded-md', sizeClass)}>
             <img
                 ref={imgRef}
                 src={src}
@@ -43,18 +29,10 @@ export default function ImageEditor({ src, onExport, children, sizeClass = 'w-80
             />
             {children}
             <div className="absolute top-4 right-4 flex gap-1">
-                <button
-                    type="button"
-                    onClick={zoomOut}
-                    className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white"
-                >
+                <button type="button" onClick={zoomOut} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
                     -
                 </button>
-                <button
-                    type="button"
-                    onClick={zoomIn}
-                    className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white"
-                >
+                <button type="button" onClick={zoomIn} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
                     +
                 </button>
             </div>

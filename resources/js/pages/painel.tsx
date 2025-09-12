@@ -603,7 +603,11 @@ export default function Painel() {
                                             )}
                                         >
                                             {selectedSlideImage && (
-                                                <ImageEditor src={selectedSlideImage.url} onExport={setEditedSlideBlob}>
+                                                <ImageEditor
+                                                    src={selectedSlideImage.url}
+                                                    onExport={setEditedSlideBlob}
+                                                    sizeClass="w-full max-w-[600px]"
+                                                >
                                                     <ImagePreviewOverlay
                                                         titulo={newSlide.title}
                                                         subtitulo={newSlide.subtitle}
@@ -819,7 +823,11 @@ export default function Painel() {
                                             )}
                                         >
                                             {selectedFeaturedImage && (
-                                                <ImageEditor src={selectedFeaturedImage.url} onExport={setEditedFeaturedBlob}>
+                                                <ImageEditor
+                                                    src={selectedFeaturedImage.url}
+                                                    onExport={setEditedFeaturedBlob}
+                                                    sizeClass="w-full max-w-[600px]"
+                                                >
                                                     <ImagePreviewOverlay
                                                         titulo={newFeatured.title}
                                                         preco={newFeatured.price}
