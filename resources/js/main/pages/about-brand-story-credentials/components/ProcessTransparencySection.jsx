@@ -230,54 +230,6 @@ const ProcessTransparencySection = () => {
           </div>
         </div>
 
-        {/* Process Guarantees */}
-        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8">
-          <h3 className="text-2xl font-bold text-text-primary mb-6 text-center">
-            Nossas Garantias de Processo
-          </h3>
-          <div className="grid lg:grid-cols-2 gap-6">
-            <div className="flex items-start space-x-3">
-              <Icon name="Shield" size={24} color="var(--color-primary)" className="flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-text-primary mb-2">Segurança Jurídica Total</h4>
-                <p className="text-sm text-text-secondary">
-                  Verificação completa de toda documentação e acompanhamento jurídico especializado 
-                  em todas as etapas do processo.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <Icon name="Clock" size={24} color="var(--color-primary)" className="flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-text-primary mb-2">Prazos Cumpridos</h4>
-                <p className="text-sm text-text-secondary">
-                  Cronograma detalhado com prazos realistas e acompanhamento constante 
-                  para garantir que tudo ocorra conforme planejado.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <Icon name="MessageCircle" size={24} color="var(--color-primary)" className="flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-text-primary mb-2">Comunicação Transparente</h4>
-                <p className="text-sm text-text-secondary">
-                  Atualizações constantes via WhatsApp sobre o andamento do processo, 
-                  sem surpresas ou informações ocultas.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <Icon name="HeadphonesIcon" size={24} color="var(--color-primary)" className="flex-shrink-0" />
-              <div>
-                <h4 className="font-semibold text-text-primary mb-2">Suporte Pós-Venda</h4>
-                <p className="text-sm text-text-secondary">
-                  Continuamos disponíveis mesmo após a entrega das chaves para 
-                  qualquer dúvida ou necessidade relacionada ao seu novo imóvel.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
