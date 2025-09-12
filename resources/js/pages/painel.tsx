@@ -116,6 +116,8 @@ export default function Painel() {
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
+    const [imagePickerOpen, setImagePickerOpen] = useState(false);
+    const [imagePickerFor, setImagePickerFor] = useState<'slide' | 'featured' | null>(null);
 
     // Notices
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; title: string; message?: string } | null>(null);
@@ -582,7 +584,18 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem na galeria abaixo.</p>
+                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            className="mt-2 w-auto"
+                                            onClick={() => {
+                                                setImagePickerFor('slide');
+                                                setImagePickerOpen(true);
+                                            }}
+                                        >
+                                            Selecionar da galeria
+                                        </Button>
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
@@ -787,7 +800,18 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem na galeria abaixo.</p>
+                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            className="mt-2 w-auto"
+                                            onClick={() => {
+                                                setImagePickerFor('featured');
+                                                setImagePickerOpen(true);
+                                            }}
+                                        >
+                                            Selecionar da galeria
+                                        </Button>
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden',
@@ -876,20 +900,61 @@ export default function Painel() {
                         </Dialog>
                     </>
                 )}
-                {(tab === 'images' || heroModalOpen || featuredModalOpen) && (
-                    <ImageGallery
-                        images={images}
-                        onSelect={(img) => {
-                            if (heroModalOpen) {
+                {/* Dialogo para selecionar imagem para slides */}
+                <Dialog
+                    open={imagePickerOpen && imagePickerFor === 'slide'}
+                    onOpenChange={(o) => {
+                        if (!o) {
+                            setImagePickerOpen(false);
+                            setImagePickerFor(null);
+                        }
+                    }}
+                >
+                    <DialogContent aria-describedby="image-picker-slide-desc">
+                        <DialogHeader>
+                            <DialogTitle>Selecionar imagem</DialogTitle>
+                        </DialogHeader>
+                        {/* DialogDescription é necessário para acessibilidade */}
+                        <DialogDescription id="image-picker-slide-desc">Escolha uma imagem na lista abaixo</DialogDescription>
+                        <ImageGallery
+                            images={images}
+                            onSelect={(img) => {
                                 setSelectedSlideImage(img);
                                 setNewSlide((s) => ({ ...s, image_id: img.id }));
-                            } else if (featuredModalOpen) {
+                                setImagePickerOpen(false);
+                                setImagePickerFor(null);
+                            }}
+                        />
+                    </DialogContent>
+                </Dialog>
+
+                {/* Dialogo para selecionar imagem para destaques */}
+                <Dialog
+                    open={imagePickerOpen && imagePickerFor === 'featured'}
+                    onOpenChange={(o) => {
+                        if (!o) {
+                            setImagePickerOpen(false);
+                            setImagePickerFor(null);
+                        }
+                    }}
+                >
+                    <DialogContent aria-describedby="image-picker-featured-desc">
+                        <DialogHeader>
+                            <DialogTitle>Selecionar imagem</DialogTitle>
+                        </DialogHeader>
+                        {/* DialogDescription é necessário para acessibilidade */}
+                        <DialogDescription id="image-picker-featured-desc">Escolha uma imagem na lista abaixo</DialogDescription>
+                        <ImageGallery
+                            images={images}
+                            onSelect={(img) => {
                                 setSelectedFeaturedImage(img);
                                 setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                            }
-                        }}
-                    />
-                )}
+                                setImagePickerOpen(false);
+                                setImagePickerFor(null);
+                            }}
+                        />
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
