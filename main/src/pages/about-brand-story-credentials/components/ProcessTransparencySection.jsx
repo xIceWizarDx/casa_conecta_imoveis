@@ -137,12 +137,12 @@ const ProcessTransparencySection = () => {
         {/* Process Steps */}
         <div className="mb-16">
           {/* Step Navigation */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-nowrap overflow-x-auto justify-center gap-2 mb-8">
             {processSteps?.map((step, index) => (
               <button
                 key={step?.step}
                 onClick={() => setActiveStep(index)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                className={`flex items-center space-x-2 px-4 py-2 whitespace-nowrap flex-shrink-0 rounded-lg font-medium transition-all duration-200 ${
                   activeStep === index
                     ? 'bg-primary text-white shadow-lg'
                     : ' text-text-secondary hover:bg-primary/10 hover:text-primary'
