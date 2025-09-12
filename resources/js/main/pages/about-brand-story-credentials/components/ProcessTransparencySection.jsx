@@ -7,7 +7,7 @@ const ProcessTransparencySection = () => {
   const processSteps = [
     {
       step: 1,
-      title: "Consulta Inicial",
+      title: "Consulta",
       duration: "30 minutos",
       description: "Entendemos suas necessidades, orçamento e preferências através de conversa detalhada via WhatsApp ou presencial.",
       details: [
@@ -21,7 +21,7 @@ const ProcessTransparencySection = () => {
     },
     {
       step: 2,
-      title: "Curadoria de Imóveis",
+      title: "Curadoria",
       duration: "2-3 dias",
       description: "Pré-selecionamos imóveis que se alinham perfeitamente com seu perfil, evitando visitas desnecessárias.",
       details: [
@@ -35,7 +35,7 @@ const ProcessTransparencySection = () => {
     },
     {
       step: 3,
-      title: "Visitas Acompanhadas",
+      title: "Visitas",
       duration: "1-2 semanas",
       description: "Acompanhamos todas as visitas, fornecendo insights sobre o imóvel, bairro e potencial de valorização.",
       details: [
@@ -49,7 +49,7 @@ const ProcessTransparencySection = () => {
     },
     {
       step: 4,
-      title: "Negociação Estratégica",
+      title: "Negociação",
       duration: "3-5 dias",
       description: "Negociamos as melhores condições em seu nome, utilizando nossa experiência e conhecimento de mercado.",
       details: [
@@ -63,7 +63,7 @@ const ProcessTransparencySection = () => {
     },
     {
       step: 5,
-      title: "Documentação Legal",
+      title: "Documentação",
       duration: "2-3 semanas",
       description: "Cuidamos de toda documentação necessária, garantindo segurança jurídica completa na transação.",
       details: [
@@ -77,7 +77,7 @@ const ProcessTransparencySection = () => {
     },
     {
       step: 6,
-      title: "Finalização e Entrega",
+      title: "Entrega",
       duration: "1 semana",
       description: "Acompanhamos até a entrega das chaves, garantindo que tudo esteja perfeito para sua mudança.",
       details: [
