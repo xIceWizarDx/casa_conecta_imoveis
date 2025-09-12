@@ -5,7 +5,6 @@ import HeroSection from './components/HeroSection';
 import TimelineSection from './components/TimelineSection';
 import ServicePhilosophySection from './components/ServicePhilosophySection';
 import ClientSuccessSection from './components/ClientSuccessSection';
-import ProcessTransparencySection from './components/ProcessTransparencySection';
 import ContactSection from './components/ContactSection';
 import Footer from '../../components/Footer';
 
@@ -41,7 +40,6 @@ const AboutBrandStoryCredentials = () => {
           <TimelineSection />
           <ServicePhilosophySection />
           <ClientSuccessSection />
-          <ProcessTransparencySection />
           <ContactSection />
         </main>
 

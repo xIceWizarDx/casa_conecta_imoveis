@@ -5,6 +5,7 @@ import FeaturedProperties from './components/FeaturedProperties';
 import ExpertiseSection from './components/ExpertiseSection';
 import NeighborhoodMap from './components/NeighborhoodMap';
 import WhatsAppFloat from './components/WhatsAppFloat';
+import ProcessTransparencySection from '../about-brand-story-credentials/components/ProcessTransparencySection';
 import Footer from '../../components/Footer';
 
 const HomepagePremiumRealEstateConsultancy = () => {
@@ -58,8 +59,11 @@ const HomepagePremiumRealEstateConsultancy = () => {
             <ExpertiseSection />
           </div>
         </section>
+
+        {/* Transparent Process Section */}
+        <ProcessTransparencySection />
       </main>
-      
+
       {/* Footer */}
       <Footer />
       
