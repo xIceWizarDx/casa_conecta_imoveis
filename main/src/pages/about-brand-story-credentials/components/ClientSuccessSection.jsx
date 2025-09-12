@@ -238,29 +238,7 @@ const ClientSuccessSection = () => {
             ))}
           </div>
         </div>
-
-        {/* Stats Summary */}
-        <div className="mt-16 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">500+</div>
-              <div className="text-sm text-text-secondary">Famílias Atendidas</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">98%</div>
-              <div className="text-sm text-text-secondary">Satisfação</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">2.5</div>
-              <div className="text-sm text-text-secondary">Meses Médios</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">100%</div>
-              <div className="text-sm text-text-secondary">Processos Concluídos</div>
-            </div>
-          </div>
         </div>
-      </div>
     </section>
   );
 };

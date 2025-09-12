@@ -4,10 +4,8 @@ import Header from '../../components/ui/Header';
 import HeroSection from './components/HeroSection';
 import TimelineSection from './components/TimelineSection';
 import ServicePhilosophySection from './components/ServicePhilosophySection';
-import CredentialsSection from './components/CredentialsSection';
 import ClientSuccessSection from './components/ClientSuccessSection';
 import ProcessTransparencySection from './components/ProcessTransparencySection';
-import NeighborhoodExpertiseSection from './components/NeighborhoodExpertiseSection';
 import ContactSection from './components/ContactSection';
 import Footer from '../../components/Footer';
 
@@ -42,10 +40,8 @@ const AboutBrandStoryCredentials = () => {
           <HeroSection />
           <TimelineSection />
           <ServicePhilosophySection />
-          <CredentialsSection />
           <ClientSuccessSection />
           <ProcessTransparencySection />
-          <NeighborhoodExpertiseSection />
           <ContactSection />
         </main>
 
