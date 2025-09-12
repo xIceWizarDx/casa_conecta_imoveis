@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import Header from '../../components/ui/Header';
-import HeroContactSection from './components/HeroContactSection';
+import HeroSection from './components/HeroSection';
 import TimelineSection from './components/TimelineSection';
 import ServicePhilosophySection from './components/ServicePhilosophySection';
 import ClientSuccessSection from './components/ClientSuccessSection';
 import ProcessTransparencySection from './components/ProcessTransparencySection';
+import ContactSection from './components/ContactSection';
 import Footer from '../../components/Footer';
 
 const AboutBrandStoryCredentials = () => {
@@ -36,11 +37,12 @@ const AboutBrandStoryCredentials = () => {
         <Header />
         
         <main>
-          <HeroContactSection />
+          <HeroSection />
           <TimelineSection />
           <ServicePhilosophySection />
           <ClientSuccessSection />
           <ProcessTransparencySection />
+          <ContactSection />
         </main>
 
         {/* WhatsApp Float Button */}
