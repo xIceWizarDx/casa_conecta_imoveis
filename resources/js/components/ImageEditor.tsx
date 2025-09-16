@@ -8,7 +8,6 @@ interface ImageEditorProps {
     onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
     sizeClass?: string;
-<<<<<<< HEAD
     aspectClass?: string;
 }
 
@@ -19,24 +18,12 @@ export default function ImageEditor({
     sizeClass = 'w-full max-w-[600px]',
     aspectClass = 'aspect-square',
 }: ImageEditorProps) {
-=======
-    aspect?: 'square' | 'video';
-}
-
-export default function ImageEditor({ src, onExport, children, sizeClass = 'w-full max-w-[600px]', aspect = 'square' }: ImageEditorProps) {
->>>>>>> c9e5a9e (Atualização)
     const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
         useImageEditor({ src, onExport });
 
     return (
-<<<<<<< HEAD
         <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, aspectClass)}>
-=======
-        <div
-            ref={containerRef}
-            className={cn('relative mx-auto overflow-hidden rounded-md', aspect === 'video' ? 'aspect-video' : 'aspect-square', sizeClass)}
-        >
->>>>>>> c9e5a9e (Atualização)
+
             <img
                 ref={imgRef}
                 src={src}

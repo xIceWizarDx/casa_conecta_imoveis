@@ -1,7 +1,7 @@
 import ImageEditor from '@/components/ImageEditor';
 import ImageGallery from '@/components/ImageGallery';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
-// Heart removed: not used anymore
+// Heart icon removed
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -62,9 +62,9 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [editedBlob, setEditedBlob] = useState<Blob | null>(null);
-    const [gallery, setGallery] = useState<Image[]>([]);
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
     const [imagePickerFor, setImagePickerFor] = useState<'main' | 'gallery' | null>(null);
+    const [gallery, setGallery] = useState<Image[]>([]);
 
     const [list, setList] = useState<FeaturedProperty[]>([]);
 
@@ -156,7 +156,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{featuredLoading ? 'Carregando…' : `${listCount} itens`}</span>
                             <Button
-                                className="w-auto"
+                                className="w-auto hidden"
                                 variant="secondary"
                                 onClick={async () => {
                                     setFeaturedLoading(true);
@@ -349,7 +349,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                                     </span>
                                                 )}
                                             </div>
-                                            {/* Removed favorite heart overlay */}
+                                            {/* Heart overlay removido */}
                                         </ImageEditor>
                                     </div>
                                     <FeaturedCardInfo
@@ -367,42 +367,6 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                 </div>
                             )}
                         </div>
-                    </div>
-                    {/* Imagens adicionais (galeria) */}
-                    <div>
-                        <Label>Imagens adicionais</Label>
-                        <div className="mt-2 flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                className="w-auto"
-                                onClick={() => {
-                                    setImagePickerFor('gallery');
-                                    setImagePickerOpen(true);
-                                }}
-                            >
-                                Adicionar da galeria
-                            </Button>
-                            {gallery.length > 0 && (
-                                <span className="text-xs text-muted-foreground">{gallery.length} foto(s) selecionada(s)</span>
-                            )}
-                        </div>
-                        {gallery.length > 0 && (
-                            <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                                {gallery.map((img) => (
-                                    <div key={img.id} className="group relative overflow-hidden rounded-md border">
-                                        <img src={img.url} alt={img.original_name} className="h-24 w-full object-cover" />
-                                        <button
-                                            type="button"
-                                            className="absolute right-1 top-1 rounded bg-red-600 px-2 py-0.5 text-[11px] text-white opacity-0 transition group-hover:opacity-100"
-                                            onClick={() => setGallery((g) => g.filter((x) => x.id !== img.id))}
-                                        >
-                                            Remover
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
                     <div className="flex items-end gap-2">
                         <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
@@ -454,25 +418,40 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                     </Button>
                 </DialogFooter>
 
-                {/* Image Picker */}
+                {/* Image Picker (principal ou galeria) */}
                 <Dialog open={imagePickerOpen} onOpenChange={setImagePickerOpen}>
                     <DialogContent aria-describedby="image-picker-featured-desc">
                         <DialogHeader>
                             <DialogTitle>Selecionar imagem</DialogTitle>
                         </DialogHeader>
-                        <DialogDescription id="image-picker-featured-desc">Escolha uma imagem na lista abaixo</DialogDescription>
+                        <DialogDescription id="image-picker-featured-desc">
+                            {imagePickerFor === 'gallery' ? 'Escolha uma ou mais imagens na lista abaixo' : 'Escolha uma imagem na lista abaixo'}
+                        </DialogDescription>
                         <ImageGallery
                             images={images}
+                            multiple={imagePickerFor === 'gallery'}
+                            selected={imagePickerFor === 'gallery' ? gallery.map((g) => g.id) : selectedImage?.id ? [selectedImage.id] : []}
+                            onChangeSelected={(_ids, imgs) => {
+                                if (imagePickerFor === 'gallery') {
+                                    setGallery(imgs);
+                                } else {
+                                    setSelectedImage(imgs[0] ?? null);
+                                    setForm((s) => ({ ...s, image_id: imgs[0]?.id ?? s.image_id }));
+                                    setImagePickerOpen(false);
+                                }
+                            }}
                             onSelect={(img) => {
-                                if (imagePickerFor === 'main') {
+                                if (imagePickerFor === 'gallery') {
+                                    // fallback: toggle handled by onChangeSelected
+                                } else {
                                     setSelectedImage(img);
                                     setForm((s) => ({ ...s, image_id: img.id }));
-                                } else if (imagePickerFor === 'gallery') {
-                                    setGallery((curr) => (curr.some((g) => g.id === img.id) ? curr : [...curr, img]));
+                                    setImagePickerOpen(false);
                                 }
-                                setImagePickerOpen(false);
-                                setImagePickerFor(null);
                             }}
+                            showFooter={imagePickerFor === 'gallery'}
+                            onConfirm={() => setImagePickerOpen(false)}
+                            confirmLabel="Concluir"
                         />
                     </DialogContent>
                 </Dialog>

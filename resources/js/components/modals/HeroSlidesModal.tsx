@@ -139,7 +139,7 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{slidesLoading ? 'Carregando…' : `${slidesCount} itens`}</span>
                             <Button
-                                className="w-auto"
+                                className="w-auto hidden"
                                 variant="secondary"
                                 onClick={async () => {
                                     setSlidesLoading(true);

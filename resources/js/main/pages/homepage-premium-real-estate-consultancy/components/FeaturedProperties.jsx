@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 
 const FeaturedProperties = () => {
   const [showMore, setShowMore] = useState(false);
+  const [favorites, setFavorites] = useState(new Set());
 
   const [filters, setFilters] = useState({
     neighborhood: '',
@@ -242,7 +243,17 @@ const FeaturedProperties = () => {
   const filteredProperties = filterProperties(list);
   const displayedProperties = showMore ? filteredProperties : filteredProperties?.slice(0, 6);
 
-  // Favorite feature removed
+  const toggleFavorite = (propertyId) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites?.has(propertyId)) {
+        newFavorites?.delete(propertyId);
+      } else {
+        newFavorites?.add(propertyId);
+      }
+      return newFavorites;
+    });
+  };
 
   const handleWhatsAppClick = (property) => {
     const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
@@ -415,6 +426,16 @@ const FeaturedProperties = () => {
                       </span>
                     </div>
                     
+                    <button
+                      onClick={() => toggleFavorite(property?.id)}
+                      className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    >
+                      <Icon 
+                        name="Heart" 
+                        size={20} 
+                        className={favorites?.has(property?.id) ? 'text-red-500 fill-current' : 'text-gray-600'} 
+                      />
+                    </button>
                   </div>
                   
                   <div className="p-6">
