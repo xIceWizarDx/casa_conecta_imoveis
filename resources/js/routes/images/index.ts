@@ -222,9 +222,9 @@ destroy.delete = (args: { image: number | { id: number } } | [image: number | { 
     
     destroy.form = destroyForm
 const images = {
-    index,
-store,
-destroy,
+    index: Object.assign(index, index),
+store: Object.assign(store, store),
+destroy: Object.assign(destroy, destroy),
 }
 
 export default images

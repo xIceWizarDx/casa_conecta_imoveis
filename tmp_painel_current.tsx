@@ -1,8 +1,6 @@
 import ImageEditor from '@/components/ImageEditor';
 import ImageGallery from '@/components/ImageGallery';
 import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
-import FeaturedCardInfo from '@/components/FeaturedCardInfo';
-// import { Heart } from 'lucide-react';
 import HeroSlidesModal from '@/components/modals/HeroSlidesModal';
 import FeaturedPropertiesModal from '@/components/modals/FeaturedPropertiesModal';
 import SlideCard from '@/components/SlideCard';
@@ -83,11 +81,6 @@ export default function Painel() {
     const [imagesLoading, setImagesLoading] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
     const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
-    // Local state for legacy slide modal
-    const [creatingSlide, setCreatingSlide] = useState(false);
-    const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
-    const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
-    const [editedSlideBlob, setEditedSlideBlob] = useState<Blob | null>(null);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
@@ -95,18 +88,9 @@ export default function Painel() {
     const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
     const [editingFeatured, setEditingFeatured] = useState<Partial<FeaturedProperty>>({});
     const [savingFeatured, setSavingFeatured] = useState(false);
-    // Local state for legacy featured modal
-    const [creatingFeatured, setCreatingFeatured] = useState(false);
-    const [newFeatured, setNewFeatured] = useState<Partial<FeaturedProperty>>({ features: [] });
-    const [selectedFeaturedImage, setSelectedFeaturedImage] = useState<Image | null>(null);
-    const [newFeaturedGallery, setNewFeaturedGallery] = useState<Image[]>([]);
-    const [featureInput, setFeatureInput] = useState('');
-    const [editedFeaturedBlob, setEditedFeaturedBlob] = useState<Blob | null>(null);
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
-    const [imagePickerOpen, setImagePickerOpen] = useState(false);
-    const [imagePickerFor, setImagePickerFor] = useState<'slide' | 'featured' | 'featured_gallery' | null>(null);
 
     // Notices
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; title: string; message?: string } | null>(null);
@@ -298,24 +282,18 @@ export default function Painel() {
                 bathrooms: newFeatured.bathrooms ?? null,
                 area: newFeatured.area ?? null,
                 type: newFeatured.type ?? null,
-                features: [
-                    ...((newFeatured.features ?? []) as string[]),
-                    ...(featureInput.trim() ? [featureInput.trim()] : []),
-                ],
+                features: newFeatured.features ?? [],
                 price_range: newFeatured.price_range ?? null,
                 is_new: !!newFeatured.is_new,
                 is_published: !!newFeatured.is_published,
-                gallery_image_ids: newFeaturedGallery.map((g) => g.id),
             });
             await apiFetch(FeaturedActions.store(), {
                 body,
                 headers: { 'Content-Type': 'application/json' },
             });
             setNewFeatured({ features: [] });
-            setFeatureInput('');
             setSelectedFeaturedImage(null);
             setEditedFeaturedBlob(null);
-            setNewFeaturedGallery([]);
             await refreshFeatured();
             setNotice({ type: 'success', title: 'Destaque adicionado' });
         } finally {
@@ -437,42 +415,6 @@ export default function Painel() {
                                                 </button>
                                             </div>
                                         </div>
-                                        {/* Imagens adicionais */}
-                                        <div className="mt-6">
-                                            <Label>Imagens adicionais</Label>
-                                            <div className="mt-2 flex items-center gap-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="secondary"
-                                                    className="w-auto"
-                                                    onClick={() => {
-                                                        setImagePickerFor('featured_gallery');
-                                                        setImagePickerOpen(true);
-                                                    }}
-                                                >
-                                                    Adicionar da galeria
-                                                </Button>
-                                                {newFeaturedGallery.length > 0 && (
-                                                    <span className="text-xs text-muted-foreground">{newFeaturedGallery.length} foto(s) selecionada(s)</span>
-                                                )}
-                                            </div>
-                                            {newFeaturedGallery.length > 0 && (
-                                                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                                                    {newFeaturedGallery.map((img) => (
-                                                        <div key={img.id} className="group relative overflow-hidden rounded-md border">
-                                                            <img src={img.url} alt={img.original_name} className="h-24 w-full object-cover" />
-                                                            <button
-                                                                type="button"
-                                                                className="absolute right-1 top-1 rounded bg-red-600 px-2 py-0.5 text-[11px] text-white opacity-0 transition group-hover:opacity-100"
-                                                                onClick={() => setNewFeaturedGallery((g) => g.filter((x) => x.id !== img.id))}
-                                                            >
-                                                                Remover
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
                                     ))}
                                 </div>
                             ) : (
@@ -485,100 +427,18 @@ export default function Painel() {
                 {/* Hero Slides */}
                 {tab === 'publicacoes' && (
                     <>
-                        {/* Seção: Hero Slides */}
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-semibold">Hero Slides</h2>
-                                <Button className="w-auto" onClick={() => setHeroModalOpen(true)}>
-                                    Novo Slide
-                                </Button>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button className="w-auto" variant="secondary" onClick={refreshSlides} disabled={slidesLoading} title="Atualizar">
-                                    Atualizar
-                                </Button>
-                            </div>
+                        <div className="flex flex-col gap-4">
+                            <Button className="w-auto self-start" onClick={() => setHeroModalOpen(true)}>
+                                Slides
+                            </Button>
+                            <Button className="w-auto self-start" onClick={() => setFeaturedModalOpen(true)}>
+                                Destaques
+                            </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                             {slides.map((s) => (
                                 <SlideCard key={s.id} slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
-                            ))}
-                        </div>
-
-                        {/* Seção: Imóveis em Destaque */}
-                        <div className="mt-10 mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-semibold">Imóveis em Destaque</h2>
-                                <Button className="w-auto" onClick={() => setFeaturedModalOpen(true)}>
-                                    Novo Destaque
-                                </Button>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button className="w-auto" variant="secondary" onClick={refreshFeatured} disabled={featuredLoading} title="Atualizar">
-                                    Atualizar
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {featured.map((f) => (
-                                <div key={f.id} className="property-card bg-white rounded-2xl shadow-lg overflow-hidden">
-                                    <div className="relative">
-                                        <div className="h-64 overflow-hidden">
-                                            {f.image_url ? (
-                                                <img
-                                                    src={f.image_url}
-                                                    alt={f.title}
-                                                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                                                />
-                                            ) : (
-                                                <div className="h-full w-full bg-muted" />
-                                            )}
-                                        </div>
-                                        <div className="absolute left-4 top-4 flex gap-2">
-                                            {!!f.is_new && (
-                                                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
-                                            )}
-                                            {(f.neighborhood ?? '').toString().trim() && (
-                                                <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                                                    {f.neighborhood}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {/* Removed favorite heart button as requested */}
-                                    </div>
-                                    <FeaturedCardInfo
-                                        title={f.title}
-                                        neighborhood={f.neighborhood}
-                                        bedrooms={f.bedrooms as any}
-                                        bathrooms={f.bathrooms as any}
-                                        area={f.area ?? undefined}
-                                        features={Array.isArray(f.features) ? (f.features as string[]) : []}
-                                        price={f.price}
-                                    />
-                                    <div className="flex items-center justify-end gap-1 border-t p-2">
-                                        
-                                        <div className="flex shrink-0 items-center gap-1">
-                                            <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
-                                                ↑
-                                            </Button>
-                                            <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
-                                                ↓
-                                            </Button>
-                                            <Button
-                                                className="w-auto"
-                                                variant={f.is_published ? 'default' : 'secondary'}
-                                                onClick={() => toggleFeaturedPublish(f.id)}
-                                                title="Publicar/Despublicar"
-                                            >
-                                                {f.is_published ? 'Publicado' : 'Rascunho'}
-                                            </Button>
-                                            <Button className="w-auto" variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
-                                                Excluir
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
                             ))}
                         </div>
 
@@ -696,8 +556,8 @@ export default function Painel() {
                                         <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
                                         <Button
                                             type="button"
-                                            variant="default"
-                                            className="mt-2 w-auto bg-black text-white hover:bg-black/90"
+                                            variant="secondary"
+                                            className="mt-2 w-auto"
                                             onClick={() => {
                                                 setImagePickerFor('slide');
                                                 setImagePickerOpen(true);
@@ -707,7 +567,7 @@ export default function Painel() {
                                         </Button>
                                         <div
                                             className={cn(
-                                                'mt-4 aspect-video w-full overflow-hidden rounded-2xl shadow-lg',
+                                                'mt-4 aspect-video w-full overflow-hidden',
                                                 !selectedSlideImage && 'border-2 border-dashed',
                                             )}
                                         >
@@ -715,13 +575,8 @@ export default function Painel() {
                                                 <ImageEditor
                                                     src={selectedSlideImage.url}
                                                     onExport={setEditedSlideBlob}
-<<<<<<< HEAD
-                                                    sizeClass="h-full w-full"
-                                                    aspectClass="aspect-video"
-=======
-                                                    sizeClass="w-full"
+                                                    sizeClass="w-full max-w-[600px]"
                                                     aspect="video"
->>>>>>> c9e5a9e (Atualização)
                                                 >
                                                     <ImagePreviewOverlay
                                                         titulo={newSlide.title}
@@ -922,8 +777,8 @@ export default function Painel() {
                                         <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
                                         <Button
                                             type="button"
-                                            variant="default"
-                                            className="mt-2 w-auto bg-black text-white hover:bg-black/90"
+                                            variant="secondary"
+                                            className="mt-2 w-auto"
                                             onClick={() => {
                                                 setImagePickerFor('featured');
                                                 setImagePickerOpen(true);
@@ -931,99 +786,30 @@ export default function Painel() {
                                         >
                                             Selecionar da galeria
                                         </Button>
-                                    <div className={cn('mt-4 w-full', !selectedFeaturedImage && 'border-2 border-dashed')}>
+                                        <div
+                                            className={cn(
+                                                'mt-4 aspect-square w-full overflow-hidden',
+                                                !selectedFeaturedImage && 'border-2 border-dashed',
+                                            )}
+                                        >
                                             {selectedFeaturedImage && (
-<<<<<<< HEAD
                                                 <ImageEditor
                                                     src={selectedFeaturedImage.url}
                                                     onExport={setEditedFeaturedBlob}
-                                                    sizeClass="h-full w-full"
-                                                    aspectClass="aspect-video"
-=======
-                                                <div
-                                                    className="w-full"
-                                                    style={{
-                                                        ['--color-primary' as any]: '#22C55E',
-                                                        ['--color-accent' as any]: '#25D366',
-                                                        ['--color-muted' as any]: '#F9FAFB',
-                                                        ['--color-muted-foreground' as any]: '#6B7280',
-                                                        ['--color-foreground' as any]: '#111827',
-                                                        ['--color-card' as any]: '#FFFFFF',
-                                                        ['--color-border' as any]: '#E5E7EB',
-                                                    }}
->>>>>>> c9e5a9e (Atualização)
+                                                    sizeClass="w-full max-w-[600px]"
+                                                    aspect="square"
                                                 >
-                                                    <div className="relative">
-                                                        <ImageEditor
-                                                            src={selectedFeaturedImage.url}
-                                                            onExport={setEditedFeaturedBlob}
-                                                            sizeClass="w-full"
-                                                            aspect="square"
-                                                        >
-                                                            <div className="absolute left-4 top-4 flex gap-2">
-                                                                {!!newFeatured.is_new && (
-                                                                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
-                                                                )}
-                                                                {(newFeatured.neighborhood || '')?.trim() && (
-                                                    <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                                                        {newFeatured.neighborhood}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {/* removed favorite heart overlay */}
-                                        </ImageEditor>
-                                    </div>
-                                    <FeaturedCardInfo
-                                        title={newFeatured.title}
-                                                        neighborhood={newFeatured.neighborhood}
-                                                        bedrooms={newFeatured.bedrooms}
-                                                        bathrooms={newFeatured.bathrooms}
+                                                    <ImagePreviewOverlay
+                                                        titulo={newFeatured.title}
+                                                        preco={newFeatured.price}
+                                                        quartos={newFeatured.bedrooms}
+                                                        banheiros={newFeatured.bathrooms}
                                                         area={newFeatured.area}
-                                                        features={[
-                                                            ...((newFeatured.features ?? []) as string[]),
-                                                            ...(featureInput.trim() ? [featureInput.trim()] : []),
-                                                        ]}
-                                                        price={newFeatured.price}
+                                                        bairro={newFeatured.neighborhood}
                                                     />
-                                                </div>
+                                                </ImageEditor>
                                             )}
                                         </div>
-                                    </div>
-                                    {/* Imagens adicionais */}
-                                    <div className="mt-6">
-                                        <Label>Imagens adicionais</Label>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                className="w-auto"
-                                                onClick={() => {
-                                                    setImagePickerFor('featured_gallery');
-                                                    setImagePickerOpen(true);
-                                                }}
-                                            >
-                                                Adicionar da galeria
-                                            </Button>
-                                            {newFeaturedGallery.length > 0 && (
-                                                <span className="text-xs text-muted-foreground">{newFeaturedGallery.length} foto(s) selecionada(s)</span>
-                                            )}
-                                        </div>
-                                        {newFeaturedGallery.length > 0 && (
-                                            <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                                                {newFeaturedGallery.map((img) => (
-                                                    <div key={img.id} className="group relative overflow-hidden rounded-md border">
-                                                        <img src={img.url} alt={img.original_name} className="h-24 w-full object-cover" />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute right-1 top-1 rounded bg-red-600 px-2 py-0.5 text-[11px] text-white opacity-0 transition group-hover:opacity-100"
-                                                            onClick={() => setNewFeaturedGallery((g) => g.filter((x) => x.id !== img.id))}
-                                                        >
-                                                            Remover
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
                                     </div>
                                     <div className="flex items-end gap-2">
                                         <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured} title="Adicionar Destaque">
@@ -1114,32 +900,6 @@ export default function Painel() {
                             onSelect={(img) => {
                                 setSelectedSlideImage(img);
                                 setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                setImagePickerOpen(false);
-                                setImagePickerFor(null);
-                            }}
-                        />
-                    </DialogContent>
-                </Dialog>
-
-                {/* Dialogo para selecionar imagens adicionais do destaque */}
-                <Dialog
-                    open={imagePickerOpen && imagePickerFor === 'featured_gallery'}
-                    onOpenChange={(o) => {
-                        if (!o) {
-                            setImagePickerOpen(false);
-                            setImagePickerFor(null);
-                        }
-                    }}
-                >
-                    <DialogContent aria-describedby="image-picker-featured-gallery-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagens adicionais</DialogTitle>
-                        </DialogHeader>
-                        <DialogDescription id="image-picker-featured-gallery-desc">Escolha uma imagem na lista abaixo</DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            onSelect={(img) => {
-                                setNewFeaturedGallery((curr) => (curr.some((g) => g.id === img.id) ? curr : [...curr, img]));
                                 setImagePickerOpen(false);
                                 setImagePickerFor(null);
                             }}

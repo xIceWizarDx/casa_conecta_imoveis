@@ -55,7 +55,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     
     store.form = storeForm
 const register = {
-    store,
+    store: Object.assign(store, store),
 }
 
 export default register

@@ -90,7 +90,7 @@ local.head = (args: { path: string | number } | [path: string | number ] | strin
     
     local.form = localForm
 const storage = {
-    local,
+    local: Object.assign(local, local),
 }
 
 export default storage

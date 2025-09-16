@@ -8,6 +8,7 @@ interface ImageEditorProps {
     onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
     sizeClass?: string;
+<<<<<<< HEAD
     aspectClass?: string;
 }
 
@@ -18,11 +19,24 @@ export default function ImageEditor({
     sizeClass = 'w-full max-w-[600px]',
     aspectClass = 'aspect-square',
 }: ImageEditorProps) {
+=======
+    aspect?: 'square' | 'video';
+}
+
+export default function ImageEditor({ src, onExport, children, sizeClass = 'w-full max-w-[600px]', aspect = 'square' }: ImageEditorProps) {
+>>>>>>> c9e5a9e (Atualização)
     const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
         useImageEditor({ src, onExport });
 
     return (
+<<<<<<< HEAD
         <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, aspectClass)}>
+=======
+        <div
+            ref={containerRef}
+            className={cn('relative mx-auto overflow-hidden rounded-md', aspect === 'video' ? 'aspect-video' : 'aspect-square', sizeClass)}
+        >
+>>>>>>> c9e5a9e (Atualização)
             <img
                 ref={imgRef}
                 src={src}
@@ -35,22 +49,24 @@ export default function ImageEditor({
                 }}
             />
             {children}
-            <div className="absolute top-4 right-4 flex gap-1">
-                <button type="button" onClick={zoomOut} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
+            <div className="absolute top-4 right-4 z-20 flex gap-1">
+                <button type="button" onClick={zoomOut} className="flex h-7 w-7 items-center justify-center rounded bg-black/60 text-white">
                     -
                 </button>
-                <button type="button" onClick={zoomIn} className="flex h-6 w-6 items-center justify-center rounded bg-black/60 text-white">
+                <button type="button" onClick={zoomIn} className="flex h-7 w-7 items-center justify-center rounded bg-black/60 text-white">
                     +
                 </button>
             </div>
-            <ImageFilters
-                brightness={brightness}
-                contrast={contrast}
-                saturation={saturation}
-                setBrightness={setBrightness}
-                setContrast={setContrast}
-                setSaturation={setSaturation}
-            />
+            <div className="absolute bottom-4 left-4 z-20">
+                <ImageFilters
+                    brightness={brightness}
+                    contrast={contrast}
+                    saturation={saturation}
+                    setBrightness={setBrightness}
+                    setContrast={setContrast}
+                    setSaturation={setSaturation}
+                />
+            </div>
         </div>
     );
 }

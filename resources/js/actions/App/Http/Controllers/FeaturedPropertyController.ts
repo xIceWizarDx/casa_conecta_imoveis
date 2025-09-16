@@ -134,7 +134,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::update
- * @see app/Http/Controllers/FeaturedPropertyController.php:55
+ * @see app/Http/Controllers/FeaturedPropertyController.php:70
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 export const update = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -149,7 +149,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::update
- * @see app/Http/Controllers/FeaturedPropertyController.php:55
+ * @see app/Http/Controllers/FeaturedPropertyController.php:70
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 update.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -182,7 +182,7 @@ update.url = (args: { featuredProperty: number | { id: number } } | [featuredPro
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::update
- * @see app/Http/Controllers/FeaturedPropertyController.php:55
+ * @see app/Http/Controllers/FeaturedPropertyController.php:70
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 update.put = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -192,7 +192,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
 
     /**
 * @see \App\Http\Controllers\FeaturedPropertyController::update
- * @see app/Http/Controllers/FeaturedPropertyController.php:55
+ * @see app/Http/Controllers/FeaturedPropertyController.php:70
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
     const updateForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -207,7 +207,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
 
             /**
 * @see \App\Http\Controllers\FeaturedPropertyController::update
- * @see app/Http/Controllers/FeaturedPropertyController.php:55
+ * @see app/Http/Controllers/FeaturedPropertyController.php:70
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
         updateForm.put = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -223,7 +223,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::destroy
- * @see app/Http/Controllers/FeaturedPropertyController.php:77
+ * @see app/Http/Controllers/FeaturedPropertyController.php:106
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 export const destroy = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -238,7 +238,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::destroy
- * @see app/Http/Controllers/FeaturedPropertyController.php:77
+ * @see app/Http/Controllers/FeaturedPropertyController.php:106
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 destroy.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -271,7 +271,7 @@ destroy.url = (args: { featuredProperty: number | { id: number } } | [featuredPr
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::destroy
- * @see app/Http/Controllers/FeaturedPropertyController.php:77
+ * @see app/Http/Controllers/FeaturedPropertyController.php:106
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
 destroy.delete = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -281,7 +281,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
 
     /**
 * @see \App\Http\Controllers\FeaturedPropertyController::destroy
- * @see app/Http/Controllers/FeaturedPropertyController.php:77
+ * @see app/Http/Controllers/FeaturedPropertyController.php:106
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
     const destroyForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -296,7 +296,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
 
             /**
 * @see \App\Http\Controllers\FeaturedPropertyController::destroy
- * @see app/Http/Controllers/FeaturedPropertyController.php:77
+ * @see app/Http/Controllers/FeaturedPropertyController.php:106
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
         destroyForm.delete = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -312,7 +312,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
     destroy.form = destroyForm
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::togglePublish
- * @see app/Http/Controllers/FeaturedPropertyController.php:83
+ * @see app/Http/Controllers/FeaturedPropertyController.php:112
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
 export const togglePublish = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -327,7 +327,7 @@ togglePublish.definition = {
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::togglePublish
- * @see app/Http/Controllers/FeaturedPropertyController.php:83
+ * @see app/Http/Controllers/FeaturedPropertyController.php:112
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
 togglePublish.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -360,7 +360,7 @@ togglePublish.url = (args: { featuredProperty: number | { id: number } } | [feat
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::togglePublish
- * @see app/Http/Controllers/FeaturedPropertyController.php:83
+ * @see app/Http/Controllers/FeaturedPropertyController.php:112
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
 togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -370,7 +370,7 @@ togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [fe
 
     /**
 * @see \App\Http\Controllers\FeaturedPropertyController::togglePublish
- * @see app/Http/Controllers/FeaturedPropertyController.php:83
+ * @see app/Http/Controllers/FeaturedPropertyController.php:112
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
     const togglePublishForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -385,7 +385,7 @@ togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [fe
 
             /**
 * @see \App\Http\Controllers\FeaturedPropertyController::togglePublish
- * @see app/Http/Controllers/FeaturedPropertyController.php:83
+ * @see app/Http/Controllers/FeaturedPropertyController.php:112
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
         togglePublishForm.patch = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -401,7 +401,7 @@ togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [fe
     togglePublish.form = togglePublishForm
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::reorder
- * @see app/Http/Controllers/FeaturedPropertyController.php:90
+ * @see app/Http/Controllers/FeaturedPropertyController.php:119
  * @route '/api/admin/featured-properties/reorder'
  */
 export const reorder = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -416,7 +416,7 @@ reorder.definition = {
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::reorder
- * @see app/Http/Controllers/FeaturedPropertyController.php:90
+ * @see app/Http/Controllers/FeaturedPropertyController.php:119
  * @route '/api/admin/featured-properties/reorder'
  */
 reorder.url = (options?: RouteQueryOptions) => {
@@ -425,7 +425,7 @@ reorder.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FeaturedPropertyController::reorder
- * @see app/Http/Controllers/FeaturedPropertyController.php:90
+ * @see app/Http/Controllers/FeaturedPropertyController.php:119
  * @route '/api/admin/featured-properties/reorder'
  */
 reorder.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -435,7 +435,7 @@ reorder.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 
     /**
 * @see \App\Http\Controllers\FeaturedPropertyController::reorder
- * @see app/Http/Controllers/FeaturedPropertyController.php:90
+ * @see app/Http/Controllers/FeaturedPropertyController.php:119
  * @route '/api/admin/featured-properties/reorder'
  */
     const reorderForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -450,7 +450,7 @@ reorder.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 
             /**
 * @see \App\Http\Controllers\FeaturedPropertyController::reorder
- * @see app/Http/Controllers/FeaturedPropertyController.php:90
+ * @see app/Http/Controllers/FeaturedPropertyController.php:119
  * @route '/api/admin/featured-properties/reorder'
  */
         reorderForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

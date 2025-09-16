@@ -208,9 +208,9 @@ destroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     
     destroy.form = destroyForm
 const profile = {
-    edit,
-update,
-destroy,
+    edit: Object.assign(edit, edit),
+update: Object.assign(update, update),
+destroy: Object.assign(destroy, destroy),
 }
 
 export default profile
