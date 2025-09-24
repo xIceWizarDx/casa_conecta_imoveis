@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
 import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type Image = {
     id: number;
@@ -56,7 +56,6 @@ interface Props {
 
 export default function FeaturedPropertiesModal({ open, onOpenChange, images, featured, onRefreshFeatured, onNotice }: Props) {
     const [creating, setCreating] = useState(false);
-    const [featuredLoading, setFeaturedLoading] = useState(false);
 
     const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
     const [featureInput, setFeatureInput] = useState('');
@@ -65,12 +64,6 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
     const [imagePickerFor, setImagePickerFor] = useState<'main' | 'gallery' | null>(null);
     const [gallery, setGallery] = useState<Image[]>([]);
-
-    const [list, setList] = useState<FeaturedProperty[]>([]);
-
-    useEffect(() => {
-        if (open) setList(featured);
-    }, [open, featured]);
 
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
@@ -117,35 +110,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
         }
     };
 
-    const togglePublish = async (id: number) => {
-        await apiFetch(FeaturedActions.togglePublish({ featuredProperty: id }));
-        await onRefreshFeatured();
-    };
-
-    const removeItem = async (id: number) => {
-        if (!confirm('Excluir este destaque?')) return;
-        await apiFetch(FeaturedActions.destroy({ featuredProperty: id }));
-        await onRefreshFeatured();
-    };
-
-    const move = async (id: number, dir: -1 | 1) => {
-        const idx = list.findIndex((s) => s.id === id);
-        if (idx < 0) return;
-        const target = idx + dir;
-        if (target < 0 || target >= list.length) return;
-        const next = list.slice();
-        const [item] = next.splice(idx, 1);
-        next.splice(target, 0, item);
-        setList(next);
-        const ids = next.map((s) => s.id);
-        await apiFetch(FeaturedActions.reorder.patch(), {
-            body: JSON.stringify({ ids }),
-            headers: { 'Content-Type': 'application/json' },
-        });
-        await onRefreshFeatured();
-    };
-
-    const listCount = useMemo(() => list.length, [list]);
+    const listCount = useMemo(() => featured.length, [featured]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,23 +119,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                     <div className="flex items-center justify-between">
                         <DialogTitle>Imóveis em Destaque</DialogTitle>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{featuredLoading ? 'Carregando…' : `${listCount} itens`}</span>
-                            <Button
-                                className="w-auto hidden"
-                                variant="secondary"
-                                onClick={async () => {
-                                    setFeaturedLoading(true);
-                                    try {
-                                        await onRefreshFeatured();
-                                    } finally {
-                                        setFeaturedLoading(false);
-                                    }
-                                }}
-                                disabled={featuredLoading}
-                                title="Atualizar"
-                            >
-                                ↻
-                            </Button>
+                            <span>{`${listCount} itens`}</span>
                         </div>
                     </div>
                 </DialogHeader>
@@ -372,44 +321,6 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                         <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
                             {creating ? '…' : '+'}
                         </Button>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                        {list.map((f) => (
-                            <div key={f.id} className="overflow-hidden rounded-md border">
-                                {f.image_url ? (
-                                    <img src={f.image_url} alt={f.title} className="h-40 w-full object-cover" />
-                                ) : (
-                                    <div className="h-40 w-full bg-muted" />
-                                )}
-                                <div className="flex items-center justify-between gap-2 p-2">
-                                    <div className="min-w-0">
-                                        <div className="truncate font-medium" title={f.title}>
-                                            {f.title}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">{f.price}</div>
-                                    </div>
-                                    <div className="flex shrink-0 items-center gap-1">
-                                        <Button className="w-auto" variant="secondary" onClick={() => move(f.id, -1)} title="Subir">
-                                            ↑
-                                        </Button>
-                                        <Button className="w-auto" variant="secondary" onClick={() => move(f.id, 1)} title="Descer">
-                                            ↓
-                                        </Button>
-                                        <Button
-                                            className="w-auto"
-                                            variant={f.is_published ? 'default' : 'secondary'}
-                                            onClick={() => togglePublish(f.id)}
-                                            title="Publicar/Despublicar"
-                                        >
-                                            {f.is_published ? 'Publicado' : 'Rascunho'}
-                                        </Button>
-                                        <Button className="w-auto" variant="destructive" onClick={() => removeItem(f.id)} title="Excluir">
-                                            Excluir
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </div>
                 <DialogFooter>
