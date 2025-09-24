@@ -8,8 +8,6 @@ interface ImageEditorProps {
     onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
     sizeClass?: string;
-    // Accept either a convenience prop or a raw class
-    aspect?: 'square' | 'video' | 'auto';
     aspectClass?: string;
 }
 
@@ -18,28 +16,13 @@ export default function ImageEditor({
     onExport,
     children,
     sizeClass = 'w-full max-w-[600px]',
-    aspect,
-    aspectClass,
+    aspectClass = 'aspect-square',
 }: ImageEditorProps) {
     const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
         useImageEditor({ src, onExport });
 
-    // Map convenience aspect prop to tailwind classes. "auto" (or undefined) means no aspect enforced here.
-    const resolvedAspectClass = (() => {
-        if (aspectClass) return aspectClass;
-        switch (aspect) {
-            case 'square':
-                return 'aspect-square';
-            case 'video':
-                return 'aspect-video';
-            case 'auto':
-            default:
-                return '';
-        }
-    })();
-
     return (
-        <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, resolvedAspectClass)}>
+        <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, aspectClass)}>
 
             <img
                 ref={imgRef}
