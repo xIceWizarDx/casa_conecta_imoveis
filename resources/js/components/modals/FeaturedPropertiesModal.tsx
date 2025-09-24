@@ -67,6 +67,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
     const [gallery, setGallery] = useState<Image[]>([]);
 
     const [list, setList] = useState<FeaturedProperty[]>([]);
+    const listCount = list.length;
 
     useEffect(() => {
         if (open) setList(featured);
@@ -74,7 +75,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
 
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
-            alert('Selecione uma imagem, título e preço.');
+            alert('Selecione uma imagem, tÃ­tulo e preÃ§o.');
             return;
         }
         setCreating(true);
@@ -145,16 +146,16 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
         await onRefreshFeatured();
     };
 
-    const listCount = useMemo(() => list.length, [list]);
+    // list removed from modal; keep header clean
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
                 <DialogHeader>
                     <div className="flex items-center justify-between">
-                        <DialogTitle>Imóveis em Destaque</DialogTitle>
+                        <DialogTitle>ImÃ³veis em Destaque</DialogTitle>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{featuredLoading ? 'Carregando…' : `${listCount} itens`}</span>
+                            <span>{featuredLoading ? 'Carregandoâ€¦' : `${listCount} itens`}</span>
                             <Button
                                 className="w-auto hidden"
                                 variant="secondary"
@@ -169,22 +170,22 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                 disabled={featuredLoading}
                                 title="Atualizar"
                             >
-                                ↻
+                                â†»
                             </Button>
                         </div>
                     </div>
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
-                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
+                    Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
                 </DialogDescription>
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
-                            <Label>Título</Label>
+                            <Label>TÃ­tulo</Label>
                             <Input
                                 value={form.title ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                                placeholder="Ex: Apartamento premium no Jardim Goiás"
+                                placeholder="Ex: Apartamento premium no Jardim GoiÃ¡s"
                             />
                         </div>
                         <div>
@@ -192,11 +193,11 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                             <Input
                                 value={form.neighborhood ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
-                                placeholder="Ex: Jardim Goiás"
+                                placeholder="Ex: Jardim GoiÃ¡s"
                             />
                         </div>
                         <div>
-                            <Label>Preço</Label>
+                            <Label>PreÃ§o</Label>
                             <Input
                                 value={form.price ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, price: e.target.value }))}
@@ -227,12 +228,12 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                             />
                         </div>
                         <div>
-                            <Label>Área</Label>
+                            <Label>Ãrea</Label>
                             <Input
                                 value={form.area ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, area: e.target.value }))}
                                 inputMode="numeric"
-                                placeholder="Ex: 120 m²"
+                                placeholder="Ex: 120 mÂ²"
                             />
                         </div>
                         <div>
@@ -242,7 +243,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                 value={form.type ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, type: e.target.value }))}
                             >
-                                <option value="">Selecione…</option>
+                                <option value="">Selecioneâ€¦</option>
                                 <option value="casa">Casa</option>
                                 <option value="apartamento">Apartamento</option>
                                 <option value="sobrado">Sobrado</option>
@@ -250,7 +251,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                             </select>
                         </div>
                         <div>
-                            <Label>Faixa de preço</Label>
+                            <Label>Faixa de preÃ§o</Label>
                             <Input
                                 value={form.price_range ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, price_range: e.target.value }))}
@@ -273,7 +274,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                         </label>
                     </div>
                     <div>
-                        <Label>Características (features)</Label>
+                        <Label>CaracterÃ­sticas (features)</Label>
                         <div className="mt-2 flex items-center gap-2">
                             <Input value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
                             <Button
@@ -301,7 +302,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                             className="text-muted-foreground hover:text-foreground"
                                             onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
                                         >
-                                            ×
+                                            Ã—
                                         </button>
                                     </span>
                                 ))}
@@ -310,7 +311,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                     </div>
                     <div>
                         <Label>Imagem</Label>
-                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
+                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botÃ£o abaixo.</p>
                         <Button
                             type="button"
                             variant="default"
@@ -327,7 +328,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                 <div
                                     className="w-full"
                                     style={{
-                                        // Alinhado às cores da home (main/styles/tailwind.css)
+                                        // Alinhado Ã s cores da home (main/styles/tailwind.css)
                                         ['--color-primary' as any]: '#22C55E',
                                         ['--color-accent' as any]: '#25D366',
                                         ['--color-muted' as any]: '#F9FAFB',
@@ -370,7 +371,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                     </div>
                     <div className="flex items-end gap-2">
                         <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
-                            {creating ? '…' : '+'}
+                            {creating ? 'â€¦' : '+'}
                         </Button>
                     </div>
                     {/* Lista de itens publicada removida do modal */}
