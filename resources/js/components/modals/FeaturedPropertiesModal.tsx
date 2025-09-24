@@ -373,44 +373,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                             {creating ? '…' : '+'}
                         </Button>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                        {list.map((f) => (
-                            <div key={f.id} className="overflow-hidden rounded-md border">
-                                {f.image_url ? (
-                                    <img src={f.image_url} alt={f.title} className="h-40 w-full object-cover" />
-                                ) : (
-                                    <div className="h-40 w-full bg-muted" />
-                                )}
-                                <div className="flex items-center justify-between gap-2 p-2">
-                                    <div className="min-w-0">
-                                        <div className="truncate font-medium" title={f.title}>
-                                            {f.title}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">{f.price}</div>
-                                    </div>
-                                    <div className="flex shrink-0 items-center gap-1">
-                                        <Button className="w-auto" variant="secondary" onClick={() => move(f.id, -1)} title="Subir">
-                                            ↑
-                                        </Button>
-                                        <Button className="w-auto" variant="secondary" onClick={() => move(f.id, 1)} title="Descer">
-                                            ↓
-                                        </Button>
-                                        <Button
-                                            className="w-auto"
-                                            variant={f.is_published ? 'default' : 'secondary'}
-                                            onClick={() => togglePublish(f.id)}
-                                            title="Publicar/Despublicar"
-                                        >
-                                            {f.is_published ? 'Publicado' : 'Rascunho'}
-                                        </Button>
-                                        <Button className="w-auto" variant="destructive" onClick={() => removeItem(f.id)} title="Excluir">
-                                            Excluir
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    {/* Lista de itens publicada removida do modal */}
                 </div>
                 <DialogFooter>
                     <Button className="w-auto" variant="secondary" onClick={() => onOpenChange(false)}>
