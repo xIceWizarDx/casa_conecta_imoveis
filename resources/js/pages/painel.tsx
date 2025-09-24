@@ -428,28 +428,6 @@ export default function Painel() {
                                         features={Array.isArray(f.features) ? (f.features as string[]) : []}
                                         price={f.price}
                                     />
-                                    <div className="flex items-center justify-end gap-1 border-t p-2">
-                                        
-                                        <div className="flex shrink-0 items-center gap-1">
-                                            <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, -1)} title="Subir">
-                                                ↑
-                                            </Button>
-                                            <Button className="w-auto" variant="secondary" onClick={() => moveFeatured(f.id, 1)} title="Descer">
-                                                ↓
-                                            </Button>
-                                            <Button
-                                                className="w-auto"
-                                                variant={f.is_published ? 'default' : 'secondary'}
-                                                onClick={() => toggleFeaturedPublish(f.id)}
-                                                title="Publicar/Despublicar"
-                                            >
-                                                {f.is_published ? 'Publicado' : 'Rascunho'}
-                                            </Button>
-                                            <Button className="w-auto" variant="destructive" onClick={() => deleteFeatured(f.id)} title="Excluir">
-                                                Excluir
-                                            </Button>
-                                        </div>
-                                    </div>
                                 </div>
                             ))}
                         </div>
