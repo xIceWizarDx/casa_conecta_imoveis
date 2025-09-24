@@ -91,22 +91,11 @@ export default function Painel() {
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
-    const [featuredLoading, setFeaturedLoading] = useState(false);
-    const [editingFeaturedId, setEditingFeaturedId] = useState<number | null>(null);
-    const [editingFeatured, setEditingFeatured] = useState<Partial<FeaturedProperty>>({});
-    const [savingFeatured, setSavingFeatured] = useState(false);
-    // Local state for legacy featured modal
-    const [creatingFeatured, setCreatingFeatured] = useState(false);
-    const [newFeatured, setNewFeatured] = useState<Partial<FeaturedProperty>>({ features: [] });
-    const [selectedFeaturedImage, setSelectedFeaturedImage] = useState<Image | null>(null);
-    const [newFeaturedGallery, setNewFeaturedGallery] = useState<Image[]>([]);
-    const [featureInput, setFeatureInput] = useState('');
-    const [editedFeaturedBlob, setEditedFeaturedBlob] = useState<Blob | null>(null);
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
-    const [imagePickerFor, setImagePickerFor] = useState<'slide' | 'featured' | null>(null);
+    const [imagePickerFor, setImagePickerFor] = useState<'slide' | null>(null);
 
     // Notices
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; title: string; message?: string } | null>(null);
@@ -179,14 +168,11 @@ export default function Painel() {
     };
 
     const refreshFeatured = async () => {
-        setFeaturedLoading(true);
         try {
             const data = await apiFetch<FeaturedProperty[]>(FeaturedActions.index());
             setFeatured(data);
         } catch (e) {
             setNotice({ type: 'error', title: 'Falha ao carregar destaques', message: e instanceof Error ? e.message : String(e) });
-        } finally {
-            setFeaturedLoading(false);
         }
     };
 
@@ -275,54 +261,6 @@ export default function Painel() {
         setHeroModalOpen(true);
     };
 
-    const submitFeatured = async () => {
-        if (!selectedFeaturedImage?.id || !newFeatured.title || !newFeatured.price) {
-            alert('Selecione uma imagem, título e preço.');
-            return;
-        }
-        setCreatingFeatured(true);
-        try {
-            let image_id = selectedFeaturedImage.id;
-            if (editedFeaturedBlob) {
-                const fd = new FormData();
-                fd.append('images[]', editedFeaturedBlob, 'preview-editada.png');
-                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
-                if (uploaded[0]?.id) image_id = uploaded[0].id;
-            }
-            const body = JSON.stringify({
-                image_id,
-                title: newFeatured.title,
-                neighborhood: newFeatured.neighborhood ?? null,
-                price: newFeatured.price,
-                bedrooms: newFeatured.bedrooms ?? null,
-                bathrooms: newFeatured.bathrooms ?? null,
-                area: newFeatured.area ?? null,
-                type: newFeatured.type ?? null,
-                features: [
-                    ...((newFeatured.features ?? []) as string[]),
-                    ...(featureInput.trim() ? [featureInput.trim()] : []),
-                ],
-                price_range: newFeatured.price_range ?? null,
-                is_new: !!newFeatured.is_new,
-                is_published: !!newFeatured.is_published,
-                gallery_image_ids: newFeaturedGallery.map((g) => g.id),
-            });
-            await apiFetch(FeaturedActions.store(), {
-                body,
-                headers: { 'Content-Type': 'application/json' },
-            });
-            setNewFeatured({ features: [] });
-            setFeatureInput('');
-            setSelectedFeaturedImage(null);
-            setEditedFeaturedBlob(null);
-            setNewFeaturedGallery([]);
-            await refreshFeatured();
-            setNotice({ type: 'success', title: 'Destaque adicionado' });
-        } finally {
-            setCreatingFeatured(false);
-        }
-    };
-
     const toggleFeaturedPublish = async (id: number) => {
         await apiFetch(FeaturedActions.togglePublish({ featuredProperty: id }));
         await refreshFeatured();
@@ -349,28 +287,6 @@ export default function Painel() {
             headers: { 'Content-Type': 'application/json' },
         });
         await refreshFeatured();
-    };
-
-    const startEditFeatured = (f: FeaturedProperty) => {
-        setEditingFeaturedId(f.id);
-        setEditingFeatured({ title: f.title, price: f.price });
-    };
-
-    const saveEditFeatured = async () => {
-        if (!editingFeaturedId) return;
-        setSavingFeatured(true);
-        try {
-            await apiFetch(FeaturedActions.update({ featuredProperty: editingFeaturedId }), {
-                body: JSON.stringify({ title: editingFeatured.title, price: editingFeatured.price }),
-                headers: { 'Content-Type': 'application/json' },
-            });
-            setEditingFeaturedId(null);
-            setEditingFeatured({});
-            await refreshFeatured();
-            setNotice({ type: 'success', title: 'Destaque atualizado' });
-        } finally {
-            setSavingFeatured(false);
-        }
     };
 
     return (
@@ -701,339 +617,14 @@ export default function Painel() {
                             </DialogContent>
                         </Dialog>
 
-                        <Dialog open={featuredModalOpen} onOpenChange={setFeaturedModalOpen}>
-                            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
-                                <DialogHeader>
-                                    <div className="flex items-center justify-between">
-                                        <DialogTitle>Imóveis em Destaque</DialogTitle>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <span>{featuredLoading ? 'Carregando…' : `${featured.length} itens`}</span>
-                                            <Button
-                                                className="w-auto hidden"
-                                                variant="secondary"
-                                                onClick={refreshFeatured}
-                                                disabled={featuredLoading}
-                                                title="Atualizar"
-                                            >
-                                                ↻
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </DialogHeader>
-                                <DialogDescription id="featured-desc">
-                                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
-                                </DialogDescription>
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                        <div>
-                                            <Label>Título</Label>
-                                            <Input
-                                                value={newFeatured.title ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, title: e.target.value }))}
-                                                placeholder="Ex: Apartamento premium Jardim Goiás"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Bairro</Label>
-                                            <Input
-                                                value={newFeatured.neighborhood ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, neighborhood: e.target.value }))}
-                                                placeholder="Ex: Jardim Goiás"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Preço</Label>
-                                            <Input
-                                                value={newFeatured.price ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
-                                                inputMode="numeric"
-                                                placeholder="Ex: R$ 950.000,00"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
-                                        <div>
-                                            <Label>Quartos</Label>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                value={newFeatured.bedrooms ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, bedrooms: Number(e.target.value || 0) }))}
-                                                inputMode="numeric"
-                                                placeholder="Ex: 3"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Banheiros</Label>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                value={newFeatured.bathrooms ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, bathrooms: Number(e.target.value || 0) }))}
-                                                inputMode="numeric"
-                                                placeholder="Ex: 2"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Área</Label>
-                                            <Input
-                                                value={newFeatured.area ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
-                                                inputMode="numeric"
-                                                placeholder="Ex: 120 m²"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Tipo</Label>
-                                            <select
-                                                className="mt-1 w-full rounded-md border bg-background p-2"
-                                                value={newFeatured.type ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, type: e.target.value }))}
-                                            >
-                                                <option value="">Selecione…</option>
-                                                <option value="casa">Casa</option>
-                                                <option value="apartamento">Apartamento</option>
-                                                <option value="sobrado">Sobrado</option>
-                                                <option value="cobertura">Cobertura</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <Label>Faixa de preço</Label>
-                                            <Input
-                                                value={newFeatured.price_range ?? ''}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, price_range: e.target.value }))}
-                                                placeholder="Ex: 800000-1200000"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-6">
-                                        <label className="flex items-center gap-2 text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!newFeatured.is_new}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, is_new: e.target.checked }))}
-                                            />
-                                            Novo
-                                        </label>
-                                        <label className="flex items-center gap-2 text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!newFeatured.is_published}
-                                                onChange={(e) => setNewFeatured((s) => ({ ...s, is_published: e.target.checked }))}
-                                            />
-                                            Publicado
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <Label>Características (features)</Label>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Input value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                className="w-auto"
-                                                onClick={() => {
-                                                    const v = featureInput.trim();
-                                                    if (!v) return;
-                                                    setNewFeatured((s) => ({ ...s, features: [...(s.features ?? []), v] }));
-                                                    setFeatureInput('');
-                                                }}
-                                                title="Adicionar"
-                                            >
-                                                +
-                                            </Button>
-                                        </div>
-                                        {(newFeatured.features ?? []).length > 0 && (
-                                            <div className="mt-2 flex flex-wrap gap-2">
-                                                {(newFeatured.features ?? []).map((f, idx) => (
-                                                    <span
-                                                        key={`${f}-${idx}`}
-                                                        className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs"
-                                                    >
-                                                        {f}
-                                                        <button
-                                                            type="button"
-                                                            className="text-muted-foreground hover:text-foreground"
-                                                            onClick={() =>
-                                                                setNewFeatured((s) => ({
-                                                                    ...s,
-                                                                    features: (s.features ?? []).filter((_, i) => i !== idx),
-                                                                }))
-                                                            }
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <Label>Imagem</Label>
-                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
-                                        <Button
-                                            type="button"
-                                            variant="default"
-                                            className="mt-2 w-auto bg-black text-white hover:bg-black/90"
-                                            onClick={() => {
-                                                setImagePickerFor('featured');
-                                                setImagePickerOpen(true);
-                                            }}
-                                        >
-                                            Selecionar da galeria
-                                        </Button>
-                                        <div className={cn('mt-4 w-full', !selectedFeaturedImage && 'border-2 border-dashed')}>
-                                            {selectedFeaturedImage && (
-                                                <div
-                                                    className="w-full"
-                                                    style={{
-                                                        ['--color-primary' as any]: '#22C55E',
-                                                        ['--color-accent' as any]: '#25D366',
-                                                        ['--color-muted' as any]: '#F9FAFB',
-                                                        ['--color-muted-foreground' as any]: '#6B7280',
-                                                        ['--color-foreground' as any]: '#111827',
-                                                        ['--color-card' as any]: '#FFFFFF',
-                                                        ['--color-border' as any]: '#E5E7EB',
-                                                    }}
-                                                >
-                                                    <div className="relative">
-                                                        <ImageEditor
-                                                            src={selectedFeaturedImage.url}
-                                                            onExport={setEditedFeaturedBlob}
-                                                            sizeClass="w-full"
-                                                            aspect="square"
-                                                        >
-                                                            <div className="absolute left-4 top-4 flex gap-2">
-                                                                {!!newFeatured.is_new && (
-                                                                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
-                                                                )}
-                                                                {(newFeatured.neighborhood || '')?.trim() && (
-                                                                    <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                                                                        {newFeatured.neighborhood}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            {/* Ícone de favorito removido */}
-                                                        </ImageEditor>
-                                                    </div>
-                                    <FeaturedCardInfo
-                                        title={newFeatured.title}
-                                        neighborhood={newFeatured.neighborhood}
-                                        bedrooms={newFeatured.bedrooms}
-                                        bathrooms={newFeatured.bathrooms}
-                                        area={newFeatured.area}
-                                        features={[
-                                            ...((newFeatured.features ?? []) as string[]),
-                                            ...(featureInput.trim() ? [featureInput.trim()] : []),
-                                        ]}
-                                        price={newFeatured.price}
-                                    />
-                                    {/* Imagens adicionais */}
-                                    <div className="mt-6">
-                                        <Label>Imagens adicionais</Label>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                className="w-auto"
-                                                onClick={() => {
-                                                    setImagePickerFor('featured_gallery');
-                                                    setImagePickerOpen(true);
-                                                }}
-                                            >
-                                                Adicionar da galeria
-                                            </Button>
-                                            {newFeaturedGallery.length > 0 && (
-                                                <span className="text-xs text-muted-foreground">{newFeaturedGallery.length} foto(s) selecionada(s)</span>
-                                            )}
-                                        </div>
-                                        {newFeaturedGallery.length > 0 && (
-                                            <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                                                {newFeaturedGallery.map((img) => (
-                                                    <div key={img.id} className="group relative overflow-hidden rounded-md border">
-                                                        <img src={img.url} alt={img.original_name} className="h-24 w-full object-cover" />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute right-1 top-1 rounded bg-red-600 px-2 py-0.5 text-[11px] text-white opacity-0 transition group-hover:opacity-100"
-                                                            onClick={() => setNewFeaturedGallery((g) => g.filter((x) => x.id !== img.id))}
-                                                        >
-                                                            Remover
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-end gap-2">
-                                        <Button className="w-auto" onClick={submitFeatured} disabled={creatingFeatured} title="Adicionar Destaque">
-                                            {creatingFeatured ? '…' : '+'}
-                                        </Button>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                                        {featured.map((f) => (
-                                            <div key={f.id} className="overflow-hidden rounded-md border">
-                                                {f.image_url ? (
-                                                    <img src={f.image_url} alt={f.title} className="h-40 w-full object-cover" />
-                                                ) : (
-                                                    <div className="h-40 w-full bg-muted" />
-                                                )}
-                                                <div className="flex items-center justify-between gap-2 p-2">
-                                                    <div className="min-w-0">
-                                                        <div className="truncate font-medium" title={f.title}>
-                                                            {f.title}
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground">{f.price}</div>
-                                                    </div>
-                                                    <div className="flex shrink-0 items-center gap-1">
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="secondary"
-                                                            onClick={() => moveFeatured(f.id, -1)}
-                                                            title="Subir"
-                                                        >
-                                                            ↑
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="secondary"
-                                                            onClick={() => moveFeatured(f.id, 1)}
-                                                            title="Descer"
-                                                        >
-                                                            ↓
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant={f.is_published ? 'default' : 'secondary'}
-                                                            onClick={() => toggleFeaturedPublish(f.id)}
-                                                            title="Publicar/Despublicar"
-                                                        >
-                                                            {f.is_published ? 'Publicado' : 'Rascunho'}
-                                                        </Button>
-                                                        <Button
-                                                            className="w-auto"
-                                                            variant="destructive"
-                                                            onClick={() => deleteFeatured(f.id)}
-                                                            title="Excluir"
-                                                        >
-                                                            Excluir
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button className="w-auto" variant="secondary" onClick={() => setFeaturedModalOpen(false)}>
-                                        Fechar
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                        <FeaturedPropertiesModal
+                            open={featuredModalOpen}
+                            onOpenChange={setFeaturedModalOpen}
+                            images={images}
+                            featured={featured}
+                            onRefreshFeatured={refreshFeatured}
+                            onNotice={(n) => setNotice(n)}
+                        />
                     </>
                 )}
                 {/* Dialogo para selecionar imagem para slides */}
@@ -1063,63 +654,7 @@ export default function Painel() {
                         />
                     </DialogContent>
                 </Dialog>
-                {/* Dialogo para selecionar imagens adicionais do destaque */}
-                <Dialog
-                    open={imagePickerOpen && imagePickerFor === 'featured_gallery'}
-                    onOpenChange={(o) => {
-                        if (!o) {
-                            setImagePickerOpen(false);
-                            setImagePickerFor(null);
-                        }
-                    }}
-                >
-                    <DialogContent aria-describedby="image-picker-featured-gallery-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagens adicionais</DialogTitle>
-                        </DialogHeader>
-                        <DialogDescription id="image-picker-featured-gallery-desc">Escolha uma ou mais imagens na lista abaixo</DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            multiple
-                            selected={newFeaturedGallery.map((i) => i.id)}
-                            onChangeSelected={(_ids, imgs) => setNewFeaturedGallery(imgs)}
-                            showFooter
-                            onConfirm={() => {
-                                setImagePickerOpen(false);
-                                setImagePickerFor(null);
-                            }}
-                            confirmLabel="Concluir"
-                        />
-                    </DialogContent>
-                </Dialog>
 
-                {/* Dialogo para selecionar imagem para destaques */}
-                <Dialog
-                    open={imagePickerOpen && imagePickerFor === 'featured'}
-                    onOpenChange={(o) => {
-                        if (!o) {
-                            setImagePickerOpen(false);
-                            setImagePickerFor(null);
-                        }
-                    }}
-                >
-                    <DialogContent aria-describedby="image-picker-featured-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagem</DialogTitle>
-                        </DialogHeader>
-                        {/* DialogDescription é necessário para acessibilidade */}
-                        <DialogDescription id="image-picker-featured-desc">Escolha uma imagem na lista abaixo</DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            onSelect={(img) => {
-                                setSelectedFeaturedImage(img);
-                                setNewFeatured((s) => ({ ...s, image_id: img.id }));
-                                setImagePickerOpen(false);
-                                setImagePickerFor(null);
-                            }}
-                        />
-                    </DialogContent>
-                </Dialog>
             </div>
         </div>
     );
