@@ -688,16 +688,14 @@ export default function Painel() {
                                                 </ImageEditor>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="flex items-end gap-2">
-                                        <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
-                                            {creatingSlide ? 'Publicando…' : 'Publicar'}
-                                        </Button>
-                                    </div>
+                                    
                                 </div>
                                 <DialogFooter>
                                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => setHeroModalOpen(false)}>
                                         Fechar
+                                    </Button>
+                                    <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
+                                        {creatingSlide ? 'Publicando.' : 'Publicar'}
                                     </Button>
                                 </DialogFooter>
                             </DialogContent>
