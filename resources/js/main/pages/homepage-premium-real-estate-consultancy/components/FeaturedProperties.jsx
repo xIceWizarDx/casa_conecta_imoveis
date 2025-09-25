@@ -77,8 +77,6 @@ const FeaturedProperties = () => {
     propertyType: ''
   });
   const [remote, setRemote] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [slidesPerView, setSlidesPerView] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeProperty, setActiveProperty] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -120,23 +118,6 @@ const FeaturedProperties = () => {
         }
       } catch {}
     })();
-  }, []);
-
-  useEffect(() => {
-    const updateSlidesPerView = () => {
-      if (typeof window === 'undefined') return;
-      if (window.innerWidth >= 1280) {
-        setSlidesPerView(3);
-      } else if (window.innerWidth >= 768) {
-        setSlidesPerView(2);
-      } else {
-        setSlidesPerView(1);
-      }
-    };
-
-    updateSlidesPerView();
-    window.addEventListener('resize', updateSlidesPerView);
-    return () => window.removeEventListener('resize', updateSlidesPerView);
   }, []);
 
   useEffect(() => {
@@ -407,20 +388,6 @@ const FeaturedProperties = () => {
   };
 
   const filteredProperties = filterProperties(list);
-  const effectiveSlidesPerView = filteredProperties.length
-    ? Math.min(slidesPerView, filteredProperties.length)
-    : 1;
-  const slideWidthPercentage = 100 / effectiveSlidesPerView;
-  const maxSlide = Math.max(0, filteredProperties.length - effectiveSlidesPerView);
-  const totalPositions = maxSlide + 1;
-
-  useEffect(() => {
-    setCurrentSlide(0);
-  }, [filteredProperties.length, effectiveSlidesPerView]);
-
-  useEffect(() => {
-    setCurrentSlide((prev) => Math.min(prev, maxSlide));
-  }, [maxSlide]);
 
   const toggleFavorite = (propertyId) => {
     setFavorites((prev) => {
@@ -446,14 +413,6 @@ const FeaturedProperties = () => {
   };
   const hasGalleryNavigation = activeGallery.length > 1;
 
-  const goToPrevSlide = () => {
-    setCurrentSlide((prev) => Math.max(prev - 1, 0));
-  };
-
-  const goToNextSlide = () => {
-    setCurrentSlide((prev) => Math.min(prev + 1, maxSlide));
-  };
-
   const handleModalPrev = () => {
     if (!hasGalleryNavigation) return;
     setActiveImageIndex((prev) => (prev - 1 + activeGallery.length) % activeGallery.length);
@@ -463,9 +422,6 @@ const FeaturedProperties = () => {
     if (!hasGalleryNavigation) return;
     setActiveImageIndex((prev) => (prev + 1) % activeGallery.length);
   };
-
-  const canGoPrev = currentSlide > 0;
-  const canGoNext = currentSlide < maxSlide;
 
   return (
     <section id="listagem" className="py-16">
@@ -611,172 +567,118 @@ const FeaturedProperties = () => {
           </div>
         ) : (
           <>
-            <div className="relative">
-              <div className="overflow-hidden">
-                <div
-                  className="flex gap-6 transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${slideWidthPercentage * currentSlide}%)` }}
-                >
-                  {filteredProperties?.map((property) => {
-                    const propertyGallery = property.gallery?.length
-                      ? property.gallery
-                      : getPropertyGallery(property);
-                    const primaryImage = property.image || propertyGallery[0] || '';
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredProperties?.map((property) => {
+                const propertyGallery = property.gallery?.length
+                  ? property.gallery
+                  : getPropertyGallery(property);
+                const primaryImage = property.image || propertyGallery[0] || '';
 
-                    return (
-                      <div
-                        key={property?.id}
-                        className="flex-shrink-0"
-                        style={{ width: `${slideWidthPercentage}%` }}
+                return (
+                  <div key={property?.id} className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => openModal({ ...property, gallery: propertyGallery })}
+                        className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                       >
-                        <div className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
-                          <div className="relative">
-                            <button
-                              type="button"
-                              onClick={() => openModal({ ...property, gallery: propertyGallery })}
-                              className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            >
-                              <Image
-                                src={primaryImage}
-                                alt={property?.title}
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                loading="lazy"
-                              />
-                              <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                                <Icon name="Images" size={14} className="text-white" />
-                                Ver galeria
-                              </span>
-                            </button>
+                        <Image
+                          src={primaryImage}
+                          alt={property?.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                          <Icon name="Images" size={14} className="text-white" />
+                          Ver galeria
+                        </span>
+                      </button>
 
-                            <div className="absolute top-4 left-4 flex gap-2">
-                              {property?.isNew && (
-                                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                                  Novo
-                                </span>
-                              )}
-                              <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                                {property?.neighborhood}
-                              </span>
-                            </div>
+                      <div className="absolute top-4 left-4 flex gap-2">
+                        {property?.isNew && (
+                          <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+                            Novo
+                          </span>
+                        )}
+                        <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
+                          {property?.neighborhood}
+                        </span>
+                      </div>
 
-                            <button
-                              type="button"
-                              onClick={() => toggleFavorite(property?.id)}
-                              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
-                              aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                            >
-                              <Icon
-                                name="Heart"
-                                size={20}
-                                className={favorites?.has(property?.id) ? 'fill-current text-red-500' : 'text-gray-600'}
-                              />
-                            </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(property?.id)}
+                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+                        aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      >
+                        <Icon
+                          name="Heart"
+                          size={20}
+                          className={favorites?.has(property?.id) ? 'fill-current text-red-500' : 'text-gray-600'}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-1 flex-col p-6">
+                      <h3 className="mb-2 text-xl font-bold text-gray-900">
+                        {property?.title}
+                      </h3>
+
+                      <div className="mb-4 flex items-center text-gray-600">
+                        <Icon name="MapPin" size={16} className="mr-1" />
+                        <span className="text-sm">{property?.neighborhood}</span>
+                      </div>
+
+                      <div className="mb-4 flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Icon name="Bed" size={16} className="mr-1" />
+                            <span>{property?.bedrooms}</span>
                           </div>
-
-                          <div className="flex flex-1 flex-col p-6">
-                            <h3 className="mb-2 text-xl font-bold text-gray-900">
-                              {property?.title}
-                            </h3>
-
-                            <div className="mb-4 flex items-center text-gray-600">
-                              <Icon name="MapPin" size={16} className="mr-1" />
-                              <span className="text-sm">{property?.neighborhood}</span>
-                            </div>
-
-                            <div className="mb-4 flex items-center justify-between">
-                              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                <div className="flex items-center">
-                                  <Icon name="Bed" size={16} className="mr-1" />
-                                  <span>{property?.bedrooms}</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <Icon name="Bath" size={16} className="mr-1" />
-                                  <span>{property?.bathrooms}</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <Icon name="Square" size={16} className="mr-1" />
-                                  <span>{property?.area}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="mb-4 flex flex-wrap gap-1">
-                              {property?.features?.slice(0, 2)?.map((feature, index) => (
-                                <span key={index} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                                  {feature}
-                                </span>
-                              ))}
-                              {property?.features?.length > 2 && (
-                                <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                                  +{property?.features?.length - 2} mais
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="mt-auto flex items-center justify-between">
-                              <div className="text-2xl font-bold text-primary">
-                                {property?.price}
-                              </div>
-                              <Button
-                                variant="default"
-                                size="sm"
-                                iconName="MessageCircle"
-                                iconPosition="left"
-                                onClick={() => handleWhatsAppClick(property)}
-                                className="bg-accent hover:bg-accent/90"
-                              >
-                                Ver Detalhes
-                              </Button>
-                            </div>
+                          <div className="flex items-center">
+                            <Icon name="Bath" size={16} className="mr-1" />
+                            <span>{property?.bathrooms}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Icon name="Square" size={16} className="mr-1" />
+                            <span>{property?.area}</span>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
 
-              {filteredProperties.length > effectiveSlidesPerView && (
-                <>
-                  <button
-                    type="button"
-                    onClick={goToPrevSlide}
-                    disabled={!canGoPrev}
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
-                      canGoPrev ? '' : 'pointer-events-none opacity-40'
-                    }`}
-                    aria-label="Ver imóveis anteriores"
-                  >
-                    <Icon name="ChevronLeft" size={20} className="text-current" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={goToNextSlide}
-                    disabled={!canGoNext}
-                    className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
-                      canGoNext ? '' : 'pointer-events-none opacity-40'
-                    }`}
-                    aria-label="Ver próximos imóveis"
-                  >
-                    <Icon name="ChevronRight" size={20} className="text-current" />
-                  </button>
-                </>
-              )}
+                      <div className="mb-4 flex flex-wrap gap-1">
+                        {property?.features?.slice(0, 2)?.map((feature, index) => (
+                          <span key={index} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                            {feature}
+                          </span>
+                        ))}
+                        {property?.features?.length > 2 && (
+                          <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                            +{property?.features?.length - 2} mais
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-auto flex items-center justify-between">
+                        <div className="text-2xl font-bold text-primary">
+                          {property?.price}
+                        </div>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          iconName="MessageCircle"
+                          iconPosition="left"
+                          onClick={() => handleWhatsAppClick(property)}
+                          className="bg-accent hover:bg-accent/90"
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            {filteredProperties.length > 1 && (
-              <div className="mt-8 flex justify-center gap-2">
-                {Array.from({ length: totalPositions }).map((_, index) => (
-                  <span
-                    key={index}
-                    className={`h-2 w-2 rounded-full transition ${
-                      index === currentSlide ? 'bg-primary' : 'bg-gray-300'
-                    }`}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-            )}
           </>
         )}
       </div>
