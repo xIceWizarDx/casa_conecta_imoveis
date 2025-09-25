@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
-import { useMemo, useState } from 'react';
+import { ChangeEvent, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 type Image = {
     id: number;
@@ -51,9 +51,20 @@ interface Props {
     featured: FeaturedProperty[];
     onRefreshFeatured: () => Promise<void>;
     onNotice?: (n: Notice) => void;
+    onUploadImages: (files: FileList | null) => Promise<boolean>;
+    uploadingImages?: boolean;
 }
 
-export default function FeaturedPropertiesModal({ open, onOpenChange, images, featured, onRefreshFeatured, onNotice }: Props) {
+export default function FeaturedPropertiesModal({
+    open,
+    onOpenChange,
+    images,
+    featured,
+    onRefreshFeatured,
+    onNotice,
+    onUploadImages,
+    uploadingImages = false,
+}: Props) {
     const [creating, setCreating] = useState(false);
 
     const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
@@ -62,6 +73,27 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
     const [imagePickerFor, setImagePickerFor] = useState<'main' | 'gallery' | null>(null);
     const [gallery, setGallery] = useState<Image[]>([]);
+    const mainUploadInputRef = useRef<HTMLInputElement | null>(null);
+    const galleryUploadInputRef = useRef<HTMLInputElement | null>(null);
+
+    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>, target: 'main' | 'gallery') => {
+        const success = await onUploadImages(event.target.files);
+        event.target.value = '';
+        if (success) {
+            setImagePickerFor(target);
+            setImagePickerOpen(true);
+        }
+    };
+
+    const previewThemeVariables = {
+        '--color-primary': '#22C55E',
+        '--color-accent': '#25D366',
+        '--color-muted': '#F9FAFB',
+        '--color-muted-foreground': '#6B7280',
+        '--color-foreground': '#111827',
+        '--color-card': '#FFFFFF',
+        '--color-border': '#E5E7EB',
+    } as CSSProperties;
 
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
@@ -261,21 +293,26 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                         >
                             Selecionar da galeria
                         </Button>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-2 w-auto"
+                            onClick={() => mainUploadInputRef.current?.click()}
+                            disabled={uploadingImages}
+                        >
+                            {uploadingImages ? 'Enviando…' : 'Enviar novas imagens'}
+                        </Button>
+                        <input
+                            ref={mainUploadInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => handleUploadChange(event, 'main')}
+                        />
                         <div className={cn('mt-4 w-full', !selectedImage && 'border-2 border-dashed')}>
                             {selectedImage && (
-                                <div
-                                    className="w-full"
-                                    style={{
-                                        // Alinhado às cores da home (main/styles/tailwind.css)
-                                        ['--color-primary' as any]: '#22C55E',
-                                        ['--color-accent' as any]: '#25D366',
-                                        ['--color-muted' as any]: '#F9FAFB',
-                                        ['--color-muted-foreground' as any]: '#6B7280',
-                                        ['--color-foreground' as any]: '#111827',
-                                        ['--color-card' as any]: '#FFFFFF',
-                                        ['--color-border' as any]: '#E5E7EB',
-                                    }}
-                                >
+                                <div className="w-full" style={previewThemeVariables}>
                                     <div className="relative">
                                         <ImageEditor src={selectedImage.url} sizeClass="w-full" aspect="square">
                                             <div className="absolute left-4 top-4 flex gap-2">
@@ -306,6 +343,61 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                 </div>
                             )}
                         </div>
+                    </div>
+                    <div>
+                        <Label>Galeria de imagens</Label>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Adicione imagens extras para compor a galeria do imóvel.
+                        </p>
+                        {gallery.length > 0 ? (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {gallery.map((img) => (
+                                    <div key={img.id} className="relative h-16 w-16 overflow-hidden rounded-md border">
+                                        <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
+                                        <button
+                                            type="button"
+                                            className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                            onClick={() => setGallery((prev) => prev.filter((item) => item.id !== img.id))}
+                                            aria-label="Remover imagem da galeria"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="mt-2 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
+                        )}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-auto"
+                                onClick={() => {
+                                    setImagePickerFor('gallery');
+                                    setImagePickerOpen(true);
+                                }}
+                            >
+                                Selecionar da galeria
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                className="w-auto"
+                                onClick={() => galleryUploadInputRef.current?.click()}
+                                disabled={uploadingImages}
+                            >
+                                {uploadingImages ? 'Enviando…' : 'Enviar novas imagens'}
+                            </Button>
+                        </div>
+                        <input
+                            ref={galleryUploadInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => handleUploadChange(event, 'gallery')}
+                        />
                     </div>
                     <div className="flex items-end gap-2">
                         <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
