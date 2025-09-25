@@ -1,4 +1,4 @@
-import ImageEditor from '@/components/ImageEditor';
+﻿import ImageEditor from '@/components/ImageEditor';
 import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -281,20 +281,19 @@ export default function HeroSlidesModal({
                             )}
                         </div>
                     </div>
-                    <div className="flex items-end gap-2">
-                        <Button
-                            className="w-auto"
-                            onClick={submit}
-                            disabled={creating}
-                            title={form.id ? 'Atualizar destaque' : 'Publicar destaque'}
-                        >
-                            {form.id ? (creating ? 'Atualizando…' : 'Atualizar') : (creating ? 'Publicando…' : 'Publicar')}
-                        </Button>
-                    </div>
+                    {/* Botão de publicar movido para o footer para igualar ao modal de Destaques */}
                 </div>
                 <DialogFooter>
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
+                    </Button>
+                    <Button
+                        className="w-auto"
+                        onClick={submit}
+                        disabled={creating}
+                        title={form.id ? "Atualizar destaque" : "Publicar destaque"}
+                    >
+                        {form.id ? (creating ? "Atualizando." : "Atualizar") : (creating ? "Publicando." : "Publicar")}
                     </Button>
                 </DialogFooter>
 
@@ -302,3 +301,5 @@ export default function HeroSlidesModal({
         </Dialog>
     );
 }
+
+

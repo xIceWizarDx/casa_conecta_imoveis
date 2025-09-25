@@ -1,4 +1,4 @@
-import ImageEditor from '@/components/ImageEditor';
+﻿import ImageEditor from '@/components/ImageEditor';
 import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
 // import { Heart } from 'lucide-react';
@@ -340,9 +340,10 @@ export default function Painel() {
     return (
         <div className="old-site">
             <Head title="Painel" />
-            <HeaderStandalone />
+            `<HeaderStandalone />
 
-            <div className="container-responsive section-spacing flex flex-col gap-6 pt-6">
+                        <div className="h-6 md:h-10"></div>
+<div className="container-responsive section-spacing flex flex-col gap-6 pt-10">
                 {notice && (
                     <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
                         <AlertTitle>{notice.title}</AlertTitle>
@@ -353,7 +354,7 @@ export default function Painel() {
                 <>
                         {/* Seção: Hero Slides */}
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }}>
+                            <div className="flex items-center gap-2">
                                 <button
                                     type="button"
                                     className="flex items-center gap-2 text-lg font-semibold hover:underline"
@@ -413,17 +414,18 @@ export default function Painel() {
                         {/* Seção: Imóveis em Destaque */}
                         <div className="mt-10 mb-2 flex flex-wrap items-center justify-between gap-2">
                             <div
-                                className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => {
-                                    setEditingFeatured(null);
-                                    setFeaturedModalOpen(true);
-                                }}
-                                title="Novo Destaque"
+                                className="flex items-center gap-2"
                             >
-                                <h2 className="text-lg font-semibold">Imóveis em Destaque</h2>
-                                <Button className="w-auto" onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }} title="Novo Destaque">
+                                <button
+                                    type="button"
+                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black text-white"
+                                    onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }}
+                                    title="Novo Destaque"
+                                >
                                     +
-                                </Button>
+                                </button>
+                                <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }}>Imóveis em Destaque</h2>
+                                
                             </div>
                             {/* Botão de atualizar removido */}
                         </div>
@@ -720,3 +722,6 @@ export default function Painel() {
         </div>
     );
 }
+
+
+
