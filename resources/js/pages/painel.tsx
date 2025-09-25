@@ -87,7 +87,6 @@ export default function Painel() {
     const [creatingSlide, setCreatingSlide] = useState(false);
     const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
     const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
-    const [editedSlideBlob, setEditedSlideBlob] = useState<Blob | null>(null);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
@@ -208,15 +207,8 @@ export default function Painel() {
         }
         setCreatingSlide(true);
         try {
-            let image_id = selectedSlideImage.id;
-            if (editedSlideBlob) {
-                const fd = new FormData();
-                fd.append('images[]', editedSlideBlob, 'preview-editada.png');
-                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
-                if (uploaded[0]?.id) image_id = uploaded[0].id;
-            }
             const body = JSON.stringify({
-                image_id,
+                image_id: selectedSlideImage.id,
                 title: newSlide.title,
                 subtitle: newSlide.subtitle ?? null,
                 price: newSlide.price,
@@ -242,7 +234,6 @@ export default function Painel() {
             }
             setNewSlide({});
             setSelectedSlideImage(null);
-            setEditedSlideBlob(null);
             await refreshSlides();
         } finally {
             setCreatingSlide(false);
@@ -676,12 +667,7 @@ export default function Painel() {
                                             )}
                                         >
                                             {selectedSlideImage && (
-                                                <ImageEditor
-                                                    src={selectedSlideImage.url}
-                                                    onExport={setEditedSlideBlob}
-                                                    sizeClass="w-full"
-                                                    aspect="video"
-                                                >
+                                                <ImageEditor src={selectedSlideImage.url} sizeClass="w-full" aspect="video">
                                                     <ImagePreviewOverlay
                                                         titulo={newSlide.title}
                                                         subtitulo={newSlide.subtitle}

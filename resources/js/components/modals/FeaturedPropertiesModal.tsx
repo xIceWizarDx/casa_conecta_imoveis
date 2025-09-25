@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
-import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
 import { useMemo, useState } from 'react';
 
 type Image = {
@@ -60,7 +59,6 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
     const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [editedBlob, setEditedBlob] = useState<Blob | null>(null);
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
     const [imagePickerFor, setImagePickerFor] = useState<'main' | 'gallery' | null>(null);
     const [gallery, setGallery] = useState<Image[]>([]);
@@ -72,15 +70,8 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
         }
         setCreating(true);
         try {
-            let image_id = selectedImage.id;
-            if (editedBlob) {
-                const fd = new FormData();
-                fd.append('images[]', editedBlob, 'preview-editada.png');
-                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
-                if (uploaded[0]?.id) image_id = uploaded[0].id;
-            }
             const body = JSON.stringify({
-                image_id,
+                image_id: selectedImage.id,
                 title: form.title,
                 neighborhood: form.neighborhood ?? null,
                 price: form.price,
@@ -101,7 +92,6 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
             setForm({ features: [] });
             setFeatureInput('');
             setSelectedImage(null);
-            setEditedBlob(null);
             setGallery([]);
             onNotice?.({ type: 'success', title: 'Destaque adicionado' });
             await onRefreshFeatured();
@@ -287,7 +277,7 @@ export default function FeaturedPropertiesModal({ open, onOpenChange, images, fe
                                     }}
                                 >
                                     <div className="relative">
-                                        <ImageEditor src={selectedImage.url} onExport={setEditedBlob} sizeClass="w-full" aspect="square">
+                                        <ImageEditor src={selectedImage.url} sizeClass="w-full" aspect="square">
                                             <div className="absolute left-4 top-4 flex gap-2">
                                                 {!!form.is_new && (
                                                     <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
