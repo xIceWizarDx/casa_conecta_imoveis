@@ -10,7 +10,7 @@ class FeaturedPropertyController extends Controller
 {
     public function publicIndex(): JsonResponse
     {
-        $items = FeaturedProperty::with('image')
+        $items = FeaturedProperty::with(['image', 'images'])
             ->where('is_published', true)
             ->orderBy('position')
             ->orderBy('id')
@@ -20,7 +20,7 @@ class FeaturedPropertyController extends Controller
 
     public function index(): JsonResponse
     {
-        $items = FeaturedProperty::with('image')
+        $items = FeaturedProperty::with(['image', 'images'])
             ->orderBy('position')
             ->orderBy('id')
             ->get();
@@ -43,12 +43,27 @@ class FeaturedPropertyController extends Controller
             'price_range'  => ['nullable', 'string', 'max:50'],
             'is_new'       => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
+            'gallery_image_ids' => ['nullable', 'array'],
+            'gallery_image_ids.*' => ['integer', 'exists:images,id'],
         ]);
 
         $data['features'] = $data['features'] ?? [];
         $data['position'] = (int) FeaturedProperty::max('position') + 1;
         $item = FeaturedProperty::create($data);
-        $item->load('image');
+
+        // Attach gallery images (excluding the cover image) preserving order
+        $galleryIds = collect($request->input('gallery_image_ids', []))
+            ->filter(fn ($id) => (int) $id !== (int) $data['image_id'])
+            ->values();
+        if ($galleryIds->count() > 0) {
+            $attach = [];
+            foreach ($galleryIds as $idx => $imgId) {
+                $attach[$imgId] = ['position' => $idx + 1];
+            }
+            $item->images()->attach($attach);
+        }
+
+        $item->load(['image', 'images']);
         return response()->json($item, 201);
     }
 
@@ -68,9 +83,25 @@ class FeaturedPropertyController extends Controller
             'price_range'  => ['nullable', 'string', 'max:50'],
             'is_new'       => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
+            'gallery_image_ids' => ['nullable', 'array'],
+            'gallery_image_ids.*' => ['integer', 'exists:images,id'],
         ]);
         $featuredProperty->update($data);
-        $featuredProperty->load('image');
+
+        // Sync gallery when provided (excluding the cover image)
+        if ($request->has('gallery_image_ids')) {
+            $coverId = (int) ($data['image_id'] ?? $featuredProperty->image_id);
+            $galleryIds = collect($request->input('gallery_image_ids', []))
+                ->filter(fn ($id) => (int) $id !== $coverId)
+                ->values();
+            $sync = [];
+            foreach ($galleryIds as $idx => $imgId) {
+                $sync[$imgId] = ['position' => $idx + 1];
+            }
+            $featuredProperty->images()->sync($sync);
+        }
+
+        $featuredProperty->load(['image', 'images']);
         return response()->json($featuredProperty);
     }
 
@@ -99,4 +130,3 @@ class FeaturedPropertyController extends Controller
         return response()->json(['message' => 'Reordered']);
     }
 }
-

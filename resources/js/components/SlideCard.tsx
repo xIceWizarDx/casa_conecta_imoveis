@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 export type Slide = {
     id: number;
@@ -17,12 +18,46 @@ interface SlideCardProps {
 }
 
 export default function SlideCard({ slide, onEdit, onToggle, onDelete }: SlideCardProps) {
+    const [menuOpen, setMenuOpen] = useState(false);
     return (
-        <div className="overflow-hidden rounded-md border">
+        <div className="relative overflow-hidden rounded-md border">
             {slide.image_url ? (
                 <img src={slide.image_url} alt={slide.title} className="aspect-square w-full object-cover" />
             ) : (
                 <div className="aspect-square w-full bg-muted" />
+            )}
+            {/* Top-right menu button */}
+            <button
+                type="button"
+                className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black"
+                aria-label="Menu"
+                onClick={() => setMenuOpen((v) => !v)}
+            >
+                ⋮
+            </button>
+            {menuOpen && (
+                <div className="absolute right-2 top-12 z-20 w-36 overflow-hidden rounded-lg border bg-white shadow-lg">
+                    <button
+                        type="button"
+                        className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                        onClick={() => {
+                            setMenuOpen(false);
+                            onEdit(slide);
+                        }}
+                    >
+                        Editar
+                    </button>
+                    <button
+                        type="button"
+                        className="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-muted"
+                        onClick={() => {
+                            setMenuOpen(false);
+                            onDelete(slide.id);
+                        }}
+                    >
+                        Excluir
+                    </button>
+                </div>
             )}
             <div className="flex items-center justify-between gap-2 p-2">
                 <div className="min-w-0">
@@ -30,22 +65,6 @@ export default function SlideCard({ slide, onEdit, onToggle, onDelete }: SlideCa
                         {slide.title}
                     </div>
                     <div className="text-xs text-muted-foreground">{slide.price}</div>
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                    <Button className="w-auto" variant="secondary" onClick={() => onEdit(slide)}>
-                        Editar
-                    </Button>
-                    <Button
-                        className="w-auto"
-                        variant={slide.is_published ? 'default' : 'secondary'}
-                        onClick={() => onToggle(slide.id)}
-                        title="Publicar/Despublicar"
-                    >
-                        {slide.is_published ? 'Publicado' : 'Rascunho'}
-                    </Button>
-                    <Button className="w-auto" variant="destructive" onClick={() => onDelete(slide.id)} title="Excluir">
-                        Excluir
-                    </Button>
                 </div>
             </div>
         </div>

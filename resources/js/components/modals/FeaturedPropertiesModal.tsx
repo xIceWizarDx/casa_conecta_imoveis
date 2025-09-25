@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
-import { ChangeEvent, DragEvent, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 type Image = {
     id: number;
@@ -35,6 +35,8 @@ export type FeaturedProperty = {
     is_new?: boolean;
     is_published?: boolean;
     position?: number;
+    // Lista opcional de imagens da galeria (quando vindo da API)
+    images?: Image[];
 };
 
 export interface Notice {
@@ -51,6 +53,7 @@ interface Props {
     onNotice?: (n: Notice) => void;
     onUploadImages: (files: FileList | null) => Promise<Image[]>;
     uploadingImages?: boolean;
+    editing?: FeaturedProperty | null;
 }
 
 export default function FeaturedPropertiesModal({
@@ -61,6 +64,7 @@ export default function FeaturedPropertiesModal({
     onNotice,
     onUploadImages,
     uploadingImages = false,
+    editing = null,
 }: Props) {
     const [creating, setCreating] = useState(false);
 
@@ -70,6 +74,39 @@ export default function FeaturedPropertiesModal({
     const [images, setImages] = useState<Image[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
+
+    // Masks
+    const formatCurrencyBRLInput = (value: string) => {
+        const digits = value.replace(/\D/g, '');
+        if (!digits) return '';
+        const number = Number(digits) / 100;
+        try {
+            return number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        } catch {
+            return `R$ ${number.toFixed(2)}`;
+        }
+    };
+
+    const formatAreaNumber = (value: string) => {
+        const digits = value.replace(/\D/g, '');
+        if (!digits) return '';
+        const n = parseInt(digits, 10);
+        try {
+            return n.toLocaleString('pt-BR');
+        } catch {
+            return String(n);
+        }
+    };
+
+    const buildAreaWithSuffix = (value?: string | null) => {
+        const digits = (value ?? '').replace(/\D/g, '');
+        if (!digits) return null;
+        const n = parseInt(digits, 10);
+        const formatted = (() => {
+            try { return n.toLocaleString('pt-BR'); } catch { return String(n); }
+        })();
+        return `${formatted} m²`;
+    };
 
     const setSelectedImageAndForm = (image: Image | null) => {
         setSelectedImage(image);
@@ -81,6 +118,45 @@ export default function FeaturedPropertiesModal({
             return rest;
         });
     };
+
+    // Preenche dados quando em modo de edição (capa + galeria)
+    useEffect(() => {
+        if (!open || !editing) return;
+        const cover: Image | null = editing.image_id && editing.image_url
+            ? { id: editing.image_id, url: editing.image_url, original_name: '', filename: '' }
+            : null;
+        const gallery: Image[] = Array.isArray(editing.images)
+            ? (editing.images as any[])
+                .map((img) => ({
+                    id: Number(img?.id),
+                    url: String(img?.url ?? img?.image_url ?? ''),
+                    original_name: String(img?.original_name ?? ''),
+                    filename: String(img?.filename ?? ''),
+                    width: typeof img?.width === 'number' ? img.width : undefined,
+                    height: typeof img?.height === 'number' ? img.height : undefined,
+                }))
+                .filter((i) => i.id && i.url)
+            : [];
+        const ordered = cover ? [cover, ...gallery] : gallery;
+        setImages(ordered);
+        setSelectedImageAndForm(ordered[0] ?? null);
+        setForm({
+            id: editing.id,
+            image_id: editing.image_id,
+            title: editing.title,
+            neighborhood: editing.neighborhood ?? undefined,
+            price: editing.price,
+            bedrooms: editing.bedrooms ?? undefined,
+            bathrooms: editing.bathrooms ?? undefined,
+            area: editing.area ?? undefined,
+            type: editing.type ?? undefined,
+            features: Array.isArray(editing.features) ? editing.features : [],
+            price_range: editing.price_range ?? undefined,
+            is_new: !!editing.is_new,
+            is_published: !!editing.is_published,
+        });
+        setFeatureInput('');
+    }, [open, editing]);
 
     const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const uploaded = await onUploadImages(event.target.files);
@@ -210,7 +286,7 @@ export default function FeaturedPropertiesModal({
                 price: form.price,
                 bedrooms: form.bedrooms ?? null,
                 bathrooms: form.bathrooms ?? null,
-                area: form.area ?? null,
+                area: buildAreaWithSuffix(form.area),
                 type: form.type ?? null,
                 features: [
                     ...((form.features ?? []) as string[]),
@@ -218,16 +294,22 @@ export default function FeaturedPropertiesModal({
                 ],
                 price_range: form.price_range ?? null,
                 is_new: !!form.is_new,
-                is_published: !!form.is_published,
+                is_published: editing?.id ? !!form.is_published : true,
                 gallery_image_ids: images.slice(1).map((img) => img.id),
             });
-            await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
+            if (editing?.id) {
+                await apiFetch(FeaturedActions.update({ featuredProperty: editing.id }), { body, headers: { 'Content-Type': 'application/json' } });
+                onNotice?.({ type: 'success', title: 'Destaque atualizado' });
+            } else {
+                await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
+                onNotice?.({ type: 'success', title: 'Destaque adicionado' });
+            }
             setForm({ features: [] });
             setFeatureInput('');
             setSelectedImageAndForm(null);
             setImages([]);
-            onNotice?.({ type: 'success', title: 'Destaque adicionado' });
             await onRefreshFeatured();
+            onOpenChange(false);
         } finally {
             setCreating(false);
         }
@@ -271,7 +353,7 @@ export default function FeaturedPropertiesModal({
                             <Label>Preço</Label>
                             <Input
                                 value={form.price ?? ''}
-                                onChange={(e) => setForm((s) => ({ ...s, price: e.target.value }))}
+                                onChange={(e) => setForm((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
                                 inputMode="numeric"
                                 placeholder="Ex: R$ 1.250.000,00"
                             />
@@ -300,12 +382,16 @@ export default function FeaturedPropertiesModal({
                         </div>
                         <div>
                             <Label>Área</Label>
-                            <Input
-                                value={form.area ?? ''}
-                                onChange={(e) => setForm((s) => ({ ...s, area: e.target.value }))}
-                                inputMode="numeric"
-                                placeholder="Ex: 120 m²"
-                            />
+                            <div className="relative">
+                                <Input
+                                    className="pr-10"
+                                    value={form.area ?? ''}
+                                    onChange={(e) => setForm((s) => ({ ...s, area: formatAreaNumber(e.target.value) }))}
+                                    inputMode="numeric"
+                                    placeholder="Ex: 120"
+                                />
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+                            </div>
                         </div>
                         <div>
                             <Label>Tipo</Label>
@@ -321,13 +407,42 @@ export default function FeaturedPropertiesModal({
                                 <option value="cobertura">Cobertura</option>
                             </select>
                         </div>
-                        <div>
-                            <Label>Faixa de preço</Label>
-                            <Input
-                                value={form.price_range ?? ''}
-                                onChange={(e) => setForm((s) => ({ ...s, price_range: e.target.value }))}
-                                placeholder="Ex: 800000-1200000"
-                            />
+                        {/* Características ao lado do campo de Tipo */}
+                        <div className="md:col-span-1 lg:col-span-2">
+                            <Label>Características (features)</Label>
+                            <div className="mt-2 flex items-center gap-2">
+                                <Input className="flex-1" value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="w-auto bg-black text-white hover:bg-black/80"
+                                    onClick={() => {
+                                        const v = featureInput.trim();
+                                        if (!v) return;
+                                        setForm((s) => ({ ...s, features: [...(s.features ?? []), v] }));
+                                        setFeatureInput('');
+                                    }}
+                                    title="Adicionar"
+                                >
+                                    +
+                                </Button>
+                            </div>
+                            {(form.features ?? []).length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {(form.features ?? []).map((f, idx) => (
+                                        <span key={`${f}-${idx}`} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs">
+                                            {f}
+                                            <button
+                                                type="button"
+                                                className="rounded-full bg-black px-1 text-white hover:bg-black/80"
+                                                onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-6">
@@ -335,51 +450,9 @@ export default function FeaturedPropertiesModal({
                             <input type="checkbox" checked={!!form.is_new} onChange={(e) => setForm((s) => ({ ...s, is_new: e.target.checked }))} />
                             Novo
                         </label>
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={!!form.is_published}
-                                onChange={(e) => setForm((s) => ({ ...s, is_published: e.target.checked }))}
-                            />
-                            Publicado
-                        </label>
+                        {/* Checkbox "Publicado" removido: novas publicações serão publicadas automaticamente */}
                     </div>
-                    <div>
-                        <Label>Características (features)</Label>
-                        <div className="mt-2 flex items-center gap-2">
-                            <Input value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                className="w-auto bg-black text-white hover:bg-black/80"
-                                onClick={() => {
-                                    const v = featureInput.trim();
-                                    if (!v) return;
-                                    setForm((s) => ({ ...s, features: [...(s.features ?? []), v] }));
-                                    setFeatureInput('');
-                                }}
-                                title="Adicionar"
-                            >
-                                +
-                            </Button>
-                        </div>
-                        {(form.features ?? []).length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {(form.features ?? []).map((f, idx) => (
-                                    <span key={`${f}-${idx}`} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs">
-                                        {f}
-                                        <button
-                                            type="button"
-                                            className="rounded-full bg-black px-1 text-white hover:bg-black/80"
-                                            onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    {/* Seção de características movida ao lado do campo de Tipo */}
                     <div>
                         <Label>Imagens</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
@@ -501,9 +574,9 @@ export default function FeaturedPropertiesModal({
                         className="w-auto"
                         onClick={submit}
                         disabled={creating}
-                        title="Publicar destaque"
+                        title={editing?.id ? 'Atualizar destaque' : 'Publicar destaque'}
                     >
-                        {creating ? 'Publicando…' : 'Publicar'}
+                        {editing?.id ? (creating ? 'Atualizando…' : 'Atualizar') : (creating ? 'Publicando…' : 'Publicar')}
                     </Button>
                 </DialogFooter>
 

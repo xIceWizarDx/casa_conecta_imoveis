@@ -112,7 +112,7 @@ export default function HeroSlidesModal({
                 area: form.area ?? null,
                 neighborhood: form.neighborhood ?? null,
                 is_new: !!form.is_new,
-                is_published: !!form.is_published,
+                is_published: form.id ? !!form.is_published : true,
             });
             if (form.id) {
                 await apiFetch(HeroActions.update({ heroSlide: form.id }), {
@@ -130,6 +130,7 @@ export default function HeroSlidesModal({
             setForm({});
             setSelectedImage(null);
             await onRefreshSlides();
+            onOpenChange(false);
         } finally {
             setCreating(false);
         }
@@ -241,14 +242,7 @@ export default function HeroSlidesModal({
                             <input type="checkbox" checked={!!form.is_new} onChange={(e) => setForm((s) => ({ ...s, is_new: e.target.checked }))} />
                             Novo
                         </label>
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={!!form.is_published}
-                                onChange={(e) => setForm((s) => ({ ...s, is_published: e.target.checked }))}
-                            />
-                            Publicado
-                        </label>
+                        {/* Checkbox "Publicado" removido: novos slides serão publicados automaticamente */}
                     </div>
                     <div>
                         <Label>Imagem</Label>
@@ -288,8 +282,13 @@ export default function HeroSlidesModal({
                         </div>
                     </div>
                     <div className="flex items-end gap-2">
-                        <Button className="w-auto" onClick={submit} disabled={creating} title={form.id ? 'Salvar' : 'Adicionar Slide'}>
-                            {creating ? '…' : form.id ? 'Salvar' : '+'}
+                        <Button
+                            className="w-auto"
+                            onClick={submit}
+                            disabled={creating}
+                            title={form.id ? 'Atualizar destaque' : 'Publicar destaque'}
+                        >
+                            {form.id ? (creating ? 'Atualizando…' : 'Atualizar') : (creating ? 'Publicando…' : 'Publicar')}
                         </Button>
                     </div>
                 </div>

@@ -62,6 +62,7 @@ type FeaturedProperty = {
     is_new?: boolean;
     is_published?: boolean;
     position?: number;
+    images?: Image[];
 };
 
 // api helpers moved to '@/lib/api'
@@ -80,6 +81,7 @@ export default function Painel() {
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
+    const [openFeaturedMenu, setOpenFeaturedMenu] = useState<number | null>(null);
 
     const [dragging, setDragging] = useState<{ type: 'slide' | 'featured'; id: number } | null>(null);
     const [slideOrderDirty, setSlideOrderDirty] = useState(false);
@@ -87,6 +89,7 @@ export default function Painel() {
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
+    const [editingFeatured, setEditingFeatured] = useState<FeaturedProperty | null>(null);
     const heroUploadInputRef = useRef<HTMLInputElement | null>(null);
 
     // Notices
@@ -202,7 +205,7 @@ export default function Painel() {
                 area: newSlide.area ?? null,
                 neighborhood: newSlide.neighborhood ?? null,
                 is_new: !!newSlide.is_new,
-                is_published: !!newSlide.is_published,
+                is_published: newSlide.id ? !!newSlide.is_published : true,
             });
             if (newSlide.id) {
                 await apiFetch(HeroActions.update({ heroSlide: newSlide.id }), {
@@ -312,6 +315,17 @@ export default function Painel() {
         }
     };
 
+    const deleteFeatured = async (id: number) => {
+        if (!confirm('Excluir este destaque?')) return;
+        await apiFetch(FeaturedActions.destroy({ featuredProperty: id }));
+        await refreshFeatured();
+    };
+
+    const editFeatured = (item: FeaturedProperty) => {
+        setEditingFeatured(item);
+        setFeaturedModalOpen(true);
+    };
+
     const handleDragEnd = async () => {
         if (!dragging) return;
         const currentDrag = dragging;
@@ -339,18 +353,20 @@ export default function Painel() {
                 <>
                         {/* Seção: Hero Slides */}
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-semibold">Hero Slides</h2>
-                                <Button
-                                    className="w-auto"
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }}>
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-2 text-lg font-semibold hover:underline"
                                     onClick={() => {
                                         setNewSlide({});
                                         setSelectedSlideImage(null);
                                         setHeroModalOpen(true);
                                     }}
+                                    title="Novo Slide"
                                 >
-                                    Novo Slide
-                                </Button>
+                                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black text-white">+</span>
+                                    <span>Hero Slides</span>
+                                </button>
                             </div>
                             {/* Botão de atualizar removido */}
                         </div>
@@ -396,10 +412,17 @@ export default function Painel() {
 
                         {/* Seção: Imóveis em Destaque */}
                         <div className="mt-10 mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
+                            <div
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => {
+                                    setEditingFeatured(null);
+                                    setFeaturedModalOpen(true);
+                                }}
+                                title="Novo Destaque"
+                            >
                                 <h2 className="text-lg font-semibold">Imóveis em Destaque</h2>
-                                <Button className="w-auto" onClick={() => setFeaturedModalOpen(true)}>
-                                    Novo Destaque
+                                <Button className="w-auto" onClick={() => { setEditingFeatured(null); setFeaturedModalOpen(true); }} title="Novo Destaque">
+                                    +
                                 </Button>
                             </div>
                             {/* Botão de atualizar removido */}
@@ -469,6 +492,42 @@ export default function Painel() {
                                                     </span>
                                                 )}
                                             </div>
+                                            {/* Botão de menu (canto superior direito) */}
+                                            <button
+                                                type="button"
+                                                className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black"
+                                                aria-label="Menu"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setOpenFeaturedMenu((v) => (v === f.id ? null : f.id));
+                                                }}
+                                            >
+                                                ⋮
+                                            </button>
+                                            {openFeaturedMenu === f.id && (
+                                                <div className="absolute right-4 top-14 z-20 w-36 overflow-hidden rounded-lg border bg-white shadow-lg">
+                                                    <button
+                                                        type="button"
+                                                        className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                                                        onClick={() => {
+                                                            setOpenFeaturedMenu(null);
+                                                            editFeatured(f);
+                                                        }}
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-muted"
+                                                        onClick={() => {
+                                                            setOpenFeaturedMenu(null);
+                                                            deleteFeatured(f.id);
+                                                        }}
+                                                    >
+                                                        Excluir
+                                                    </button>
+                                                </div>
+                                            )}
                                             {/* Botão de favorito removido */}
                                         </div>
                                         <FeaturedCardInfo
@@ -585,14 +644,7 @@ export default function Painel() {
                                             />
                                             Novo
                                         </label>
-                                        <label className="flex items-center gap-2 text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!newSlide.is_published}
-                                                onChange={(e) => setNewSlide((s) => ({ ...s, is_published: e.target.checked }))}
-                                            />
-                                            Publicado
-                                        </label>
+                                        {/* Checkbox "Publicado" removido: novos slides serão publicados automaticamente */}
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
@@ -651,12 +703,16 @@ export default function Painel() {
 
                         <FeaturedPropertiesModal
                             open={featuredModalOpen}
-                            onOpenChange={setFeaturedModalOpen}
+                            onOpenChange={(open) => {
+                                setFeaturedModalOpen(open);
+                                if (!open) setEditingFeatured(null);
+                            }}
                             featured={featured}
                             onRefreshFeatured={refreshFeatured}
                             onNotice={(n) => setNotice(n)}
                             onUploadImages={uploadImages}
                             uploadingImages={imagesUploading}
+                            editing={editingFeatured}
                         />
                 </>
 
