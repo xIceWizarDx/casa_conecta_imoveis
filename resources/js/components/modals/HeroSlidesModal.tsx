@@ -1,5 +1,4 @@
 import ImageEditor from '@/components/ImageEditor';
-import ImageGallery from '@/components/ImageGallery';
 import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 type Image = {
     id: number;
@@ -44,20 +43,30 @@ export interface Notice {
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    images: Image[];
     slides: HeroSlide[];
     onRefreshSlides: () => Promise<void>;
     onNotice?: (n: Notice) => void;
     editingSlide?: HeroSlide | null;
+    onUploadImages: (files: FileList | null) => Promise<Image[]>;
+    uploadingImages?: boolean;
 }
 
-export default function HeroSlidesModal({ open, onOpenChange, images, slides, onRefreshSlides, onNotice, editingSlide }: Props) {
+export default function HeroSlidesModal({
+    open,
+    onOpenChange,
+    slides,
+    onRefreshSlides,
+    onNotice,
+    editingSlide,
+    onUploadImages,
+    uploadingImages = false,
+}: Props) {
     const [creating, setCreating] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
 
     const [form, setForm] = useState<Partial<HeroSlide>>({});
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [imagePickerOpen, setImagePickerOpen] = useState(false);
+    const uploadInputRef = useRef<HTMLInputElement | null>(null);
 
     // Prefill when editing
     useEffect(() => {
@@ -75,6 +84,16 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
             setSelectedImage(null);
         }
     }, [open, editingSlide]);
+
+    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const uploaded = await onUploadImages(event.target.files);
+        event.target.value = '';
+        if (uploaded.length > 0) {
+            const [first] = uploaded;
+            setSelectedImage(first);
+            setForm((s) => ({ ...s, image_id: first.id }));
+        }
+    };
 
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
@@ -233,10 +252,25 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
                     </div>
                     <div>
                         <Label>Imagem</Label>
-                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
-                        <Button type="button" variant="default" className="mt-2 w-auto bg-black text-white hover:bg-black/90" onClick={() => setImagePickerOpen(true)}>
-                            Selecionar da galeria
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Envie uma imagem utilizando o botão abaixo.
+                        </p>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-2 w-auto"
+                            onClick={() => uploadInputRef.current?.click()}
+                            disabled={uploadingImages}
+                        >
+                            {uploadingImages ? 'Enviando…' : 'Enviar imagem'}
                         </Button>
+                        <input
+                            ref={uploadInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleUploadChange}
+                        />
                         <div className={cn('mt-4 w-full rounded-2xl shadow-lg overflow-hidden', !selectedImage && 'border-2 border-dashed')}>
                             {selectedImage && (
                                 <ImageEditor src={selectedImage.url} sizeClass="w-full" aspect="video">
@@ -265,23 +299,6 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
                     </Button>
                 </DialogFooter>
 
-                {/* Image Picker */}
-                <Dialog open={imagePickerOpen} onOpenChange={setImagePickerOpen}>
-                    <DialogContent aria-describedby="image-picker-slide-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagem</DialogTitle>
-                        </DialogHeader>
-                        <DialogDescription id="image-picker-slide-desc">Escolha uma imagem na lista abaixo</DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            onSelect={(img) => {
-                                setSelectedImage(img);
-                                setForm((s) => ({ ...s, image_id: img.id }));
-                                setImagePickerOpen(false);
-                            }}
-                        />
-                    </DialogContent>
-                </Dialog>
             </DialogContent>
         </Dialog>
     );
