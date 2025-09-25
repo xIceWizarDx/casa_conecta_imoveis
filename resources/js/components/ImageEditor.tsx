@@ -5,45 +5,40 @@ import ImageFilters from './ImageFilters';
 
 interface ImageEditorProps {
     src: string;
-    onExport?: (blob: Blob | null) => void;
     children?: ReactNode;
     sizeClass?: string;
+    aspect?: string;
     aspectClass?: string;
 }
 
 export default function ImageEditor({
     src,
-    onExport,
     children,
     sizeClass = 'w-full max-w-[600px]',
-    aspectClass = 'aspect-square',
+    aspect,
+    aspectClass,
 }: ImageEditorProps) {
-    const { imgRef, containerRef, zoom, brightness, contrast, saturation, setBrightness, setContrast, setSaturation, zoomIn, zoomOut } =
-        useImageEditor({ src, onExport });
+    const { brightness, contrast, saturation, setBrightness, setContrast, setSaturation } = useImageEditor();
+
+    const resolvedAspectClass = aspectClass
+        ? aspectClass
+        : aspect
+          ? aspect.startsWith('aspect-')
+              ? aspect
+              : `aspect-${aspect}`
+          : 'aspect-square';
 
     return (
-        <div ref={containerRef} className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, aspectClass)}>
-
+        <div className={cn('relative mx-auto overflow-hidden rounded-md', sizeClass, resolvedAspectClass)}>
             <img
-                ref={imgRef}
                 src={src}
                 alt=""
                 className="h-full w-full object-cover transition-transform"
                 style={{
-                    transform: `scale(${zoom})`,
-                    transformOrigin: 'center',
                     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`,
                 }}
             />
             {children}
-            <div className="absolute top-4 right-4 z-20 flex gap-1">
-                <button type="button" onClick={zoomOut} className="flex h-7 w-7 items-center justify-center rounded bg-black/60 text-white">
-                    -
-                </button>
-                <button type="button" onClick={zoomIn} className="flex h-7 w-7 items-center justify-center rounded bg-black/60 text-white">
-                    +
-                </button>
-            </div>
             <div className="absolute bottom-4 left-4 z-20">
                 <ImageFilters
                     brightness={brightness}

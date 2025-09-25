@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
-import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
 import { useEffect, useMemo, useState } from 'react';
 
 type Image = {
@@ -58,7 +57,6 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
 
     const [form, setForm] = useState<Partial<HeroSlide>>({});
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [editedBlob, setEditedBlob] = useState<Blob | null>(null);
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
 
     // Prefill when editing
@@ -70,13 +68,11 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
                     ? { id: editingSlide.image_id, url: editingSlide.image_url, original_name: '', filename: '' }
                     : null,
             );
-            setEditedBlob(null);
         }
         if (open && !editingSlide) {
             // New entry
             setForm({});
             setSelectedImage(null);
-            setEditedBlob(null);
         }
     }, [open, editingSlide]);
 
@@ -87,15 +83,8 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
         }
         setCreating(true);
         try {
-            let image_id = selectedImage.id;
-            if (editedBlob) {
-                const fd = new FormData();
-                fd.append('images[]', editedBlob, 'preview-editada.png');
-                const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
-                if (uploaded[0]?.id) image_id = uploaded[0].id;
-            }
             const body = JSON.stringify({
-                image_id,
+                image_id: selectedImage.id,
                 title: form.title,
                 subtitle: form.subtitle ?? null,
                 price: form.price,
@@ -121,7 +110,6 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
             }
             setForm({});
             setSelectedImage(null);
-            setEditedBlob(null);
             await onRefreshSlides();
         } finally {
             setCreating(false);
@@ -251,7 +239,7 @@ export default function HeroSlidesModal({ open, onOpenChange, images, slides, on
                         </Button>
                         <div className={cn('mt-4 w-full rounded-2xl shadow-lg overflow-hidden', !selectedImage && 'border-2 border-dashed')}>
                             {selectedImage && (
-                                <ImageEditor src={selectedImage.url} onExport={setEditedBlob} sizeClass="w-full" aspect="video">
+                                <ImageEditor src={selectedImage.url} sizeClass="w-full" aspect="video">
                                     <ImagePreviewOverlay
                                         titulo={form.title}
                                         subtitulo={form.subtitle}
