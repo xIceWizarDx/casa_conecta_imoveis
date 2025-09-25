@@ -481,15 +481,18 @@ export default function FeaturedPropertiesModal({
                             <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
                         )}
                     </div>
-                    <div className="flex items-end gap-2">
-                        <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
-                            {creating ? '…' : '+'}
-                        </Button>
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button className="w-auto" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
+                    </Button>
+                    <Button
+                        className="w-auto"
+                        onClick={submit}
+                        disabled={creating}
+                        title="Publicar destaque"
+                    >
+                        {creating ? 'Publicando…' : 'Publicar'}
                     </Button>
                 </DialogFooter>
 
