@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
-import { ChangeEvent, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { ChangeEvent, DragEvent, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 type Image = {
     id: number;
@@ -68,6 +68,7 @@ export default function FeaturedPropertiesModal({
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [images, setImages] = useState<Image[]>([]);
+    const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
 
     const setSelectedImageAndForm = (image: Image | null) => {
@@ -89,13 +90,9 @@ export default function FeaturedPropertiesModal({
                 const existingIds = new Set(prev.map((img) => img.id));
                 const additions = uploaded.filter((img) => !existingIds.has(img.id));
                 const merged = [...prev, ...additions];
-
-                const selectedStillExists = selectedImage ? merged.some((img) => img.id === selectedImage.id) : false;
-                if (!selectedStillExists) {
-                    const nextSelected = additions[0] ?? merged[0] ?? null;
-                    setSelectedImageAndForm(nextSelected);
+                if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                    setSelectedImageAndForm(merged[0] ?? null);
                 }
-
                 return merged;
             });
         }
@@ -104,16 +101,89 @@ export default function FeaturedPropertiesModal({
     const handleRemoveImage = (id: number) => {
         setImages((prev) => {
             const filtered = prev.filter((img) => img.id !== id);
-            if (selectedImage?.id === id) {
-                const nextSelected = filtered[0] ?? null;
-                setSelectedImageAndForm(nextSelected);
+            if ((filtered[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(filtered[0] ?? null);
             }
             return filtered;
         });
     };
 
-    const handleSelectAsMain = (image: Image) => {
-        setSelectedImageAndForm(image);
+    const handleDragStart = (image: Image) => (event: DragEvent<HTMLDivElement>) => {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', image.id.toString());
+        setDraggedImageId(image.id);
+    };
+
+    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (targetImage: Image) => (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const data = event.dataTransfer.getData('text/plain');
+        const sourceId = Number.parseInt(data || '', 10);
+        if (!Number.isFinite(sourceId) || sourceId === targetImage.id) {
+            setDraggedImageId(null);
+            return;
+        }
+
+        setImages((prev) => {
+            const next = [...prev];
+            const fromIndex = next.findIndex((img) => img.id === sourceId);
+            const toIndex = next.findIndex((img) => img.id === targetImage.id);
+
+            if (fromIndex === -1 || toIndex === -1) {
+                return next;
+            }
+
+            const [moved] = next.splice(fromIndex, 1);
+            next.splice(toIndex, 0, moved);
+
+            if ((next[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(next[0] ?? null);
+            }
+
+            return next;
+        });
+
+        setDraggedImageId(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedImageId(null);
+    };
+
+    const handleContainerDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const data = event.dataTransfer.getData('text/plain');
+        const sourceId = Number.parseInt(data || '', 10);
+
+        if (!Number.isFinite(sourceId)) {
+            setDraggedImageId(null);
+            return;
+        }
+
+        setImages((prev) => {
+            const next = [...prev];
+            const fromIndex = next.findIndex((img) => img.id === sourceId);
+
+            if (fromIndex === -1) {
+                return next;
+            }
+
+            const [moved] = next.splice(fromIndex, 1);
+            next.push(moved);
+
+            if ((next[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(next[0] ?? null);
+            }
+
+            return next;
+        });
+
+        setDraggedImageId(null);
     };
 
     const previewThemeVariables = {
@@ -149,7 +219,7 @@ export default function FeaturedPropertiesModal({
                 price_range: form.price_range ?? null,
                 is_new: !!form.is_new,
                 is_published: !!form.is_published,
-                gallery_image_ids: images.filter((img) => img.id !== selectedImage.id).map((img) => img.id),
+                gallery_image_ids: images.slice(1).map((img) => img.id),
             });
             await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
             setForm({ features: [] });
@@ -313,7 +383,7 @@ export default function FeaturedPropertiesModal({
                     <div>
                         <Label>Imagens</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Escolha as imagens do imóvel e defina qual será a imagem principal.
+                            Arraste para ordenar as imagens. A primeira imagem será usada como capa.
                         </p>
                         <Button
                             type="button"
@@ -367,26 +437,28 @@ export default function FeaturedPropertiesModal({
                         </div>
                         {images.length > 0 ? (
                             <>
-                                <p className="mt-4 text-sm text-muted-foreground">Clique em uma imagem para defini-la como principal.</p>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {images.map((img) => {
-                                        const isSelected = selectedImage?.id === img.id;
+                                <div
+                                    className="mt-2 flex flex-wrap gap-2"
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleContainerDrop}
+                                >
+                                    {images.map((img, index) => {
+                                        const isDragged = draggedImageId === img.id;
+                                        const isCover = index === 0;
                                         return (
                                             <div
                                                 key={img.id}
                                                 className={cn(
-                                                    'relative h-20 w-20 overflow-hidden rounded-md border',
-                                                    isSelected && 'ring-2 ring-primary'
+                                                    'relative h-20 w-20 cursor-move overflow-hidden rounded-md border',
+                                                    isDragged && 'opacity-60'
                                                 )}
+                                                draggable
+                                                onDragStart={handleDragStart(img)}
+                                                onDragOver={handleDragOver}
+                                                onDrop={handleDrop(img)}
+                                                onDragEnd={handleDragEnd}
                                             >
-                                                <button
-                                                    type="button"
-                                                    className="block h-full w-full"
-                                                    onClick={() => handleSelectAsMain(img)}
-                                                    aria-label={isSelected ? 'Imagem principal selecionada' : 'Definir como imagem principal'}
-                                                >
-                                                    <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
-                                                </button>
+                                                <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
                                                 <button
                                                     type="button"
                                                     className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
@@ -395,7 +467,7 @@ export default function FeaturedPropertiesModal({
                                                 >
                                                     ×
                                                 </button>
-                                                {isSelected && (
+                                                {isCover && (
                                                     <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] font-medium text-white">
                                                         Principal
                                                     </span>
