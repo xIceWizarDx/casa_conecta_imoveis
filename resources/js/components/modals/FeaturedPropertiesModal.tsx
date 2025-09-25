@@ -402,11 +402,20 @@ export default function FeaturedPropertiesModal({
                             className="hidden"
                             onChange={handleUploadChange}
                         />
-                        <div className={cn('mt-4 w-full', !selectedImage && 'border-2 border-dashed')}>
+                        <div
+                            className={cn(
+                                'mt-4 w-full max-w-md mx-auto',
+                                !selectedImage && 'border-2 border-dashed'
+                            )}
+                        >
                             {selectedImage && (
                                 <div className="w-full" style={previewThemeVariables}>
                                     <div className="relative">
-                                        <ImageEditor src={selectedImage.url} sizeClass="w-full" aspect="square">
+                                        <ImageEditor
+                                            src={selectedImage.url}
+                                            sizeClass="w-full max-w-[300px]"
+                                            aspect="square"
+                                        >
                                             <div className="absolute left-4 top-4 flex gap-2">
                                                 {!!form.is_new && (
                                                     <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
@@ -420,18 +429,20 @@ export default function FeaturedPropertiesModal({
                                             {/* Heart overlay removido */}
                                         </ImageEditor>
                                     </div>
-                                    <FeaturedCardInfo
-                                        title={form.title}
-                                        neighborhood={form.neighborhood}
-                                        bedrooms={form.bedrooms}
-                                        bathrooms={form.bathrooms}
-                                        area={form.area}
-                                        features={[
-                                            ...((form.features ?? []) as string[]),
-                                            ...(featureInput.trim() ? [featureInput.trim()] : []),
-                                        ]}
-                                        price={form.price}
-                                    />
+                                    <div className="mx-auto mt-4 w-full max-w-[300px]">
+                                        <FeaturedCardInfo
+                                            title={form.title}
+                                            neighborhood={form.neighborhood}
+                                            bedrooms={form.bedrooms}
+                                            bathrooms={form.bathrooms}
+                                            area={form.area}
+                                            features={[
+                                                ...((form.features ?? []) as string[]),
+                                                ...(featureInput.trim() ? [featureInput.trim()] : []),
+                                            ]}
+                                            price={form.price}
+                                        />
+                                    </div>
                                 </div>
                             )}
                         </div>
