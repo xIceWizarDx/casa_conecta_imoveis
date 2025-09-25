@@ -67,30 +67,53 @@ export default function FeaturedPropertiesModal({
     const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [gallery, setGallery] = useState<Image[]>([]);
-    const mainUploadInputRef = useRef<HTMLInputElement | null>(null);
-    const galleryUploadInputRef = useRef<HTMLInputElement | null>(null);
+    const [images, setImages] = useState<Image[]>([]);
+    const uploadInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleMainUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const setSelectedImageAndForm = (image: Image | null) => {
+        setSelectedImage(image);
+        setForm((s) => {
+            if (image) {
+                return { ...s, image_id: image.id };
+            }
+            const { image_id, ...rest } = s;
+            return rest;
+        });
+    };
+
+    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const uploaded = await onUploadImages(event.target.files);
         event.target.value = '';
         if (uploaded.length > 0) {
-            const [first] = uploaded;
-            setSelectedImage(first);
-            setForm((s) => ({ ...s, image_id: first.id }));
+            setImages((prev) => {
+                const existingIds = new Set(prev.map((img) => img.id));
+                const additions = uploaded.filter((img) => !existingIds.has(img.id));
+                const merged = [...prev, ...additions];
+
+                const selectedStillExists = selectedImage ? merged.some((img) => img.id === selectedImage.id) : false;
+                if (!selectedStillExists) {
+                    const nextSelected = additions[0] ?? merged[0] ?? null;
+                    setSelectedImageAndForm(nextSelected);
+                }
+
+                return merged;
+            });
         }
     };
 
-    const handleGalleryUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const uploaded = await onUploadImages(event.target.files);
-        event.target.value = '';
-        if (uploaded.length > 0) {
-            setGallery((prev) => {
-                const existingIds = new Set(prev.map((img) => img.id));
-                const additions = uploaded.filter((img) => !existingIds.has(img.id));
-                return [...prev, ...additions];
-            });
-        }
+    const handleRemoveImage = (id: number) => {
+        setImages((prev) => {
+            const filtered = prev.filter((img) => img.id !== id);
+            if (selectedImage?.id === id) {
+                const nextSelected = filtered[0] ?? null;
+                setSelectedImageAndForm(nextSelected);
+            }
+            return filtered;
+        });
+    };
+
+    const handleSelectAsMain = (image: Image) => {
+        setSelectedImageAndForm(image);
     };
 
     const previewThemeVariables = {
@@ -126,13 +149,13 @@ export default function FeaturedPropertiesModal({
                 price_range: form.price_range ?? null,
                 is_new: !!form.is_new,
                 is_published: !!form.is_published,
-                gallery_image_ids: gallery.map((g) => g.id),
+                gallery_image_ids: images.filter((img) => img.id !== selectedImage.id).map((img) => img.id),
             });
             await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
             setForm({ features: [] });
             setFeatureInput('');
-            setSelectedImage(null);
-            setGallery([]);
+            setSelectedImageAndForm(null);
+            setImages([]);
             onNotice?.({ type: 'success', title: 'Destaque adicionado' });
             await onRefreshFeatured();
         } finally {
@@ -288,26 +311,26 @@ export default function FeaturedPropertiesModal({
                         )}
                     </div>
                     <div>
-                        <Label>Imagem</Label>
+                        <Label>Imagens</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Envie a imagem principal do destaque utilizando o botão abaixo.
+                            Escolha as imagens do imóvel e defina qual será a imagem principal.
                         </p>
                         <Button
                             type="button"
                             variant="secondary"
                             className="mt-2 w-auto"
-                            onClick={() => mainUploadInputRef.current?.click()}
+                            onClick={() => uploadInputRef.current?.click()}
                             disabled={uploadingImages}
                         >
-                            {uploadingImages ? 'Enviando…' : 'Enviar imagem principal'}
+                            {uploadingImages ? 'Enviando…' : 'Escolher imagens'}
                         </Button>
                         <input
-                            ref={mainUploadInputRef}
+                            ref={uploadInputRef}
                             type="file"
                             multiple
                             accept="image/*"
                             className="hidden"
-                            onChange={handleMainUploadChange}
+                            onChange={handleUploadChange}
                         />
                         <div className={cn('mt-4 w-full', !selectedImage && 'border-2 border-dashed')}>
                             {selectedImage && (
@@ -342,50 +365,49 @@ export default function FeaturedPropertiesModal({
                                 </div>
                             )}
                         </div>
-                    </div>
-                    <div>
-                        <Label>Galeria de imagens</Label>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Adicione imagens extras para compor a galeria do imóvel.
-                        </p>
-                        {gallery.length > 0 ? (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {gallery.map((img) => (
-                                    <div key={img.id} className="relative h-16 w-16 overflow-hidden rounded-md border">
-                                        <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
-                                        <button
-                                            type="button"
-                                            className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
-                                            onClick={() => setGallery((prev) => prev.filter((item) => item.id !== img.id))}
-                                            aria-label="Remover imagem da galeria"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
+                        {images.length > 0 ? (
+                            <>
+                                <p className="mt-4 text-sm text-muted-foreground">Clique em uma imagem para defini-la como principal.</p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {images.map((img) => {
+                                        const isSelected = selectedImage?.id === img.id;
+                                        return (
+                                            <div
+                                                key={img.id}
+                                                className={cn(
+                                                    'relative h-20 w-20 overflow-hidden rounded-md border',
+                                                    isSelected && 'ring-2 ring-primary'
+                                                )}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className="block h-full w-full"
+                                                    onClick={() => handleSelectAsMain(img)}
+                                                    aria-label={isSelected ? 'Imagem principal selecionada' : 'Definir como imagem principal'}
+                                                >
+                                                    <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                                    onClick={() => handleRemoveImage(img.id)}
+                                                    aria-label="Remover imagem"
+                                                >
+                                                    ×
+                                                </button>
+                                                {isSelected && (
+                                                    <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] font-medium text-white">
+                                                        Principal
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
+                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
                         )}
-                        <div className="mt-3 flex flex-wrap gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                className="w-auto"
-                                onClick={() => galleryUploadInputRef.current?.click()}
-                                disabled={uploadingImages}
-                            >
-                                {uploadingImages ? 'Enviando…' : 'Enviar imagens da galeria'}
-                            </Button>
-                        </div>
-                        <input
-                            ref={galleryUploadInputRef}
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleGalleryUploadChange}
-                        />
                     </div>
                     <div className="flex items-end gap-2">
                         <Button className="w-auto" onClick={submit} disabled={creating} title="Adicionar Destaque">
