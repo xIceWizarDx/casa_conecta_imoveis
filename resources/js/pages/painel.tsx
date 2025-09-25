@@ -339,19 +339,20 @@ export default function Painel() {
                 <>
                         {/* Seção: Hero Slides */}
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-semibold">Hero Slides</h2>
-                                <Button
-                                    className="w-auto"
-                                    onClick={() => {
-                                        setNewSlide({});
-                                        setSelectedSlideImage(null);
-                                        setHeroModalOpen(true);
-                                    }}
-                                >
-                                    Novo Slide
-                                </Button>
-                            </div>
+                            <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-left text-lg font-semibold text-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                onClick={() => {
+                                    setNewSlide({});
+                                    setSelectedSlideImage(null);
+                                    setHeroModalOpen(true);
+                                }}
+                            >
+                                <span aria-hidden="true" className="text-xl leading-none">
+                                    +
+                                </span>
+                                <span>Hero Slides</span>
+                            </button>
                             {/* Botão de atualizar removido */}
                         </div>
 
@@ -396,12 +397,18 @@ export default function Painel() {
 
                         {/* Seção: Imóveis em Destaque */}
                         <div className="mt-10 mb-2 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-semibold">Imóveis em Destaque</h2>
-                                <Button className="w-auto" onClick={() => setFeaturedModalOpen(true)}>
-                                    Novo Destaque
-                                </Button>
-                            </div>
+                            <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-left text-lg font-semibold text-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                onClick={() => {
+                                    setFeaturedModalOpen(true);
+                                }}
+                            >
+                                <span aria-hidden="true" className="text-xl leading-none">
+                                    +
+                                </span>
+                                <span>Imóveis em Destaque</span>
+                            </button>
                             {/* Botão de atualizar removido */}
                         </div>
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
