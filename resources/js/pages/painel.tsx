@@ -1,5 +1,4 @@
 import ImageEditor from '@/components/ImageEditor';
-import ImageGallery from '@/components/ImageGallery';
 import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
 // import { Heart } from 'lucide-react';
@@ -69,12 +68,10 @@ type FeaturedProperty = {
 
 export default function Painel() {
     // Imagens
-    const [images, setImages] = useState<Image[]>([]);
     const [imagesUploading, setImagesUploading] = useState(false);
 
     // Slides
     const [slides, setSlides] = useState<HeroSlide[]>([]);
-    const [, setImagesLoading] = useState(false);
     const [slidesLoading, setSlidesLoading] = useState(false);
     // Local state for legacy slide modal
     const [creatingSlide, setCreatingSlide] = useState(false);
@@ -90,8 +87,6 @@ export default function Painel() {
 
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
-    const [imagePickerOpen, setImagePickerOpen] = useState(false);
-    const [imagePickerFor, setImagePickerFor] = useState<'slide' | null>(null);
     const heroUploadInputRef = useRef<HTMLInputElement | null>(null);
 
     // Notices
@@ -135,19 +130,7 @@ export default function Painel() {
     };
 
     const refreshAll = async () => {
-        await Promise.all([refreshImages(), refreshSlides(), refreshFeatured()]);
-    };
-
-    const refreshImages = async () => {
-        setImagesLoading(true);
-        try {
-            const data = await apiFetch<Image[]>(ImageActions.index());
-            setImages(data);
-        } catch (e) {
-            setNotice({ type: 'error', title: 'Falha ao carregar imagens', message: e instanceof Error ? e.message : String(e) });
-        } finally {
-            setImagesLoading(false);
-        }
+        await Promise.all([refreshSlides(), refreshFeatured()]);
     };
 
     const refreshSlides = async () => {
@@ -171,34 +154,34 @@ export default function Painel() {
         }
     };
 
-    const uploadImages = async (fileList: FileList | null) => {
-        if (!fileList || fileList.length === 0) return false;
+    const uploadImages = async (fileList: FileList | null): Promise<Image[]> => {
+        if (!fileList || fileList.length === 0) return [];
         const fd = new FormData();
         Array.from(fileList).forEach((f) => fd.append('images[]', f));
         setImagesUploading(true);
         try {
-            await apiFetch(ImageActions.store(), { body: fd });
-            await refreshImages();
+            const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
             setNotice({ type: 'success', title: 'Imagens enviadas com sucesso' });
-            return true;
+            return uploaded;
         } catch (e) {
             setNotice({
                 type: 'error',
                 title: 'Falha ao enviar imagens',
                 message: e instanceof Error ? e.message : String(e),
             });
-            return false;
+            return [];
         } finally {
             setImagesUploading(false);
         }
     };
 
     const handleHeroUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const success = await uploadImages(event.target.files);
+        const uploaded = await uploadImages(event.target.files);
         event.target.value = '';
-        if (success) {
-            setImagePickerFor('slide');
-            setImagePickerOpen(true);
+        if (uploaded.length > 0) {
+            const [first] = uploaded;
+            setSelectedSlideImage(first);
+            setNewSlide((s) => ({ ...s, image_id: first.id }));
         }
     };
 
@@ -257,8 +240,11 @@ export default function Painel() {
         const fullSlide = slides.find((item) => item.id === slide.id) ?? null;
         if (fullSlide) {
             setNewSlide(fullSlide);
-            const relatedImage = images.find((img) => img.id === fullSlide.image_id) ?? null;
-            setSelectedSlideImage(relatedImage);
+            setSelectedSlideImage(
+                fullSlide.image_id && fullSlide.image_url
+                    ? { id: fullSlide.image_id, url: fullSlide.image_url, original_name: '', filename: '' }
+                    : null,
+            );
         } else {
             setNewSlide({
                 id: slide.id,
@@ -267,7 +253,11 @@ export default function Painel() {
                 image_id: slide.image_id,
                 is_published: slide.is_published,
             });
-            setSelectedSlideImage(slide.image_id ? images.find((img) => img.id === slide.image_id) ?? null : null);
+            setSelectedSlideImage(
+                slide.image_id && slide.image_url
+                    ? { id: slide.image_id, url: slide.image_url, original_name: '', filename: '' }
+                    : null,
+            );
         }
         setHeroModalOpen(true);
     };
@@ -606,18 +596,7 @@ export default function Painel() {
                                     </div>
                                     <div>
                                         <Label>Imagem</Label>
-                                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
-                                        <Button
-                                            type="button"
-                                            variant="default"
-                                            className="mt-2 w-auto bg-black text-white hover:bg-black/90"
-                                            onClick={() => {
-                                                setImagePickerFor('slide');
-                                                setImagePickerOpen(true);
-                                            }}
-                                        >
-                                            Selecionar da galeria
-                                        </Button>
+                                        <p className="mt-2 text-sm text-muted-foreground">Envie uma imagem utilizando o botão abaixo.</p>
                                         <Button
                                             type="button"
                                             variant="secondary"
@@ -625,7 +604,7 @@ export default function Painel() {
                                             onClick={() => heroUploadInputRef.current?.click()}
                                             disabled={imagesUploading}
                                         >
-                                            {imagesUploading ? 'Enviando…' : 'Enviar novas imagens'}
+                                            {imagesUploading ? 'Enviando…' : 'Enviar imagem'}
                                         </Button>
                                         <input
                                             ref={heroUploadInputRef}
@@ -673,7 +652,6 @@ export default function Painel() {
                         <FeaturedPropertiesModal
                             open={featuredModalOpen}
                             onOpenChange={setFeaturedModalOpen}
-                            images={images}
                             featured={featured}
                             onRefreshFeatured={refreshFeatured}
                             onNotice={(n) => setNotice(n)}
@@ -681,33 +659,6 @@ export default function Painel() {
                             uploadingImages={imagesUploading}
                         />
                 </>
-                {/* Dialogo para selecionar imagem para slides */}
-                <Dialog
-                    open={imagePickerOpen && imagePickerFor === 'slide'}
-                    onOpenChange={(o) => {
-                        if (!o) {
-                            setImagePickerOpen(false);
-                            setImagePickerFor(null);
-                        }
-                    }}
-                >
-                    <DialogContent aria-describedby="image-picker-slide-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagem</DialogTitle>
-                        </DialogHeader>
-                        {/* DialogDescription é necessário para acessibilidade */}
-                        <DialogDescription id="image-picker-slide-desc">Escolha uma imagem na lista abaixo</DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            onSelect={(img) => {
-                                setSelectedSlideImage(img);
-                                setNewSlide((s) => ({ ...s, image_id: img.id }));
-                                setImagePickerOpen(false);
-                                setImagePickerFor(null);
-                            }}
-                        />
-                    </DialogContent>
-                </Dialog>
 
             </div>
         </div>

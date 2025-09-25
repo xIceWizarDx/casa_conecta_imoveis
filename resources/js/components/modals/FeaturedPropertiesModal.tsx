@@ -1,5 +1,4 @@
 import ImageEditor from '@/components/ImageEditor';
-import ImageGallery from '@/components/ImageGallery';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
 // Heart icon removed
 import { Button } from '@/components/ui/button';
@@ -47,18 +46,16 @@ export interface Notice {
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    images: Image[];
     featured: FeaturedProperty[];
     onRefreshFeatured: () => Promise<void>;
     onNotice?: (n: Notice) => void;
-    onUploadImages: (files: FileList | null) => Promise<boolean>;
+    onUploadImages: (files: FileList | null) => Promise<Image[]>;
     uploadingImages?: boolean;
 }
 
 export default function FeaturedPropertiesModal({
     open,
     onOpenChange,
-    images,
     featured,
     onRefreshFeatured,
     onNotice,
@@ -70,18 +67,29 @@ export default function FeaturedPropertiesModal({
     const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [imagePickerOpen, setImagePickerOpen] = useState(false);
-    const [imagePickerFor, setImagePickerFor] = useState<'main' | 'gallery' | null>(null);
     const [gallery, setGallery] = useState<Image[]>([]);
     const mainUploadInputRef = useRef<HTMLInputElement | null>(null);
     const galleryUploadInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>, target: 'main' | 'gallery') => {
-        const success = await onUploadImages(event.target.files);
+    const handleMainUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const uploaded = await onUploadImages(event.target.files);
         event.target.value = '';
-        if (success) {
-            setImagePickerFor(target);
-            setImagePickerOpen(true);
+        if (uploaded.length > 0) {
+            const [first] = uploaded;
+            setSelectedImage(first);
+            setForm((s) => ({ ...s, image_id: first.id }));
+        }
+    };
+
+    const handleGalleryUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const uploaded = await onUploadImages(event.target.files);
+        event.target.value = '';
+        if (uploaded.length > 0) {
+            setGallery((prev) => {
+                const existingIds = new Set(prev.map((img) => img.id));
+                const additions = uploaded.filter((img) => !existingIds.has(img.id));
+                return [...prev, ...additions];
+            });
         }
     };
 
@@ -281,18 +289,9 @@ export default function FeaturedPropertiesModal({
                     </div>
                     <div>
                         <Label>Imagem</Label>
-                        <p className="mt-2 text-sm text-muted-foreground">Selecione uma imagem clicando no botão abaixo.</p>
-                        <Button
-                            type="button"
-                            variant="default"
-                            className="mt-2 w-auto bg-black text-white hover:bg-black/90"
-                            onClick={() => {
-                                setImagePickerFor('main');
-                                setImagePickerOpen(true);
-                            }}
-                        >
-                            Selecionar da galeria
-                        </Button>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Envie a imagem principal do destaque utilizando o botão abaixo.
+                        </p>
                         <Button
                             type="button"
                             variant="secondary"
@@ -300,7 +299,7 @@ export default function FeaturedPropertiesModal({
                             onClick={() => mainUploadInputRef.current?.click()}
                             disabled={uploadingImages}
                         >
-                            {uploadingImages ? 'Enviando…' : 'Enviar novas imagens'}
+                            {uploadingImages ? 'Enviando…' : 'Enviar imagem principal'}
                         </Button>
                         <input
                             ref={mainUploadInputRef}
@@ -308,7 +307,7 @@ export default function FeaturedPropertiesModal({
                             multiple
                             accept="image/*"
                             className="hidden"
-                            onChange={(event) => handleUploadChange(event, 'main')}
+                            onChange={handleMainUploadChange}
                         />
                         <div className={cn('mt-4 w-full', !selectedImage && 'border-2 border-dashed')}>
                             {selectedImage && (
@@ -371,23 +370,12 @@ export default function FeaturedPropertiesModal({
                         <div className="mt-3 flex flex-wrap gap-2">
                             <Button
                                 type="button"
-                                variant="outline"
-                                className="w-auto"
-                                onClick={() => {
-                                    setImagePickerFor('gallery');
-                                    setImagePickerOpen(true);
-                                }}
-                            >
-                                Selecionar da galeria
-                            </Button>
-                            <Button
-                                type="button"
                                 variant="secondary"
                                 className="w-auto"
                                 onClick={() => galleryUploadInputRef.current?.click()}
                                 disabled={uploadingImages}
                             >
-                                {uploadingImages ? 'Enviando…' : 'Enviar novas imagens'}
+                                {uploadingImages ? 'Enviando…' : 'Enviar imagens da galeria'}
                             </Button>
                         </div>
                         <input
@@ -396,7 +384,7 @@ export default function FeaturedPropertiesModal({
                             multiple
                             accept="image/*"
                             className="hidden"
-                            onChange={(event) => handleUploadChange(event, 'gallery')}
+                            onChange={handleGalleryUploadChange}
                         />
                     </div>
                     <div className="flex items-end gap-2">
@@ -411,43 +399,6 @@ export default function FeaturedPropertiesModal({
                     </Button>
                 </DialogFooter>
 
-                {/* Image Picker (principal ou galeria) */}
-                <Dialog open={imagePickerOpen} onOpenChange={setImagePickerOpen}>
-                    <DialogContent aria-describedby="image-picker-featured-desc">
-                        <DialogHeader>
-                            <DialogTitle>Selecionar imagem</DialogTitle>
-                        </DialogHeader>
-                        <DialogDescription id="image-picker-featured-desc">
-                            {imagePickerFor === 'gallery' ? 'Escolha uma ou mais imagens na lista abaixo' : 'Escolha uma imagem na lista abaixo'}
-                        </DialogDescription>
-                        <ImageGallery
-                            images={images}
-                            multiple={imagePickerFor === 'gallery'}
-                            selected={imagePickerFor === 'gallery' ? gallery.map((g) => g.id) : selectedImage?.id ? [selectedImage.id] : []}
-                            onChangeSelected={(_ids, imgs) => {
-                                if (imagePickerFor === 'gallery') {
-                                    setGallery(imgs);
-                                } else {
-                                    setSelectedImage(imgs[0] ?? null);
-                                    setForm((s) => ({ ...s, image_id: imgs[0]?.id ?? s.image_id }));
-                                    setImagePickerOpen(false);
-                                }
-                            }}
-                            onSelect={(img) => {
-                                if (imagePickerFor === 'gallery') {
-                                    // fallback: toggle handled by onChangeSelected
-                                } else {
-                                    setSelectedImage(img);
-                                    setForm((s) => ({ ...s, image_id: img.id }));
-                                    setImagePickerOpen(false);
-                                }
-                            }}
-                            showFooter={imagePickerFor === 'gallery'}
-                            onConfirm={() => setImagePickerOpen(false)}
-                            confirmLabel="Concluir"
-                        />
-                    </DialogContent>
-                </Dialog>
             </DialogContent>
         </Dialog>
     );
