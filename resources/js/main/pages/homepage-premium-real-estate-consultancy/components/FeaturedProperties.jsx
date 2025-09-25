@@ -1,12 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const FeaturedProperties = () => {
-  const [showMore, setShowMore] = useState(false);
-  const [favorites, setFavorites] = useState(new Set());
+const normalizeImageValue = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    return (
+      value.url ||
+      value.image_url ||
+      value.imageUrl ||
+      value.src ||
+      value.source ||
+      value.path ||
+      null
+    );
+  }
+  return null;
+};
 
+const normalizeImageArray = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeImageValue(item))
+      .filter((item) => typeof item === 'string' && item.length > 0);
+  }
+  return [];
+};
+
+const extractGalleryFromRecord = (record) => {
+  if (!record) return [];
+
+  const candidateFields = [
+    'gallery',
+    'gallery_images',
+    'galleryImages',
+    'imageGallery',
+    'images',
+    'image_urls',
+    'photos',
+    'media',
+  ];
+
+  for (const field of candidateFields) {
+    const normalized = normalizeImageArray(record?.[field]);
+    if (normalized.length) {
+      return normalized;
+    }
+  }
+
+  return [];
+};
+
+const getPropertyGallery = (property) => {
+  if (!property) return [];
+  const gallery = extractGalleryFromRecord(property);
+  if (gallery.length) {
+    return gallery;
+  }
+  const primary = normalizeImageValue(property.image) || normalizeImageValue(property.image_url);
+  return primary ? [primary] : [];
+};
+
+const FeaturedProperties = () => {
+  const [favorites, setFavorites] = useState(new Set());
   const [filters, setFilters] = useState({
     neighborhood: '',
     priceRange: '',
@@ -17,8 +76,14 @@ const FeaturedProperties = () => {
     priceRange: '',
     propertyType: ''
   });
-
   const [remote, setRemote] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slidesPerView, setSlidesPerView] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeProperty, setActiveProperty] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const activeGallery = useMemo(() => getPropertyGallery(activeProperty), [activeProperty]);
 
   useEffect(() => {
     (async () => {
@@ -26,37 +91,103 @@ const FeaturedProperties = () => {
         const res = await fetch('/api/featured-properties');
         if (res.ok) {
           const data = await res.json();
-          const normalizeFeatures = (v) => {
-            if (Array.isArray(v)) return v;
-            if (typeof v === 'string') {
-              try {
-                const parsed = JSON.parse(v);
-                return Array.isArray(parsed) ? parsed : [];
-              } catch {
-                return [];
-              }
-            }
-            return [];
-          };
-          const mapped = (data || []).map((p) => ({
-            id: p.id,
-            title: p.title,
-            neighborhood: p.neighborhood,
-            price: p.price,
-            bedrooms: p.bedrooms,
-            bathrooms: p.bathrooms,
-            area: p.area,
-            type: p.type,
-            image: p.image_url,
-            features: normalizeFeatures(p.features),
-            isNew: !!p.is_new,
-            priceRange: p.price_range || '',
-          }));
+          const mapped = (data || []).map((p) => {
+            const galleryFromRecord = extractGalleryFromRecord(p);
+            const fallbackImage = normalizeImageValue(p.image) || p.image_url || null;
+            const gallery = galleryFromRecord.length
+              ? galleryFromRecord
+              : fallbackImage
+                ? [fallbackImage]
+                : [];
+
+            return {
+              id: p.id,
+              title: p.title,
+              neighborhood: p.neighborhood,
+              price: p.price,
+              bedrooms: p.bedrooms,
+              bathrooms: p.bathrooms,
+              area: p.area,
+              type: p.type,
+              image: gallery[0] || fallbackImage,
+              gallery,
+              features: Array.isArray(p.features) ? p.features : [],
+              isNew: !!p.is_new,
+              priceRange: p.price_range || '',
+            };
+          });
           setRemote(mapped);
         }
       } catch {}
     })();
   }, []);
+
+  useEffect(() => {
+    const updateSlidesPerView = () => {
+      if (typeof window === 'undefined') return;
+      if (window.innerWidth >= 1280) {
+        setSlidesPerView(3);
+      } else if (window.innerWidth >= 768) {
+        setSlidesPerView(2);
+      } else {
+        setSlidesPerView(1);
+      }
+    };
+
+    updateSlidesPerView();
+    window.addEventListener('resize', updateSlidesPerView);
+    return () => window.removeEventListener('resize', updateSlidesPerView);
+  }, []);
+
+  useEffect(() => {
+    if (!isModalOpen || typeof document === 'undefined') {
+      return undefined;
+    }
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isModalOpen]);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setActiveProperty(null);
+    setActiveImageIndex(0);
+  }, []);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return;
+    }
+
+    const galleryLength = activeGallery.length;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+      } else if (event.key === 'ArrowLeft' && galleryLength > 1) {
+        event.preventDefault();
+        setActiveImageIndex((prev) => (prev - 1 + galleryLength) % galleryLength);
+      } else if (event.key === 'ArrowRight' && galleryLength > 1) {
+        event.preventDefault();
+        setActiveImageIndex((prev) => (prev + 1) % galleryLength);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, activeGallery.length, closeModal]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [activeProperty]);
+
+  useEffect(() => {
+    if (!activeGallery.length) return;
+    setActiveImageIndex((prev) => Math.min(prev, activeGallery.length - 1));
+  }, [activeGallery.length]);
 
   const neighborhoods = [
     { value: '', label: 'Todos os Bairros' },
@@ -87,7 +218,7 @@ const FeaturedProperties = () => {
   ];
 
   const handleFilterChange = (type, value) => {
-    setFormFilters(prev => ({ ...prev, [type]: value }));
+    setFormFilters((prev) => ({ ...prev, [type]: value }));
   };
 
   const applyFilters = () => {
@@ -103,125 +234,160 @@ const FeaturedProperties = () => {
   const removeFilter = (type) => {
     const updated = { ...formFilters, [type]: '' };
     setFormFilters(updated);
-    setFilters(prev => ({ ...prev, [type]: '' }));
+    setFilters((prev) => ({ ...prev, [type]: '' }));
   };
 
-  const hasActiveFilters = Object.values(filters).some(f => f !== '');
+  const hasActiveFilters = Object.values(filters).some((f) => f !== '');
 
   const allPropertiesStatic = [
     {
       id: 1,
-      title: "Casa de Luxo no Setor Bueno",
-      neighborhood: "Setor Bueno",
-      price: "R$ 1.850.000",
+      title: 'Casa de Luxo no Setor Bueno',
+      neighborhood: 'Setor Bueno',
+      price: 'R$ 1.850.000',
       bedrooms: 4,
       bathrooms: 3,
-      area: "320m²",
-      type: "casa",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop",
-      features: ["Piscina", "Churrasqueira", "Garagem 4 vagas"],
+      area: '320m²',
+      type: 'casa',
+      gallery: [
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1600585154603-2c5b938b00ec?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Piscina', 'Churrasqueira', 'Garagem 4 vagas'],
       isNew: true,
-      priceRange: "1800000-2500000"
+      priceRange: '1800000-2500000',
     },
     {
       id: 2,
-      title: "Apartamento Premium Jardim Goiás",
-      neighborhood: "Jardim Goiás",
-      price: "R$ 1.200.000",
+      title: 'Apartamento Premium Jardim Goiás',
+      neighborhood: 'Jardim Goiás',
+      price: 'R$ 1.200.000',
       bedrooms: 3,
       bathrooms: 2,
-      area: "180m²",
-      type: "apartamento",
-      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop",
-      features: ["Vista panorâmica", "Varanda gourmet", "2 vagas"],
+      area: '180m²',
+      type: 'apartamento',
+      gallery: [
+        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Vista panorâmica', 'Varanda gourmet', '2 vagas'],
       isNew: false,
-      priceRange: "1200000-1800000"
+      priceRange: '1200000-1800000',
     },
     {
       id: 3,
-      title: "Cobertura Alto da Glória",
-      neighborhood: "Alto da Glória",
-      price: "R$ 2.400.000",
+      title: 'Cobertura Alto da Glória',
+      neighborhood: 'Alto da Glória',
+      price: 'R$ 2.400.000',
       bedrooms: 5,
       bathrooms: 4,
-      area: "450m²",
-      type: "cobertura",
-      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop",
-      features: ["Terraço privativo", "Piscina", "Vista 360°"],
+      area: '450m²',
+      type: 'cobertura',
+      gallery: [
+        'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1598620617137-b4c21cdd553a?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Terraço privativo', 'Piscina', 'Vista 360°'],
       isNew: true,
-      priceRange: "2500000-3000000"
+      priceRange: '2500000-3000000',
     },
     {
       id: 4,
-      title: "Casa Moderna Setor Marista",
-      neighborhood: "Setor Marista",
-      price: "R$ 1.650.000",
+      title: 'Casa Moderna Setor Marista',
+      neighborhood: 'Setor Marista',
+      price: 'R$ 1.650.000',
       bedrooms: 4,
       bathrooms: 3,
-      area: "280m²",
-      type: "casa",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop",
-      features: ["Arquitetura moderna", "Jardim", "3 vagas"],
+      area: '280m²',
+      type: 'casa',
+      gallery: [
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Arquitetura moderna', 'Jardim', '3 vagas'],
       isNew: false,
-      priceRange: "1200000-1800000"
+      priceRange: '1200000-1800000',
     },
     {
       id: 5,
-      title: "Sobrado Park Lozandes",
-      neighborhood: "Park Lozandes",
-      price: "R$ 980.000",
+      title: 'Sobrado Park Lozandes',
+      neighborhood: 'Park Lozandes',
+      price: 'R$ 980.000',
       bedrooms: 3,
       bathrooms: 2,
-      area: "220m²",
-      type: "sobrado",
-      image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&h=600&fit=crop",
-      features: ["Condomínio fechado", "Área gourmet", "2 vagas"],
+      area: '220m²',
+      type: 'sobrado',
+      gallery: [
+        'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Condomínio fechado', 'Área gourmet', '2 vagas'],
       isNew: false,
-      priceRange: "800000-1200000"
+      priceRange: '800000-1200000',
     },
     {
       id: 6,
-      title: "Apartamento Setor Oeste",
-      neighborhood: "Setor Oeste",
-      price: "R$ 850.000",
+      title: 'Apartamento Setor Oeste',
+      neighborhood: 'Setor Oeste',
+      price: 'R$ 850.000',
       bedrooms: 2,
       bathrooms: 2,
-      area: "120m²",
-      type: "apartamento",
-      image: "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=800&h=600&fit=crop",
-      features: ["Mobiliado", "Sacada", "1 vaga"],
+      area: '120m²',
+      type: 'apartamento',
+      gallery: [
+        'https://images.unsplash.com/photo-1600607687644-c7171b42498b?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Mobiliado', 'Sacada', '1 vaga'],
       isNew: true,
-      priceRange: "800000-1200000"
+      priceRange: '800000-1200000',
     },
     {
       id: 7,
-      title: "Casa Condomínio Jardim Goiás",
-      neighborhood: "Jardim Goiás",
-      price: "R$ 2.100.000",
+      title: 'Casa Condomínio Jardim Goiás',
+      neighborhood: 'Jardim Goiás',
+      price: 'R$ 2.100.000',
       bedrooms: 4,
       bathrooms: 4,
-      area: "380m²",
-      type: "casa",
-      image: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800&h=600&fit=crop",
-      features: ["Condomínio de luxo", "Piscina", "4 vagas"],
+      area: '380m²',
+      type: 'casa',
+      gallery: [
+        'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1616594039964-26e5f2267d43?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1599423300746-b62533397364?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Condomínio de luxo', 'Piscina', '4 vagas'],
       isNew: false,
-      priceRange: "1800000-2500000"
+      priceRange: '1800000-2500000',
     },
     {
       id: 8,
-      title: "Cobertura Setor Bueno",
-      neighborhood: "Setor Bueno",
-      price: "R$ 3.200.000",
+      title: 'Cobertura Setor Bueno',
+      neighborhood: 'Setor Bueno',
+      price: 'R$ 3.200.000',
       bedrooms: 5,
       bathrooms: 5,
-      area: "520m²",
-      type: "cobertura",
-      image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&h=600&fit=crop",
-      features: ["Duplex", "Piscina privativa", "6 vagas"],
+      area: '520m²',
+      type: 'cobertura',
+      gallery: [
+        'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1616594039964-26e5f2267d43?auto=format&fit=crop&w=1600&q=80',
+        'https://images.unsplash.com/photo-1600585154435-3d04e3f22864?auto=format&fit=crop&w=1600&q=80',
+      ],
+      features: ['Duplex', 'Piscina privativa', '6 vagas'],
       isNew: true,
-      priceRange: "3000000+"
-    }
-  ];
+      priceRange: '3000000+',
+    },
+  ].map((property) => ({
+    ...property,
+    image: property.gallery[0],
+  }));
 
   const list = remote?.length ? remote : allPropertiesStatic;
 
@@ -241,15 +407,28 @@ const FeaturedProperties = () => {
   };
 
   const filteredProperties = filterProperties(list);
-  const displayedProperties = showMore ? filteredProperties : filteredProperties?.slice(0, 6);
+  const effectiveSlidesPerView = filteredProperties.length
+    ? Math.min(slidesPerView, filteredProperties.length)
+    : 1;
+  const slideWidthPercentage = 100 / effectiveSlidesPerView;
+  const maxSlide = Math.max(0, filteredProperties.length - effectiveSlidesPerView);
+  const totalPositions = maxSlide + 1;
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [filteredProperties.length, effectiveSlidesPerView]);
+
+  useEffect(() => {
+    setCurrentSlide((prev) => Math.min(prev, maxSlide));
+  }, [maxSlide]);
 
   const toggleFavorite = (propertyId) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const newFavorites = new Set(prev);
-      if (newFavorites?.has(propertyId)) {
-        newFavorites?.delete(propertyId);
+      if (newFavorites.has(propertyId)) {
+        newFavorites.delete(propertyId);
       } else {
-        newFavorites?.add(propertyId);
+        newFavorites.add(propertyId);
       }
       return newFavorites;
     });
@@ -260,6 +439,34 @@ const FeaturedProperties = () => {
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
+  const openModal = (property) => {
+    setActiveProperty(property);
+    setActiveImageIndex(0);
+    setIsModalOpen(true);
+  };
+  const hasGalleryNavigation = activeGallery.length > 1;
+
+  const goToPrevSlide = () => {
+    setCurrentSlide((prev) => Math.max(prev - 1, 0));
+  };
+
+  const goToNextSlide = () => {
+    setCurrentSlide((prev) => Math.min(prev + 1, maxSlide));
+  };
+
+  const handleModalPrev = () => {
+    if (!hasGalleryNavigation) return;
+    setActiveImageIndex((prev) => (prev - 1 + activeGallery.length) % activeGallery.length);
+  };
+
+  const handleModalNext = () => {
+    if (!hasGalleryNavigation) return;
+    setActiveImageIndex((prev) => (prev + 1) % activeGallery.length);
+  };
+
+  const canGoPrev = currentSlide > 0;
+  const canGoNext = currentSlide < maxSlide;
+
   return (
     <section id="listagem" className="py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -268,124 +475,125 @@ const FeaturedProperties = () => {
             Imóveis em Destaque
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia, 
+            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia,
             próximos ao Flamboyant Shopping e principais centros comerciais
           </p>
-        {filteredProperties?.length > 0 && (
-          <p className="text-sm text-primary font-medium mt-2">
-            {filteredProperties?.length} {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-12 w-full p-6 rounded-2xl">
-        <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              <Icon name="MapPin" size={16} className="mr-2 inline" />
-              Bairro
-            </label>
-            <select
-              value={formFilters.neighborhood}
-              onChange={(e) => handleFilterChange('neighborhood', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
-            >
-              {neighborhoods.map((neighborhood) => (
-                <option key={neighborhood.value} value={neighborhood.value}>
-                  {neighborhood.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              <Icon name="DollarSign" size={16} className="mr-2 inline" />
-              Faixa de Preço
-            </label>
-            <select
-              value={formFilters.priceRange}
-              onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
-            >
-              {priceRanges.map((range) => (
-                <option key={range.value} value={range.value}>
-                  {range.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              <Icon name="Home" size={16} className="mr-2 inline" />
-              Tipo de Imóvel
-            </label>
-            <select
-              value={formFilters.propertyType}
-              onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
-            >
-              {propertyTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-end justify-center">
-            <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
-              Buscar Imóveis
-            </Button>
-          </div>
+          {filteredProperties?.length > 0 && (
+            <p className="text-sm text-primary font-medium mt-2">
+              {filteredProperties?.length}{' '}
+              {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+            </p>
+          )}
         </div>
 
-        {hasActiveFilters && (
-          <>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {filters.neighborhood && (
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                  {neighborhoods.find((n) => n.value === filters.neighborhood)?.label}
-                  <button onClick={() => removeFilter('neighborhood')} className="ml-2 hover:text-primary/80">
-                    <Icon name="X" size={14} />
-                  </button>
-                </span>
-              )}
-              {filters.priceRange && (
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                  {priceRanges.find((p) => p.value === filters.priceRange)?.label}
-                  <button onClick={() => removeFilter('priceRange')} className="ml-2 hover:text-primary/80">
-                    <Icon name="X" size={14} />
-                  </button>
-                </span>
-              )}
-              {filters.propertyType && (
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                  {propertyTypes.find((t) => t.value === filters.propertyType)?.label}
-                  <button onClick={() => removeFilter('propertyType')} className="ml-2 hover:text-primary/80">
-                    <Icon name="X" size={14} />
-                  </button>
-                </span>
-              )}
+        <div className="mb-12 w-full rounded-2xl p-6">
+          <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                <Icon name="MapPin" size={16} className="mr-2 inline" />
+                Bairro
+              </label>
+              <select
+                value={formFilters.neighborhood}
+                onChange={(e) => handleFilterChange('neighborhood', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+              >
+                {neighborhoods.map((neighborhood) => (
+                  <option key={neighborhood.value} value={neighborhood.value}>
+                    {neighborhood.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="mt-4 flex justify-end">
-              <Button variant="outline" iconName="RotateCcw" iconPosition="left" onClick={clearFilters}>
-                Limpar Filtros
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                <Icon name="DollarSign" size={16} className="mr-2 inline" />
+                Faixa de Preço
+              </label>
+              <select
+                value={formFilters.priceRange}
+                onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+              >
+                {priceRanges.map((range) => (
+                  <option key={range.value} value={range.value}>
+                    {range.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                <Icon name="Home" size={16} className="mr-2 inline" />
+                Tipo de Imóvel
+              </label>
+              <select
+                value={formFilters.propertyType}
+                onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+              >
+                {propertyTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-end justify-center">
+              <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
+                Buscar Imóveis
               </Button>
             </div>
-          </>
-        )}
-      </div>
+          </div>
 
-      {filteredProperties?.length === 0 ? (
-          <div className="text-center py-12">
-            <Icon name="Search" size={48} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          {hasActiveFilters && (
+            <>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {filters.neighborhood && (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                    {neighborhoods.find((n) => n.value === filters.neighborhood)?.label}
+                    <button onClick={() => removeFilter('neighborhood')} className="ml-2 hover:text-primary/80">
+                      <Icon name="X" size={14} />
+                    </button>
+                  </span>
+                )}
+                {filters.priceRange && (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                    {priceRanges.find((p) => p.value === filters.priceRange)?.label}
+                    <button onClick={() => removeFilter('priceRange')} className="ml-2 hover:text-primary/80">
+                      <Icon name="X" size={14} />
+                    </button>
+                  </span>
+                )}
+                {filters.propertyType && (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                    {propertyTypes.find((t) => t.value === filters.propertyType)?.label}
+                    <button onClick={() => removeFilter('propertyType')} className="ml-2 hover:text-primary/80">
+                      <Icon name="X" size={14} />
+                    </button>
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button variant="outline" iconName="RotateCcw" iconPosition="left" onClick={clearFilters}>
+                  Limpar Filtros
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {filteredProperties?.length === 0 ? (
+          <div className="py-12 text-center">
+            <Icon name="Search" size={48} className="mx-auto mb-4 text-gray-400" />
+            <h3 className="mb-2 text-xl font-semibold text-gray-900">
               Nenhum imóvel encontrado
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6 text-gray-600">
               Tente ajustar os filtros ou entre em contato conosco para mais opções
             </p>
             <Button
@@ -403,118 +611,289 @@ const FeaturedProperties = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayedProperties?.map((property) => (
-                <div key={property?.id} className="property-card bg-white rounded-2xl shadow-lg overflow-hidden">
-                  <div className="relative">
-                    <div className="h-64 overflow-hidden">
-                      <Image
-                        src={property?.image}
-                        alt={property?.title}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                    
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      {property?.isNew && (
-                        <span className="bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold">
-                          Novo
-                        </span>
-                      )}
-                      <span className="bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 rounded-full text-xs font-medium">
-                        {property?.neighborhood}
-                      </span>
-                    </div>
-                    
-                    <button
-                      onClick={() => toggleFavorite(property?.id)}
-                      className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
-                    >
-                      <Icon 
-                        name="Heart" 
-                        size={20} 
-                        className={favorites?.has(property?.id) ? 'text-red-500 fill-current' : 'text-gray-600'} 
-                      />
-                    </button>
-                  </div>
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {property?.title}
-                    </h3>
-                    
-                    <div className="flex items-center text-gray-600 mb-4">
-                      <Icon name="MapPin" size={16} className="mr-1" />
-                      <span className="text-sm">{property?.neighborhood}</span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Icon name="Bed" size={16} className="mr-1" />
-                          <span>{property?.bedrooms}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Icon name="Bath" size={16} className="mr-1" />
-                          <span>{property?.bathrooms}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Icon name="Square" size={16} className="mr-1" />
-                          <span>{property?.area}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {property?.features?.slice(0, 2)?.map((feature, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                          {feature}
-                        </span>
-                      ))}
-                      {property?.features?.length > 2 && (
-                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                          +{property?.features?.length - 2} mais
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-primary">
-                        {property?.price}
-                      </div>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        iconName="MessageCircle"
-                        iconPosition="left"
-                        onClick={() => handleWhatsAppClick(property)}
-                        className="bg-accent hover:bg-accent/90"
+            <div className="relative">
+              <div className="overflow-hidden">
+                <div
+                  className="flex gap-6 transition-transform duration-500 ease-out"
+                  style={{ transform: `translateX(-${slideWidthPercentage * currentSlide}%)` }}
+                >
+                  {filteredProperties?.map((property) => {
+                    const propertyGallery = property.gallery?.length
+                      ? property.gallery
+                      : getPropertyGallery(property);
+                    const primaryImage = property.image || propertyGallery[0] || '';
+
+                    return (
+                      <div
+                        key={property?.id}
+                        className="flex-shrink-0"
+                        style={{ width: `${slideWidthPercentage}%` }}
                       >
-                        Ver Detalhes
-                      </Button>
-                    </div>
-                  </div>
+                        <div className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => openModal({ ...property, gallery: propertyGallery })}
+                              className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            >
+                              <Image
+                                src={primaryImage}
+                                alt={property?.title}
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                              <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                                <Icon name="Images" size={14} className="text-white" />
+                                Ver galeria
+                              </span>
+                            </button>
+
+                            <div className="absolute top-4 left-4 flex gap-2">
+                              {property?.isNew && (
+                                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+                                  Novo
+                                </span>
+                              )}
+                              <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
+                                {property?.neighborhood}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => toggleFavorite(property?.id)}
+                              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+                              aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                            >
+                              <Icon
+                                name="Heart"
+                                size={20}
+                                className={favorites?.has(property?.id) ? 'fill-current text-red-500' : 'text-gray-600'}
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-1 flex-col p-6">
+                            <h3 className="mb-2 text-xl font-bold text-gray-900">
+                              {property?.title}
+                            </h3>
+
+                            <div className="mb-4 flex items-center text-gray-600">
+                              <Icon name="MapPin" size={16} className="mr-1" />
+                              <span className="text-sm">{property?.neighborhood}</span>
+                            </div>
+
+                            <div className="mb-4 flex items-center justify-between">
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                <div className="flex items-center">
+                                  <Icon name="Bed" size={16} className="mr-1" />
+                                  <span>{property?.bedrooms}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Icon name="Bath" size={16} className="mr-1" />
+                                  <span>{property?.bathrooms}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Icon name="Square" size={16} className="mr-1" />
+                                  <span>{property?.area}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mb-4 flex flex-wrap gap-1">
+                              {property?.features?.slice(0, 2)?.map((feature, index) => (
+                                <span key={index} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                                  {feature}
+                                </span>
+                              ))}
+                              {property?.features?.length > 2 && (
+                                <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                                  +{property?.features?.length - 2} mais
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="mt-auto flex items-center justify-between">
+                              <div className="text-2xl font-bold text-primary">
+                                {property?.price}
+                              </div>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                iconName="MessageCircle"
+                                iconPosition="left"
+                                onClick={() => handleWhatsAppClick(property)}
+                                className="bg-accent hover:bg-accent/90"
+                              >
+                                Ver Detalhes
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
+
+              {filteredProperties.length > effectiveSlidesPerView && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPrevSlide}
+                    disabled={!canGoPrev}
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
+                      canGoPrev ? '' : 'pointer-events-none opacity-40'
+                    }`}
+                    aria-label="Ver imóveis anteriores"
+                  >
+                    <Icon name="ChevronLeft" size={20} className="text-current" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNextSlide}
+                    disabled={!canGoNext}
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-white p-3 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
+                      canGoNext ? '' : 'pointer-events-none opacity-40'
+                    }`}
+                    aria-label="Ver próximos imóveis"
+                  >
+                    <Icon name="ChevronRight" size={20} className="text-current" />
+                  </button>
+                </>
+              )}
             </div>
 
-            {filteredProperties?.length > 6 && (
-              <div className="text-center mt-12">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  iconName={showMore ? "ChevronUp" : "ChevronDown"}
-                  iconPosition="right"
-                  onClick={() => setShowMore(!showMore)}
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
-                >
-                  {showMore ? 'Ver Menos Imóveis' : `Ver Mais Imóveis (${filteredProperties?.length - 6} restantes)`}
-                </Button>
+            {filteredProperties.length > 1 && (
+              <div className="mt-8 flex justify-center gap-2">
+                {Array.from({ length: totalPositions }).map((_, index) => (
+                  <span
+                    key={index}
+                    className={`h-2 w-2 rounded-full transition ${
+                      index === currentSlide ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                    aria-hidden="true"
+                  />
+                ))}
               </div>
             )}
           </>
         )}
       </div>
+
+      {isModalOpen && activeProperty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+          <div className="absolute inset-0 bg-black/80" onClick={closeModal} aria-hidden="true" />
+          <div className="relative z-10 w-full max-w-5xl">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                aria-label="Fechar galeria"
+              >
+                <Icon name="X" size={20} />
+              </button>
+
+              <div className="relative bg-black">
+                <Image
+                  src={activeGallery[activeImageIndex]}
+                  alt={`${activeProperty.title} - imagem ${activeImageIndex + 1}`}
+                  className="h-[60vh] w-full object-cover"
+                />
+
+                {hasGalleryNavigation && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleModalPrev}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                      aria-label="Imagem anterior"
+                    >
+                      <Icon name="ChevronLeft" size={22} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleModalNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                      aria-label="Próxima imagem"
+                    >
+                      <Icon name="ChevronRight" size={22} />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {hasGalleryNavigation && (
+                <div className="flex gap-3 overflow-x-auto bg-white px-6 py-4">
+                  {activeGallery.map((thumb, index) => (
+                    <button
+                      type="button"
+                      key={thumb + index}
+                      onClick={() => setActiveImageIndex(index)}
+                      className={`relative h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
+                        index === activeImageIndex ? 'border-primary' : 'border-transparent'
+                      }`}
+                      aria-label={`Ver imagem ${index + 1}`}
+                    >
+                      <Image
+                        src={thumb}
+                        alt={`${activeProperty.title} - miniatura ${index + 1}`}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      {index === activeImageIndex && (
+                        <span className="absolute inset-0 border-2 border-primary" aria-hidden="true" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="px-6 pb-6 pt-4">
+                <h3 className="text-2xl font-bold text-gray-900">{activeProperty.title}</h3>
+                <p className="mt-2 flex items-center text-gray-600">
+                  <Icon name="MapPin" size={18} className="mr-2" />
+                  {activeProperty.neighborhood}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                  <span className="flex items-center">
+                    <Icon name="Bed" size={16} className="mr-1" />
+                    {activeProperty.bedrooms}
+                  </span>
+                  <span className="flex items-center">
+                    <Icon name="Bath" size={16} className="mr-1" />
+                    {activeProperty.bathrooms}
+                  </span>
+                  <span className="flex items-center">
+                    <Icon name="Square" size={16} className="mr-1" />
+                    {activeProperty.area}
+                  </span>
+                </div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {activeProperty.features?.map((feature, index) => (
+                    <span key={index} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                  <span className="text-3xl font-semibold text-primary">{activeProperty.price}</span>
+                  <Button
+                    variant="default"
+                    iconName="MessageCircle"
+                    iconPosition="left"
+                    onClick={() => handleWhatsAppClick(activeProperty)}
+                    className="bg-accent hover:bg-accent/90"
+                  >
+                    Falar no WhatsApp
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
