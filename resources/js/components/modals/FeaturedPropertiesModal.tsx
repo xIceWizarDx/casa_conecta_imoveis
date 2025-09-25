@@ -351,7 +351,7 @@ export default function FeaturedPropertiesModal({
                             <Button
                                 type="button"
                                 variant="secondary"
-                                className="w-auto"
+                                className="w-auto bg-black text-white hover:bg-black/80"
                                 onClick={() => {
                                     const v = featureInput.trim();
                                     if (!v) return;
@@ -370,7 +370,7 @@ export default function FeaturedPropertiesModal({
                                         {f}
                                         <button
                                             type="button"
-                                            className="text-muted-foreground hover:text-foreground"
+                                            className="rounded-full bg-black px-1 text-white hover:bg-black/80"
                                             onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
                                         >
                                             ×
@@ -388,7 +388,7 @@ export default function FeaturedPropertiesModal({
                         <Button
                             type="button"
                             variant="secondary"
-                            className="mt-2 w-auto"
+                            className="mt-2 w-auto bg-black text-white hover:bg-black/80"
                             onClick={() => uploadInputRef.current?.click()}
                             disabled={uploadingImages}
                         >
@@ -494,7 +494,7 @@ export default function FeaturedPropertiesModal({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button className="w-auto" variant="secondary" onClick={() => onOpenChange(false)}>
+                    <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
                     <Button

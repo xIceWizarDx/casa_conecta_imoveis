@@ -72,7 +72,11 @@ export default function DeleteUser() {
 
                                     <DialogFooter className="gap-2">
                                         <DialogClose asChild>
-                                            <Button variant="secondary" onClick={() => resetAndClearErrors()}>
+                                            <Button
+                                                variant="secondary"
+                                                className="bg-black text-white hover:bg-black/80"
+                                                onClick={() => resetAndClearErrors()}
+                                            >
                                                 Cancel
                                             </Button>
                                         </DialogClose>
