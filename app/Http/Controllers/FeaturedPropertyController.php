@@ -10,7 +10,7 @@ class FeaturedPropertyController extends Controller
 {
     public function publicIndex(): JsonResponse
     {
-        $items = FeaturedProperty::with(['image', 'galleryImages.image'])
+        $items = FeaturedProperty::with('image')
             ->where('is_published', true)
             ->orderBy('position')
             ->orderBy('id')
@@ -20,7 +20,7 @@ class FeaturedPropertyController extends Controller
 
     public function index(): JsonResponse
     {
-        $items = FeaturedProperty::with(['image', 'galleryImages.image'])
+        $items = FeaturedProperty::with('image')
             ->orderBy('position')
             ->orderBy('id')
             ->get();
@@ -43,15 +43,12 @@ class FeaturedPropertyController extends Controller
             'price_range'  => ['nullable', 'string', 'max:50'],
             'is_new'       => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
-            'gallery_image_ids' => ['nullable', 'array'],
-            'gallery_image_ids.*' => ['integer', 'exists:images,id'],
         ]);
 
         $data['features'] = $data['features'] ?? [];
         $data['position'] = (int) FeaturedProperty::max('position') + 1;
         $item = FeaturedProperty::create($data);
-        $this->syncGalleryImages($item, $request->input('gallery_image_ids', []));
-        $item->load('image', 'galleryImages.image');
+        $item->load('image');
         return response()->json($item, 201);
     }
 
@@ -71,14 +68,9 @@ class FeaturedPropertyController extends Controller
             'price_range'  => ['nullable', 'string', 'max:50'],
             'is_new'       => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
-            'gallery_image_ids' => ['nullable', 'array'],
-            'gallery_image_ids.*' => ['integer', 'exists:images,id'],
         ]);
         $featuredProperty->update($data);
-        if ($request->has('gallery_image_ids')) {
-            $this->syncGalleryImages($featuredProperty, $request->input('gallery_image_ids', []));
-        }
-        $featuredProperty->load('image', 'galleryImages.image');
+        $featuredProperty->load('image');
         return response()->json($featuredProperty);
     }
 
@@ -105,26 +97,6 @@ class FeaturedPropertyController extends Controller
             FeaturedProperty::where('id', $id)->update(['position' => $idx + 1]);
         }
         return response()->json(['message' => 'Reordered']);
-    }
-
-    /**
-     * @param  int[]  $galleryImageIds
-     */
-    protected function syncGalleryImages(FeaturedProperty $featuredProperty, array $galleryImageIds): void
-    {
-        $featuredProperty->galleryImages()->delete();
-
-        $position = 1;
-        foreach ($galleryImageIds as $imageId) {
-            if (!is_int($imageId) && !ctype_digit((string) $imageId)) {
-                continue;
-            }
-
-            $featuredProperty->galleryImages()->create([
-                'image_id' => (int) $imageId,
-                'position' => $position++,
-            ]);
-        }
     }
 }
 

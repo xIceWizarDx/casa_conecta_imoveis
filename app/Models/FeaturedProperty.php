@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class FeaturedProperty extends Model
@@ -27,16 +26,11 @@ class FeaturedProperty extends Model
         'features' => '[]',
     ];
 
-    protected $appends = ['image_url', 'gallery'];
+    protected $appends = ['image_url'];
 
     public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class);
-    }
-
-    public function galleryImages(): HasMany
-    {
-        return $this->hasMany(FeaturedPropertyGalleryImage::class)->orderBy('position');
     }
 
     public function getImageUrlAttribute(): ?string
@@ -47,28 +41,5 @@ class FeaturedProperty extends Model
         $image = $this->getRelation('image');
         if (!$image) return null;
         return Storage::disk($image->disk)->url($image->path);
-    }
-
-    public function getGalleryAttribute(): array
-    {
-        $gallery = [];
-
-        $primary = $this->image_url;
-        if ($primary) {
-            $gallery[] = $primary;
-        }
-
-        $galleryImages = $this->relationLoaded('galleryImages')
-            ? $this->galleryImages
-            : $this->galleryImages()->with('image')->get();
-
-        foreach ($galleryImages as $galleryImage) {
-            $url = $galleryImage->image?->url;
-            if ($url && !in_array($url, $gallery, true)) {
-                $gallery[] = $url;
-            }
-        }
-
-        return $gallery;
     }
 }
