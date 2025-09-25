@@ -45,6 +45,14 @@ export default function ImageGallery({
         onChangeSelected(nextIds, nextImages);
     };
 
+    if (images.length === 0) {
+        return (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+                Nenhuma imagem disponível. Envie novas imagens para continuar.
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
