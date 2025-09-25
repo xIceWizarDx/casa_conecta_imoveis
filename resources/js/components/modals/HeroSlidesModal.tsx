@@ -283,7 +283,7 @@ export default function HeroSlidesModal({
                     </div>
                     {/* Botão de publicar movido para o footer para igualar ao modal de Destaques */}
                 </div>
-                <DialogFooter>
+                <DialogFooter className="flex-row justify-end gap-2">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
