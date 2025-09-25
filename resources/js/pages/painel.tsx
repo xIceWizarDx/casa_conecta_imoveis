@@ -92,6 +92,10 @@ export default function Painel() {
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
 
+    const [dragging, setDragging] = useState<{ type: 'slide' | 'featured'; id: number } | null>(null);
+    const [slideOrderDirty, setSlideOrderDirty] = useState(false);
+    const [featuredOrderDirty, setFeaturedOrderDirty] = useState(false);
+
     const [heroModalOpen, setHeroModalOpen] = useState(false);
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
     const [imagePickerOpen, setImagePickerOpen] = useState(false);
@@ -272,21 +276,65 @@ export default function Painel() {
         await refreshFeatured();
     };
 
-    const moveFeatured = async (id: number, dir: -1 | 1) => {
-        const idx = featured.findIndex((s) => s.id === id);
-        if (idx < 0) return;
-        const target = idx + dir;
-        if (target < 0 || target >= featured.length) return;
-        const next = featured.slice();
-        const [item] = next.splice(idx, 1);
-        next.splice(target, 0, item);
-        setFeatured(next);
-        const ids = next.map((s) => s.id);
-        await apiFetch(FeaturedActions.reorder.patch(), {
-            body: JSON.stringify({ ids }),
-            headers: { 'Content-Type': 'application/json' },
-        });
-        await refreshFeatured();
+    const reorderList = <T extends { id: number }>(list: T[], sourceId: number, targetId: number): T[] | null => {
+        const next = list.slice();
+        const fromIndex = next.findIndex((item) => item.id === sourceId);
+        const toIndex = next.findIndex((item) => item.id === targetId);
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return null;
+        const [moved] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, moved);
+        return next;
+    };
+
+    const persistSlidesOrder = async () => {
+        const ids = slides.map((s) => s.id);
+        if (ids.length === 0) return;
+        try {
+            await apiFetch(HeroActions.reorder.patch(), {
+                body: JSON.stringify({ ids }),
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (e) {
+            setNotice({
+                type: 'error',
+                title: 'Falha ao reordenar slides',
+                message: e instanceof Error ? e.message : String(e),
+            });
+            await refreshSlides();
+        } finally {
+            setSlideOrderDirty(false);
+        }
+    };
+
+    const persistFeaturedOrder = async () => {
+        const ids = featured.map((f) => f.id);
+        if (ids.length === 0) return;
+        try {
+            await apiFetch(FeaturedActions.reorder.patch(), {
+                body: JSON.stringify({ ids }),
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (e) {
+            setNotice({
+                type: 'error',
+                title: 'Falha ao reordenar destaques',
+                message: e instanceof Error ? e.message : String(e),
+            });
+            await refreshFeatured();
+        } finally {
+            setFeaturedOrderDirty(false);
+        }
+    };
+
+    const handleDragEnd = async () => {
+        if (!dragging) return;
+        const currentDrag = dragging;
+        setDragging(null);
+        if (currentDrag.type === 'slide') {
+            if (slideOrderDirty) await persistSlidesOrder();
+        } else if (currentDrag.type === 'featured') {
+            if (featuredOrderDirty) await persistFeaturedOrder();
+        }
     };
 
     return (
@@ -378,7 +426,40 @@ export default function Painel() {
 
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {slides.map((s) => (
-                                <SlideCard key={s.id} slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
+                                <div
+                                    key={s.id}
+                                    draggable
+                                    onDragStart={(event) => {
+                                        event.dataTransfer.effectAllowed = 'move';
+                                        event.dataTransfer.setData('text/plain', String(s.id));
+                                        setDragging({ type: 'slide', id: s.id });
+                                    }}
+                                    onDragEnter={() => {
+                                        if (!dragging || dragging.type !== 'slide' || dragging.id === s.id) return;
+                                        setSlides((prev) => {
+                                            const updated = reorderList(prev, dragging.id, s.id);
+                                            if (!updated) return prev;
+                                            setSlideOrderDirty(true);
+                                            return updated;
+                                        });
+                                    }}
+                                    onDragOver={(event) => {
+                                        if (!dragging || dragging.type !== 'slide') return;
+                                        event.preventDefault();
+                                        event.dataTransfer.dropEffect = 'move';
+                                    }}
+                                    onDrop={(event) => {
+                                        if (!dragging || dragging.type !== 'slide') return;
+                                        event.preventDefault();
+                                    }}
+                                    onDragEnd={handleDragEnd}
+                                    className={cn(
+                                        'cursor-move select-none',
+                                        dragging?.type === 'slide' && dragging.id === s.id ? 'ring-2 ring-primary ring-offset-2' : '',
+                                    )}
+                                >
+                                    <SlideCard slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
+                                </div>
                             ))}
                         </div>
 
@@ -394,7 +475,40 @@ export default function Painel() {
                         </div>
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {featured.map((f) => (
-                                <div key={f.id} className="property-card bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div
+                                    key={f.id}
+                                    draggable
+                                    onDragStart={(event) => {
+                                        event.dataTransfer.effectAllowed = 'move';
+                                        event.dataTransfer.setData('text/plain', String(f.id));
+                                        setDragging({ type: 'featured', id: f.id });
+                                    }}
+                                    onDragEnter={() => {
+                                        if (!dragging || dragging.type !== 'featured' || dragging.id === f.id) return;
+                                        setFeatured((prev) => {
+                                            const updated = reorderList(prev, dragging.id, f.id);
+                                            if (!updated) return prev;
+                                            setFeaturedOrderDirty(true);
+                                            return updated;
+                                        });
+                                    }}
+                                    onDragOver={(event) => {
+                                        if (!dragging || dragging.type !== 'featured') return;
+                                        event.preventDefault();
+                                        event.dataTransfer.dropEffect = 'move';
+                                    }}
+                                    onDrop={(event) => {
+                                        if (!dragging || dragging.type !== 'featured') return;
+                                        event.preventDefault();
+                                    }}
+                                    onDragEnd={handleDragEnd}
+                                    className={cn(
+                                        'property-card bg-white rounded-2xl shadow-lg overflow-hidden cursor-move select-none',
+                                        dragging?.type === 'featured' && dragging.id === f.id
+                                            ? 'ring-2 ring-primary ring-offset-2'
+                                            : '',
+                                    )}
+                                >
                                     <div className="relative">
                                         <div className="h-64 overflow-hidden">
                                             {f.image_url ? (
