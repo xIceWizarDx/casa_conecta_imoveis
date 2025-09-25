@@ -691,7 +691,7 @@ export default function Painel() {
                                     </div>
                                     <div className="flex items-end gap-2">
                                         <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
-                                            {creatingSlide ? '…' : '+'}
+                                            {creatingSlide ? 'Publicando…' : 'Publicar'}
                                         </Button>
                                     </div>
                                 </div>
