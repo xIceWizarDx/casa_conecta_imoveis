@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Form, usePage } from '@inertiajs/react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import PasswordController from '@/actions/App/Http/Controllers/Settings/PasswordController';
+import { apiFetch } from '@/lib/api';
 
 type Props = {
   open: boolean;
@@ -20,7 +21,7 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
   const [contact, setContact] = useState<{ email?: string | null; phone?: string | null; whatsapp?: string | null; whatsapp_link?: string | null }>({});
 
   // Carrega contato ao abrir
-  React.useEffect(() => {
+  useEffect(() => {
     let ignore = false;
     if (open) {
       apiFetch('/api/settings/contact')
@@ -35,8 +36,8 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-xl" aria-describedby="settings-desc">
         <DialogHeader>
-          <DialogTitle>Configurações</DialogTitle>
-          <DialogDescription id="settings-desc">Gerencie suas informações de perfil e senha.</DialogDescription>
+          <DialogTitle>ConfiguraÃ§Ãµes</DialogTitle>
+          <DialogDescription id="settings-desc">Gerencie suas informaÃ§Ãµes de perfil e senha.</DialogDescription>
         </DialogHeader>
 
         {/* Tabs simples */}
@@ -92,17 +93,17 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
                 <>
                   <div className="grid gap-2">
                     <Label htmlFor="current_password">Senha atual</Label>
-                    <Input id="current_password" type="password" name="current_password" placeholder="••••••••" />
+                    <Input id="current_password" type="password" name="current_password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
                     <InputError message={errors.current_password} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="password">Nova senha</Label>
-                    <Input id="password" type="password" name="password" placeholder="••••••••" />
+                    <Input id="password" type="password" name="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
                     <InputError message={errors.password} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="password_confirmation">Confirmar senha</Label>
-                    <Input id="password_confirmation" type="password" name="password_confirmation" placeholder="••••••••" />
+                    <Input id="password_confirmation" type="password" name="password_confirmation" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
                     <InputError message={errors.password_confirmation} />
                   </div>
                   <DialogFooter>
@@ -125,7 +126,7 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
               <Input id="contact_phone" value={contact.phone ?? ''} onChange={(e) => setContact({ ...contact, phone: e.target.value })} placeholder="(62) 99999-9999" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="contact_whatsapp">WhatsApp (apenas números, com DDD e DDI)</Label>
+              <Label htmlFor="contact_whatsapp">WhatsApp (apenas nÃºmeros, com DDD e DDI)</Label>
               <Input id="contact_whatsapp" value={contact.whatsapp ?? ''} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} placeholder="5562999999999" />
             </div>
             <div className="grid gap-2">
@@ -149,4 +150,7 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
-import { apiFetch } from '@/lib/api';
+
+
+
+

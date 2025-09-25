@@ -29,7 +29,7 @@ const Header = () => {
     }, []);
 
     // Contatos (consumidos pelo header)
-    const [contact, setContact] = useState(null as null | { email?: string; phone?: string; whatsapp?: string; whatsapp_link?: string });
+    const [contact, setContact] = useState(null);
     useEffect(() => {
         fetch('/api/settings/contact')
             .then((r) => r.json())
@@ -244,7 +244,6 @@ const Header = () => {
 };
 
 export default Header;
-
 
 
 
