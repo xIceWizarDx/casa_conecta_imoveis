@@ -146,7 +146,7 @@ export default function HeroSlidesModal({
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{slidesLoading ? 'Carregando…' : `${slidesCount} itens`}</span>
                             <Button
-                                className="w-auto hidden"
+                                className="hidden w-auto bg-black text-white hover:bg-black/80"
                                 variant="secondary"
                                 onClick={async () => {
                                     setSlidesLoading(true);
@@ -258,7 +258,7 @@ export default function HeroSlidesModal({
                         <Button
                             type="button"
                             variant="secondary"
-                            className="mt-2 w-auto"
+                            className="mt-2 w-auto bg-black text-white hover:bg-black/80"
                             onClick={() => uploadInputRef.current?.click()}
                             disabled={uploadingImages}
                         >
@@ -294,7 +294,7 @@ export default function HeroSlidesModal({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button className="w-auto" variant="secondary" onClick={() => onOpenChange(false)}>
+                    <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
                 </DialogFooter>

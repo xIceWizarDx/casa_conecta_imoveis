@@ -493,7 +493,7 @@ export default function Painel() {
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
                                             <Button
-                                                className="w-auto hidden"
+                                                className="hidden w-auto bg-black text-white hover:bg-black/80"
                                                 variant="secondary"
                                                 onClick={refreshSlides}
                                                 disabled={slidesLoading}
@@ -600,7 +600,7 @@ export default function Painel() {
                                         <Button
                                             type="button"
                                             variant="secondary"
-                                            className="mt-2 w-auto"
+                                            className="mt-2 w-auto bg-black text-white hover:bg-black/80"
                                             onClick={() => heroUploadInputRef.current?.click()}
                                             disabled={imagesUploading}
                                         >
@@ -642,7 +642,7 @@ export default function Painel() {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button className="w-auto" variant="secondary" onClick={() => setHeroModalOpen(false)}>
+                                    <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => setHeroModalOpen(false)}>
                                         Fechar
                                     </Button>
                                 </DialogFooter>
