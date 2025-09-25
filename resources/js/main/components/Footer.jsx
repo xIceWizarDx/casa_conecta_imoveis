@@ -16,9 +16,7 @@ const Footer = () => {
                         {/* Brand */}
                         <div className="space-y-6">
                             <div className="flex items-center space-x-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
-                                    <Icon name="Home" size={24} color="white" strokeWidth={2.5} />
-                                </div>
+                                <img src="/logo.png" alt="Casa Conecta" className="h-10 w-auto" />
                                 <div>
                                     <h3 className="text-xl font-bold">Casa Conecta</h3>
                                     <p className="text-sm text-gray-400">Imóveis Premium</p>
@@ -58,6 +56,10 @@ const Footer = () => {
                             </a>
                             <a href="#" className="transition-colors hover:text-white">
                                 Termos de Uso
+                            </a>
+                            {/* Acesso discreto ao login */}
+                            <a href="/login" className="opacity-60 transition-opacity hover:opacity-100">
+                                Área restrita
                             </a>
                         </div>
                     </div>

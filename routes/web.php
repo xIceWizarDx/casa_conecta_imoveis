@@ -4,6 +4,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\HeroSlideController;
 use App\Http\Controllers\FeaturedPropertyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Settings\ContactController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -39,6 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('images', [ImageController::class, 'index'])->name('images.index');
         Route::post('images', [ImageController::class, 'store'])->name('images.store');
         Route::delete('images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
+        // Settings protegidos
+        Route::patch('admin/settings/contact', [ContactController::class, 'update']);
     });
 
     // Endpoints admin para Hero Slides
@@ -64,6 +67,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('api/hero-slides', [HeroSlideController::class, 'publicIndex']);
 // Endpoint público para imóveis em destaque
 Route::get('api/featured-properties', [FeaturedPropertyController::class, 'publicIndex']);
+// Endpoint público para configurações de contato
+Route::get('api/settings/contact', [ContactController::class, 'show']);
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

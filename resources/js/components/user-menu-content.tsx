@@ -9,9 +9,10 @@ import { LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
+    onOpenSettings?: () => void;
 }
 
-export function UserMenuContent({ user }: UserMenuContentProps) {
+export function UserMenuContent({ user, onOpenSettings }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
@@ -28,12 +29,21 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Link className="block w-full" href={edit()} as="button" prefetch onClick={cleanup}>
-                        <Settings className="mr-2" />
-                        Settings
-                    </Link>
-                </DropdownMenuItem>
+                {onOpenSettings ? (
+                    <DropdownMenuItem asChild>
+                        <button className="block w-full text-left" onClick={() => { onOpenSettings(); cleanup(); }}>
+                            <Settings className="mr-2" />
+                            Settings
+                        </button>
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem asChild>
+                        <Link className="block w-full" href={edit()} as="button" prefetch onClick={cleanup}>
+                            <Settings className="mr-2" />
+                            Settings
+                        </Link>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import Icon from '../AppIcon';
 import Button from './Button';
+import SettingsModal from '@/components/modals/SettingsModal';
+import { usePage } from '@inertiajs/react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserMenuContent } from '@/components/user-menu-content';
+import { useInitials } from '@/hooks/use-initials';
 
 // Standalone header for Inertia pages (no react-router dependency)
 export default function HeaderStandalone() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const page = usePage();
+    const auth = page?.props?.auth;
+    const isLogged = !!auth?.user;
+    const getInitials = useInitials();
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -86,7 +97,26 @@ export default function HeaderStandalone() {
                         >
                             WhatsApp
                         </Button>
+
+                        {isLogged && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="size-10 rounded-full p-1 hover:opacity-90">
+                                        <Avatar className="size-8 overflow-hidden rounded-full">
+                                            <AvatarImage src={auth.user?.avatar} alt={auth.user?.name} />
+                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                {getInitials(auth.user?.name || '')}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end">
+                                    {auth?.user && <UserMenuContent user={auth.user} onOpenSettings={() => setSettingsOpen(true)} />}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </div>
+                    <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
 
                     {/* Mobile Menu Button */}
                     <button

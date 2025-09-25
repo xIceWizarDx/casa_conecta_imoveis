@@ -340,7 +340,7 @@ export default function Painel() {
     return (
         <div className="old-site">
             <Head title="Painel" />
-            `<HeaderStandalone />
+            <HeaderStandalone />
 
                         <div className="h-6 md:h-10"></div>
 <div className="container-responsive section-spacing flex flex-col gap-6 pt-10">
@@ -688,7 +688,7 @@ export default function Painel() {
                                                 </ImageEditor>
                                             )}
                                         </div>
-                                    
+                                    </div>
                                 </div>
                                 <DialogFooter>
                                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => setHeroModalOpen(false)}>
