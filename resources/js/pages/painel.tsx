@@ -340,12 +340,11 @@ export default function Painel() {
     };
 
     return (
-        <div className="old-site">
+        <div className="min-h-screen bg-background">
             <Head title="Painel" />
             <HeaderStandalone />
 
-                        <div className="h-6 md:h-10"></div>
-<div className="container-responsive section-spacing flex flex-col gap-6 pt-10">
+            <main className="container-responsive py-10 flex flex-col gap-6">
                 {notice && (
                     <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
                         <AlertTitle>{notice.title}</AlertTitle>
@@ -718,9 +717,9 @@ export default function Painel() {
                         />
                 </>
 
-            </div>
+            </main>
+            <Footer />
         </div>
     );
 }
-
 
