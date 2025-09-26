@@ -1,23 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const buildPlaceholderSrc = (url) => {
+const PLACEHOLDER_QUALITY = '10';
+const PLACEHOLDER_BLUR = '50';
+
+const buildUnsplashUrl = (url, paramsToMerge = {}) => {
   if (!url) return null;
 
   try {
     const [path, search = ""] = url.split('?');
     const params = new URLSearchParams(search);
 
-    params.set('q', '30');
+    Object.entries(paramsToMerge).forEach(([key, value]) => {
+      if (typeof value === 'undefined' || value === null) return;
+      params.set(key, String(value));
+    });
 
     if (!params.has('auto')) {
       params.set('auto', 'format');
-    }
-
-    if (!params.has('blur')) {
-      params.set('blur', '35');
     }
 
     return `${path}?${params.toString()}`;
@@ -25,6 +27,36 @@ const buildPlaceholderSrc = (url) => {
     return url;
   }
 };
+
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  const isUnsplash = url.includes('images.unsplash.com') || url.includes('unsplash.com');
+  if (isUnsplash) {
+    return buildUnsplashUrl(url, { q: PLACEHOLDER_QUALITY, blur: PLACEHOLDER_BLUR });
+  }
+
+  return url;
+};
+
+const buildResponsiveSrcSet = (url) => {
+  if (!url) return null;
+
+  const isUnsplash = url.includes('images.unsplash.com') || url.includes('unsplash.com');
+  if (!isUnsplash) {
+    return null;
+  }
+
+  const widths = [480, 768, 1024, 1440];
+  const srcSet = widths
+    .map((width) => `${buildUnsplashUrl(url, { w: width, q: 80 })} ${width}w`)
+    .join(', ');
+
+  return srcSet;
+};
+
+const CARD_IMAGE_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+const MODAL_IMAGE_SIZES = '(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1024px';
 
 const normalizeImageValue = (value) => {
   if (!value) return null;
@@ -77,14 +109,229 @@ const extractGalleryFromRecord = (record) => {
   return [];
 };
 
+const extractThumbnailsFromRecord = (record) => {
+  if (!record) return [];
+
+  const candidateFields = [
+    'thumbnails',
+    'gallery_thumbnails',
+    'galleryThumbnails',
+    'galleryThumbs',
+    'gallery_thumbs',
+    'images_thumbnails',
+    'image_thumbnails',
+    'thumbs',
+  ];
+
+  for (const field of candidateFields) {
+    const normalized = normalizeImageArray(record?.[field]);
+    if (normalized.length) {
+      return normalized;
+    }
+  }
+
+  return [];
+};
+
+const buildGalleryEntries = (property) => {
+  if (!property) return [];
+
+  const galleryUrls = extractGalleryFromRecord(property);
+  const fallbackImage = normalizeImageValue(property.image) || normalizeImageValue(property.image_url);
+  const imagesToUse = galleryUrls.length ? galleryUrls : fallbackImage ? [fallbackImage] : [];
+  const thumbnails = extractThumbnailsFromRecord(property);
+
+  return imagesToUse.map((src, index) => {
+    const placeholderCandidate = thumbnails[index] || thumbnails[0];
+    const placeholder = placeholderCandidate || buildPlaceholderSrc(src);
+
+    return {
+      src,
+      placeholder,
+      srcSet: buildResponsiveSrcSet(src),
+    };
+  });
+};
+
+const isGalleryEntry = (value) => value && typeof value === 'object' && typeof value.src === 'string';
+
 const getPropertyGallery = (property) => {
   if (!property) return [];
-  const gallery = extractGalleryFromRecord(property);
-  if (gallery.length) {
-    return gallery;
+
+  if (Array.isArray(property.gallery) && property.gallery.every((item) => isGalleryEntry(item))) {
+    return property.gallery;
   }
-  const primary = normalizeImageValue(property.image) || normalizeImageValue(property.image_url);
-  return primary ? [primary] : [];
+
+  if (Array.isArray(property.galleryEntries) && property.galleryEntries.every((item) => isGalleryEntry(item))) {
+    return property.galleryEntries;
+  }
+
+  return buildGalleryEntries(property);
+};
+
+const GalleryThumbnails = memo(({ gallery, activeIndex, onSelect, title }) => {
+  if (!Array.isArray(gallery) || !gallery.length) {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-3 overflow-x-auto bg-white px-6 py-4">
+      {gallery.map((entry, index) => {
+        const isActive = index === activeIndex;
+
+        return (
+          <button
+            type="button"
+            key={`${entry?.src || 'thumb'}-${index}`}
+            onClick={() => onSelect(index)}
+            className={`relative h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
+              isActive ? 'border-primary' : 'border-transparent'
+            }`}
+            aria-label={`Ver imagem ${index + 1}`}
+          >
+            <Image
+              src={entry?.src}
+              alt={`${title} - miniatura ${index + 1}`}
+              wrapperClassName="h-full w-full"
+              imgClassName="h-full w-full object-cover"
+              placeholderSrc={entry?.placeholder || buildPlaceholderSrc(entry?.src)}
+              srcSet={entry?.srcSet}
+              sizes="112px"
+              loading="lazy"
+              decoding="async"
+            />
+            {isActive && <span className="absolute inset-0 border-2 border-primary" aria-hidden="true" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
+
+GalleryThumbnails.displayName = 'GalleryThumbnails';
+
+const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWhatsAppClick }) => {
+  const propertyGallery = useMemo(() => getPropertyGallery(property), [property]);
+  const primaryImageEntry = propertyGallery[0] || {
+    src: property?.image || null,
+    placeholder: property?.imagePlaceholder || buildPlaceholderSrc(property?.image || null),
+    srcSet: property?.imageSrcSet || buildResponsiveSrcSet(property?.image || null),
+  };
+
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsImageLoaded(false);
+  }, [primaryImageEntry?.src]);
+
+  return (
+    <div className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => onOpenModal({ ...property, gallery: propertyGallery })}
+          className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        >
+          <div className="relative h-64 w-full">
+            {!isImageLoaded && (
+              <span className="absolute inset-0 z-[0] animate-pulse bg-slate-200" aria-hidden="true" />
+            )}
+            <Image
+              src={primaryImageEntry?.src}
+              alt={property?.title}
+              wrapperClassName="h-64 w-full"
+              imgClassName="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              placeholderSrc={primaryImageEntry?.placeholder}
+              srcSet={primaryImageEntry?.srcSet}
+              sizes={CARD_IMAGE_SIZES}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setIsImageLoaded(true)}
+            />
+          </div>
+          <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+            <Icon name="Images" size={14} className="text-white" />
+            Ver galeria
+          </span>
+        </button>
+
+        <div className="absolute top-4 left-4 flex gap-2">
+          {property?.isNew && (
+            <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
+          )}
+          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
+            {property?.neighborhood}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onToggleFavorite(property?.id)}
+          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+          aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        >
+          <Icon
+            name="Heart"
+            size={20}
+            className={favorites?.has(property?.id) ? 'fill-current text-red-500' : 'text-gray-600'}
+          />
+        </button>
+      </div>
+
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="mb-2 text-xl font-bold text-gray-900">{property?.title}</h3>
+
+        <div className="mb-4 flex items-center text-gray-600">
+          <Icon name="MapPin" size={16} className="mr-1" />
+          <span className="text-sm">{property?.neighborhood}</span>
+        </div>
+
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <div className="flex items-center">
+              <Icon name="Bed" size={16} className="mr-1" />
+              {property?.bedrooms}
+            </div>
+            <div className="flex items-center">
+              <Icon name="Bath" size={16} className="mr-1" />
+              {property?.bathrooms}
+            </div>
+            <div className="flex items-center">
+              <Icon name="Square" size={16} className="mr-1" />
+              {property?.area}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4 flex flex-wrap gap-2">
+          {property?.features?.slice(0, 2).map((feature) => (
+            <span key={feature} className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              {feature}
+            </span>
+          ))}
+          {property?.features?.length > 2 && (
+            <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+              +{property?.features?.length - 2} mais
+            </span>
+          )}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between">
+          <div className="text-2xl font-bold text-primary">{property?.price}</div>
+          <Button
+            variant="default"
+            size="sm"
+            iconName="MessageCircle"
+            iconPosition="left"
+            onClick={() => onWhatsAppClick(property)}
+            className="bg-accent hover:bg-accent/90"
+          >
+            Ver Detalhes
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const FeaturedProperties = () => {
@@ -113,13 +360,9 @@ const FeaturedProperties = () => {
         if (res.ok) {
           const data = await res.json();
           const mapped = (data || []).map((p) => {
-            const galleryFromRecord = extractGalleryFromRecord(p);
-            const fallbackImage = normalizeImageValue(p.image) || p.image_url || null;
-            const gallery = galleryFromRecord.length
-              ? galleryFromRecord
-              : fallbackImage
-                ? [fallbackImage]
-                : [];
+            const galleryEntries = buildGalleryEntries(p);
+            const primaryImageEntry = galleryEntries[0] || null;
+            const fallbackImage = normalizeImageValue(p.image) || normalizeImageValue(p.image_url) || null;
 
             return {
               id: p.id,
@@ -130,8 +373,11 @@ const FeaturedProperties = () => {
               bathrooms: p.bathrooms,
               area: p.area,
               type: p.type,
-              image: gallery[0] || fallbackImage,
-              gallery,
+              image: primaryImageEntry?.src || fallbackImage,
+              imagePlaceholder: primaryImageEntry?.placeholder || buildPlaceholderSrc(fallbackImage),
+              imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(fallbackImage),
+              gallery: galleryEntries,
+              galleryEntries,
               features: Array.isArray(p.features) ? p.features : [],
               isNew: !!p.is_new,
               priceRange: p.price_range || '',
@@ -388,10 +634,18 @@ const FeaturedProperties = () => {
       isNew: true,
       priceRange: '3000000+',
     },
-  ].map((property) => ({
-    ...property,
-    image: property.gallery[0],
-  }));
+  ].map((property) => {
+    const galleryEntries = buildGalleryEntries(property);
+    const primaryImageEntry = galleryEntries[0] || null;
+
+    return {
+      ...property,
+      gallery: galleryEntries,
+      image: primaryImageEntry?.src || null,
+      imagePlaceholder: primaryImageEntry?.placeholder || buildPlaceholderSrc(primaryImageEntry?.src || null),
+      imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(primaryImageEntry?.src || null),
+    };
+  });
 
   const list = remote?.length ? remote : allPropertiesStatic;
 
@@ -434,6 +688,7 @@ const FeaturedProperties = () => {
     setActiveImageIndex(0);
     setIsModalOpen(true);
   };
+  const activeImageEntry = activeGallery[activeImageIndex] || null;
   const hasGalleryNavigation = activeGallery.length > 1;
 
   const handleModalPrev = () => {
@@ -445,6 +700,26 @@ const FeaturedProperties = () => {
     if (!hasGalleryNavigation) return;
     setActiveImageIndex((prev) => (prev + 1) % activeGallery.length);
   };
+
+  useEffect(() => {
+    if (!hasGalleryNavigation || typeof window === 'undefined') return;
+
+    const preloadIndices = [
+      (activeImageIndex + 1) % activeGallery.length,
+      (activeImageIndex - 1 + activeGallery.length) % activeGallery.length,
+    ].filter((index, pos, arr) => index !== activeImageIndex && arr.indexOf(index) === pos);
+
+    preloadIndices.forEach((index) => {
+      const entry = activeGallery[index];
+      if (!entry?.src) return;
+
+      const img = new window.Image();
+      if (entry.srcSet) {
+        img.srcset = entry.srcSet;
+      }
+      img.src = entry.src;
+    });
+  }, [activeGallery, activeImageIndex, hasGalleryNavigation]);
 
   return (
     <section id="listagem" className="py-16">
@@ -591,118 +866,16 @@ const FeaturedProperties = () => {
         ) : (
           <>
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredProperties?.map((property) => {
-                const propertyGallery = property.gallery?.length
-                  ? property.gallery
-                  : getPropertyGallery(property);
-                const primaryImage = property.image || propertyGallery[0] || '';
-
-                return (
-                  <div key={property?.id} className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => openModal({ ...property, gallery: propertyGallery })}
-                        className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                      >
-                        <Image
-                          src={primaryImage}
-                          alt={property?.title}
-                          wrapperClassName="h-64 w-full"
-                          imgClassName="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          placeholderSrc={buildPlaceholderSrc(primaryImage)}
-                          loading="lazy"
-                        />
-                        <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                          <Icon name="Images" size={14} className="text-white" />
-                          Ver galeria
-                        </span>
-                      </button>
-
-                      <div className="absolute top-4 left-4 flex gap-2">
-                        {property?.isNew && (
-                          <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                            Novo
-                          </span>
-                        )}
-                        <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                          {property?.neighborhood}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => toggleFavorite(property?.id)}
-                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
-                        aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                      >
-                        <Icon
-                          name="Heart"
-                          size={20}
-                          className={favorites?.has(property?.id) ? 'fill-current text-red-500' : 'text-gray-600'}
-                        />
-                      </button>
-                    </div>
-
-                    <div className="flex flex-1 flex-col p-6">
-                      <h3 className="mb-2 text-xl font-bold text-gray-900">
-                        {property?.title}
-                      </h3>
-
-                      <div className="mb-4 flex items-center text-gray-600">
-                        <Icon name="MapPin" size={16} className="mr-1" />
-                        <span className="text-sm">{property?.neighborhood}</span>
-                      </div>
-
-                      <div className="mb-4 flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Icon name="Bed" size={16} className="mr-1" />
-                            <span>{property?.bedrooms}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Icon name="Bath" size={16} className="mr-1" />
-                            <span>{property?.bathrooms}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Icon name="Square" size={16} className="mr-1" />
-                            <span>{property?.area}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mb-4 flex flex-wrap gap-1">
-                        {property?.features?.slice(0, 2)?.map((feature, index) => (
-                          <span key={index} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                            {feature}
-                          </span>
-                        ))}
-                        {property?.features?.length > 2 && (
-                          <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                            +{property?.features?.length - 2} mais
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-auto flex items-center justify-between">
-                        <div className="text-2xl font-bold text-primary">
-                          {property?.price}
-                        </div>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          iconName="MessageCircle"
-                          iconPosition="left"
-                          onClick={() => handleWhatsAppClick(property)}
-                          className="bg-accent hover:bg-accent/90"
-                        >
-                          Ver Detalhes
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {filteredProperties?.map((property) => (
+                <PropertyCard
+                  key={property?.id}
+                  property={property}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
+                  onOpenModal={openModal}
+                  onWhatsAppClick={handleWhatsAppClick}
+                />
+              ))}
             </div>
           </>
         )}
@@ -724,11 +897,15 @@ const FeaturedProperties = () => {
 
               <div className="relative bg-black">
                 <Image
-                  src={activeGallery[activeImageIndex]}
+                  src={activeImageEntry?.src}
                   alt={`${activeProperty.title} - imagem ${activeImageIndex + 1}`}
                   wrapperClassName="block w-full"
                   imgClassName="h-[60vh] w-full object-cover"
-                  placeholderSrc={buildPlaceholderSrc(activeGallery[activeImageIndex])}
+                  placeholderSrc={activeImageEntry?.placeholder || buildPlaceholderSrc(activeImageEntry?.src)}
+                  srcSet={activeImageEntry?.srcSet}
+                  sizes={MODAL_IMAGE_SIZES}
+                  loading="lazy"
+                  decoding="async"
                 />
 
                 {hasGalleryNavigation && (
@@ -754,31 +931,12 @@ const FeaturedProperties = () => {
               </div>
 
               {hasGalleryNavigation && (
-                <div className="flex gap-3 overflow-x-auto bg-white px-6 py-4">
-                  {activeGallery.map((thumb, index) => (
-                    <button
-                      type="button"
-                      key={thumb + index}
-                      onClick={() => setActiveImageIndex(index)}
-                      className={`relative h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 ${
-                        index === activeImageIndex ? 'border-primary' : 'border-transparent'
-                      }`}
-                      aria-label={`Ver imagem ${index + 1}`}
-                    >
-                      <Image
-                        src={thumb}
-                        alt={`${activeProperty.title} - miniatura ${index + 1}`}
-                        wrapperClassName="h-full w-full"
-                        imgClassName="h-full w-full object-cover"
-                        placeholderSrc={buildPlaceholderSrc(thumb)}
-                        loading="lazy"
-                      />
-                      {index === activeImageIndex && (
-                        <span className="absolute inset-0 border-2 border-primary" aria-hidden="true" />
-                      )}
-                    </button>
-                  ))}
-                </div>
+                <GalleryThumbnails
+                  gallery={activeGallery}
+                  activeIndex={activeImageIndex}
+                  onSelect={setActiveImageIndex}
+                  title={activeProperty.title}
+                />
               )}
 
               <div className="px-6 pb-6 pt-4">
