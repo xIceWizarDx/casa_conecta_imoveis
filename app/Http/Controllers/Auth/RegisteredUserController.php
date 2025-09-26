@@ -88,7 +88,14 @@ class RegisteredUserController extends Controller
 
     private function isRegistrationOpen(): bool
     {
+        $userCount = User::count();
+
+        if ($userCount === 0) {
+            return true;
+        }
+
         $value = Setting::firstWhere('key', 'auth')?->value ?? [];
-        return (bool)($value['registration_open'] ?? (User::count() === 0));
+
+        return (bool)($value['registration_open'] ?? true);
     }
 }

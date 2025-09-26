@@ -11,8 +11,14 @@ class AuthSettingsController extends Controller
 {
     public function show()
     {
+        $userCount = User::count();
+
+        if ($userCount === 0) {
+            return response()->json(['auth' => ['registration_open' => true]]);
+        }
+
         $value = Setting::firstWhere('key', 'auth')?->value ?? [];
-        $open = (bool)($value['registration_open'] ?? (User::count() === 0));
+        $open = (bool)($value['registration_open'] ?? true);
 
         return response()->json(['auth' => ['registration_open' => $open]]);
     }
