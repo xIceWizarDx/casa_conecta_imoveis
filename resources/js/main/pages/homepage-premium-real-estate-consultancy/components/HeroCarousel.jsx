@@ -144,6 +144,7 @@ const HeroCarousel = ({ onFirstSlideReady }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroProperties, setHeroProperties] = useState([]);
   const [loadedSlides, setLoadedSlides] = useState({});
+  const [isLoadingSlides, setIsLoadingSlides] = useState(true);
   const firstSlideReadyRef = useRef(false);
 
   const notifyFirstSlideReady = useCallback(() => {
@@ -159,17 +160,22 @@ const HeroCarousel = ({ onFirstSlideReady }) => {
 
     if (heroSlidesCache.data) {
       setHeroProperties(heroSlidesCache.data);
+      setIsLoadingSlides(false);
+    } else {
+      setIsLoadingSlides(true);
     }
 
     getHeroSlides()
       .then((slides) => {
-        if (isMounted) {
-          setHeroProperties(slides);
-        }
+        if (!isMounted) return;
+        setHeroProperties(slides);
+        setIsLoadingSlides(false);
       })
       .catch(() => {
+        if (!isMounted) return;
         // Já tentamos usar o cache acima; se a requisição falhar e não houver
         // dados anteriores não podemos fazer muito além de manter o fallback.
+        setIsLoadingSlides(false);
       });
 
     return () => {
@@ -199,10 +205,10 @@ const HeroCarousel = ({ onFirstSlideReady }) => {
   }, [slides]);
 
   useEffect(() => {
-    if (!slides.length) {
+    if (!isLoadingSlides && !slides.length) {
       notifyFirstSlideReady();
     }
-  }, [slides.length, notifyFirstSlideReady]);
+  }, [isLoadingSlides, slides.length, notifyFirstSlideReady]);
 
   useEffect(() => {
     if (slides.length <= 1) return undefined;
