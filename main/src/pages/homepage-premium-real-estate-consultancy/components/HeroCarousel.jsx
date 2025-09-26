@@ -1,95 +1,193 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const buildPlaceholderSrc = (url) => {
-  if (!url) return null;
+const DEFAULT_SIZES = '(min-width: 1024px) 100vw, 100vw';
+const UNSPLASH_HOST = 'images.unsplash.com';
+const FALLBACK_IMAGE = '/assets/images/no_image.png';
 
+const ensureUrl = (rawUrl) => {
   try {
-    const [path, search = ""] = url.split('?');
-    const params = new URLSearchParams(search);
-
-    params.set('q', '30');
-
-    if (!params.has('auto')) {
-      params.set('auto', 'format');
-    }
-
-    if (!params.has('blur')) {
-      params.set('blur', '40');
-    }
-
-    return `${path}?${params.toString()}`;
+    return new URL(
+      rawUrl,
+      typeof window !== 'undefined' ? window.location.origin : 'https://example.com'
+    );
   } catch (error) {
-    return url;
+    return null;
   }
+};
+
+const buildUnsplashUrl = (rawUrl, params = {}) => {
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return rawUrl;
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  if (!url.searchParams.has('auto')) {
+    url.searchParams.set('auto', 'format');
+  }
+
+  return url.toString();
+};
+
+const buildPlaceholderSrc = (rawUrl, fallback) => {
+  if (fallback) return fallback;
+  if (!rawUrl) return null;
+
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return rawUrl;
+
+  if (url.hostname.includes(UNSPLASH_HOST)) {
+    return buildUnsplashUrl(url.toString(), { q: 10, blur: 50 });
+  }
+
+  return fallback ?? rawUrl;
+};
+
+const buildResponsiveSrcSet = (rawUrl) => {
+  if (!rawUrl) return undefined;
+
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return undefined;
+
+  if (url.hostname.includes(UNSPLASH_HOST)) {
+    const aspectRatio = 1080 / 1920;
+    const widths = [640, 1280, 1920];
+
+    return widths
+      .map((width) => {
+        const height = Math.round(width * aspectRatio);
+        return `${buildUnsplashUrl(rawUrl, { w: width, h: height })} ${width}w`;
+      })
+      .join(', ');
+  }
+
+  return undefined;
 };
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const heroProperties = [
-    {
-      id: 1,
-      title: "Casa de Luxo no Setor Bueno",
-      subtitle: "Sua nova casa nos melhores bairros de Goiânia",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.850.000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "320m²",
-      neighborhood: "Setor Bueno"
-    },
-    {
-      id: 2,
-      title: "Apartamento Premium Jardim Goiás",
-      subtitle: "Viva com sofisticação próximo ao Flamboyant",
-      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.200.000",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: "180m²",
-      neighborhood: "Jardim Goiás"
-    },
-    {
-      id: 3,
-      title: "Cobertura Alto da Glória",
-      subtitle: "Exclusividade e vista panorâmica da cidade",
-      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 2.400.000",
-      bedrooms: 5,
-      bathrooms: 4,
-      area: "450m²",
-      neighborhood: "Alto da Glória"
-    },
-    {
-      id: 4,
-      title: "Casa Moderna Setor Marista",
-      subtitle: "Arquitetura contemporânea em localização privilegiada",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.650.000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "280m²",
-      neighborhood: "Setor Marista"
-    }
-  ];
+  const [heroProperties, setHeroProperties] = useState([]);
+  const [loadedSlides, setLoadedSlides] = useState({});
 
   useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/hero-slides');
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = (data || []).map((s) => ({
+            id: s.id,
+            title: s.title,
+            subtitle: s.subtitle,
+            // HeroSlide::image_url já carrega a foto enviada pelo painel de administração,
+            // evitando a necessidade de recorrer a imagens fictícias.
+            image: s.image_url,
+            price: s.price,
+            bedrooms: s.bedrooms,
+            bathrooms: s.bathrooms,
+            area: s.area,
+            neighborhood: s.neighborhood,
+            isNew: !!s.is_new,
+            placeholder: s.placeholder_url || s.thumbnail_url,
+          }));
+          setHeroProperties(mapped);
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const slides = useMemo(() => {
+    // Quando a API não retorna slides publicados não devemos recorrer à antiga
+    // lista heroPropertiesStatic com URLs do Unsplash, pois isso reintroduz
+    // conteúdo fictício no carrossel.
+    return heroProperties.map((slide) => {
+      const placeholder = buildPlaceholderSrc(slide?.image, slide?.placeholder);
+      const srcSet = buildResponsiveSrcSet(slide?.image);
+
+      return {
+        ...slide,
+        placeholder,
+        srcSet,
+        sizes: srcSet ? DEFAULT_SIZES : undefined,
+      };
+    });
+  }, [heroProperties]);
+
+  useEffect(() => {
+    setLoadedSlides({});
+  }, [slides]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return undefined;
+
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroProperties?.length);
-    }, 6000); // Increased timing for better user experience
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
 
     return () => clearInterval(interval);
-  }, [heroProperties?.length]);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (currentSlide >= slides.length && slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [currentSlide, slides.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || slides.length <= 1) return undefined;
+
+    const preloadIndices = [
+      (currentSlide + 1) % slides.length,
+      (currentSlide - 1 + slides.length) % slides.length,
+    ];
+
+    const preloaded = preloadIndices
+      .filter((index) => index !== currentSlide && slides[index]?.image)
+      .map((index) => {
+        const img = new window.Image();
+        img.decoding = 'async';
+        img.src = slides[index].image;
+        if (slides[index].srcSet) {
+          img.srcset = slides[index].srcSet;
+          if (slides[index].sizes) {
+            img.sizes = slides[index].sizes;
+          }
+        }
+        return img;
+      });
+
+    return () => {
+      preloaded.forEach((img) => {
+        img.onload = null;
+        img.onerror = null;
+      });
+    };
+  }, [currentSlide, slides]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroProperties?.length);
+    if (slides.length <= 1) return;
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroProperties?.length) % heroProperties?.length);
+    if (slides.length <= 1) return;
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleImageLoad = (index) => () => {
+    setLoadedSlides((prev) => ({
+      ...prev,
+      [index]: true,
+    }));
   };
 
   const handleWhatsAppClick = (property) => {
@@ -97,10 +195,38 @@ const HeroCarousel = () => {
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
+  if (!slides.length) {
+    return (
+      <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
+        <div className="relative w-full h-full">
+          <Image
+            src={FALLBACK_IMAGE}
+            alt="Banner institucional"
+            wrapperClassName="w-full h-full"
+            imgClassName="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 hero-overlay" />
+          <div className="absolute inset-0 flex items-center">
+            <div className="container-responsive">
+              <div className="max-w-2xl text-white space-y-6">
+                <h1 className="text-4xl sm:text-5xl font-bold leading-tight">
+                  Nenhum destaque publicado no momento
+                </h1>
+                <p className="text-lg sm:text-xl text-gray-100">
+                  Assim que novos imóveis forem destacados aqui, você verá as fotos reais cadastradas pelo time Casa Conecta.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
       <div className="relative w-full h-full">
-        {heroProperties?.map((property, index) => (
+        {slides.map((property, index) => (
           <div
             key={property?.id}
             className={`absolute inset-0 transition-all duration-1000 ${
@@ -113,15 +239,27 @@ const HeroCarousel = () => {
                 alt={property?.title}
                 wrapperClassName="w-full h-full"
                 imgClassName="w-full h-full object-cover object-center"
-                placeholderSrc={buildPlaceholderSrc(property?.image)}
-                fetchPriority={index === currentSlide ? 'high' : undefined}
+                placeholderSrc={property?.placeholder}
+                srcSet={property?.srcSet}
+                sizes={property?.sizes}
+                fetchPriority={index === 0 ? 'high' : undefined}
                 loading={index === 0 ? 'eager' : 'lazy'}
+                onLoad={handleImageLoad(index)}
               />
-              <div className="absolute inset-0 hero-overlay" />
-              
+              <div
+                className={`absolute inset-0 hero-overlay transition-all duration-700 ${
+                  loadedSlides[index] ? 'opacity-90 blur-0' : 'opacity-70 blur-sm'
+                }`}
+              />
+
+              {/* Volta a posição anterior (centrado verticalmente) */}
               <div className="absolute inset-0 flex items-center">
                 <div className="container-responsive">
-                  <div className="max-w-3xl text-white animate-fade-in-up">
+                  <div
+                    className={`max-w-3xl text-white transition-all duration-700 ${
+                      loadedSlides[index] ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-2'
+                    }`}
+                  >
                     <div className="mb-4">
                       <span className="inline-flex items-center px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-primary-foreground">
                         <Icon name="MapPin" size={16} className="mr-2" />
@@ -153,7 +291,8 @@ const HeroCarousel = () => {
                     </div>
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                      <div className="text-3xl sm:text-4xl lg:text-5xl font-bold gradient-primary bg-clip-text text-transparent">
+                      {/* Preço sem contorno */}
+                      <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary">
                         {property?.price}
                       </div>
                       <div className="flex flex-wrap gap-4">
@@ -164,7 +303,7 @@ const HeroCarousel = () => {
                           onClick={() => handleWhatsAppClick(property)}
                           className="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 text-base shadow-lg hover:shadow-xl transition-all duration-200"
                         >
-                          Ver Detalhes
+                          Detalhes
                         </Button>
                         <Button
                           variant="outline"
@@ -173,7 +312,7 @@ const HeroCarousel = () => {
                           onClick={() => window.open('tel:+5562999999999')}
                           className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-6 py-3 text-base backdrop-blur-sm transition-all duration-200"
                         >
-                          Ligar Agora
+                          Ligar
                         </Button>
                       </div>
                     </div>
@@ -190,39 +329,42 @@ const HeroCarousel = () => {
         onClick={prevSlide}
         className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 z-20 border border-white/20 hover:scale-110"
         aria-label="Previous slide"
+        disabled={slides.length <= 1}
       >
         <Icon name="ChevronLeft" size={28} />
       </button>
-      
+
       <button
         onClick={nextSlide}
         className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 z-20 border border-white/20 hover:scale-110"
         aria-label="Next slide"
+        disabled={slides.length <= 1}
       >
         <Icon name="ChevronRight" size={28} />
       </button>
-      
+
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
-        {heroProperties?.map((_, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`transition-all duration-300 rounded-full ${
-              index === currentSlide 
+              index === currentSlide
                 ? 'w-8 h-3 bg-white' :'w-3 h-3 bg-white/50 hover:bg-white/70'
             }`}
             aria-label={`Go to slide ${index + 1}`}
+            disabled={slides.length <= 1}
           />
         ))}
       </div>
-      
+
       {/* Progress Bar */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-        <div 
+        <div
           className="h-full gradient-primary transition-all duration-300"
-          style={{ 
-            width: `${((currentSlide + 1) / heroProperties?.length) * 100}%` 
+          style={{
+            width: `${slides.length ? ((currentSlide + 1) / slides.length) * 100 : 0}%`
           }}
         />
       </div>
