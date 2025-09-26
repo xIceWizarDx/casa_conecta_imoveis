@@ -1,34 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const buildPlaceholderSrc = (url) => {
-  if (!url) return null;
+const DEFAULT_SIZES = '(min-width: 1024px) 100vw, 100vw';
+const UNSPLASH_HOST = 'images.unsplash.com';
 
+const ensureUrl = (rawUrl) => {
   try {
-    const [path, search = ""] = url.split('?');
-    const params = new URLSearchParams(search);
-
-    params.set('q', '30');
-
-    if (!params.has('auto')) {
-      params.set('auto', 'format');
-    }
-
-    if (!params.has('blur')) {
-      params.set('blur', '40');
-    }
-
-    return `${path}?${params.toString()}`;
+    return new URL(
+      rawUrl,
+      typeof window !== 'undefined' ? window.location.origin : 'https://example.com'
+    );
   } catch (error) {
-    return url;
+    return null;
   }
 };
+
+const buildUnsplashUrl = (rawUrl, params = {}) => {
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return rawUrl;
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  if (!url.searchParams.has('auto')) {
+    url.searchParams.set('auto', 'format');
+  }
+
+  return url.toString();
+};
+
+const buildPlaceholderSrc = (rawUrl, fallback) => {
+  if (fallback) return fallback;
+  if (!rawUrl) return null;
+
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return rawUrl;
+
+  if (url.hostname.includes(UNSPLASH_HOST)) {
+    return buildUnsplashUrl(url.toString(), { q: 10, blur: 50 });
+  }
+
+  return fallback ?? rawUrl;
+};
+
+const buildResponsiveSrcSet = (rawUrl) => {
+  if (!rawUrl) return undefined;
+
+  const url = ensureUrl(rawUrl);
+
+  if (!url) return undefined;
+
+  if (url.hostname.includes(UNSPLASH_HOST)) {
+    const aspectRatio = 1080 / 1920;
+    const widths = [640, 1280, 1920];
+
+    return widths
+      .map((width) => {
+        const height = Math.round(width * aspectRatio);
+        return `${buildUnsplashUrl(rawUrl, { w: width, h: height })} ${width}w`;
+      })
+      .join(', ');
+  }
+
+  return undefined;
+};
+
+const heroPropertiesStatic = [
+  {
+    id: 1,
+    title: "Casa de Luxo no Setor Bueno",
+    subtitle: "Sua nova casa nos melhores bairros de Goiânia",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+    price: "R$ 1.850.000",
+    bedrooms: 4,
+    bathrooms: 3,
+    area: "320m²",
+    neighborhood: "Setor Bueno"
+  },
+  {
+    id: 2,
+    title: "Apartamento Premium Jardim Goiás",
+    subtitle: "Viva com sofisticação próximo ao Flamboyant",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+    price: "R$ 1.200.000",
+    bedrooms: 3,
+    bathrooms: 2,
+    area: "180m²",
+    neighborhood: "Jardim Goiás"
+  },
+  {
+    id: 3,
+    title: "Cobertura Alto da Glória",
+    subtitle: "Exclusividade e vista panorâmica da cidade",
+    image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+    price: "R$ 2.400.000",
+    bedrooms: 5,
+    bathrooms: 4,
+    area: "450m²",
+    neighborhood: "Alto da Glória"
+  },
+  {
+    id: 4,
+    title: "Casa Moderna Setor Marista",
+    subtitle: "Arquitetura contemporânea em localização privilegiada",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
+    price: "R$ 1.650.000",
+    bedrooms: 4,
+    bathrooms: 3,
+    area: "280m²",
+    neighborhood: "Setor Marista"
+  }
+];
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroProperties, setHeroProperties] = useState([]);
+  const [loadedSlides, setLoadedSlides] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -47,6 +141,7 @@ const HeroCarousel = () => {
             area: s.area,
             neighborhood: s.neighborhood,
             isNew: !!s.is_new,
+            placeholder: s.placeholder_url || s.thumbnail_url,
           }));
           setHeroProperties(mapped);
         }
@@ -54,67 +149,88 @@ const HeroCarousel = () => {
     })();
   }, []);
 
-  const heroPropertiesStatic = [
-    {
-      id: 1,
-      title: "Casa de Luxo no Setor Bueno",
-      subtitle: "Sua nova casa nos melhores bairros de Goiânia",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.850.000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "320m²",
-      neighborhood: "Setor Bueno"
-    },
-    {
-      id: 2,
-      title: "Apartamento Premium Jardim Goiás",
-      subtitle: "Viva com sofisticação próximo ao Flamboyant",
-      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.200.000",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: "180m²",
-      neighborhood: "Jardim Goiás"
-    },
-    {
-      id: 3,
-      title: "Cobertura Alto da Glória",
-      subtitle: "Exclusividade e vista panorâmica da cidade",
-      image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 2.400.000",
-      bedrooms: 5,
-      bathrooms: 4,
-      area: "450m²",
-      neighborhood: "Alto da Glória"
-    },
-    {
-      id: 4,
-      title: "Casa Moderna Setor Marista",
-      subtitle: "Arquitetura contemporânea em localização privilegiada",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&h=1080&fit=crop&crop=center&auto=format&q=90",
-      price: "R$ 1.650.000",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "280m²",
-      neighborhood: "Setor Marista"
-    }
-  ];
+  const slides = useMemo(() => {
+    const source = heroProperties?.length ? heroProperties : heroPropertiesStatic;
+
+    return source.map((slide) => {
+      const placeholder = buildPlaceholderSrc(slide?.image, slide?.placeholder);
+      const srcSet = buildResponsiveSrcSet(slide?.image);
+
+      return {
+        ...slide,
+        placeholder,
+        srcSet,
+        sizes: srcSet ? DEFAULT_SIZES : undefined,
+      };
+    });
+  }, [heroProperties]);
 
   useEffect(() => {
-    const list = heroProperties?.length ? heroProperties : heroPropertiesStatic;
+    setLoadedSlides({});
+  }, [slides]);
+
+  useEffect(() => {
+    if (!slides.length) return undefined;
+
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (list.length ? (prev + 1) % list.length : 0));
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
+
     return () => clearInterval(interval);
-  }, [heroProperties?.length]);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (currentSlide >= slides.length && slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [currentSlide, slides.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || slides.length <= 1) return undefined;
+
+    const preloadIndices = [
+      (currentSlide + 1) % slides.length,
+      (currentSlide - 1 + slides.length) % slides.length,
+    ];
+
+    const preloaded = preloadIndices
+      .filter((index) => index !== currentSlide && slides[index]?.image)
+      .map((index) => {
+        const img = new window.Image();
+        img.decoding = 'async';
+        img.src = slides[index].image;
+        if (slides[index].srcSet) {
+          img.srcset = slides[index].srcSet;
+          if (slides[index].sizes) {
+            img.sizes = slides[index].sizes;
+          }
+        }
+        return img;
+      });
+
+    return () => {
+      preloaded.forEach((img) => {
+        img.onload = null;
+        img.onerror = null;
+      });
+    };
+  }, [currentSlide, slides]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroProperties?.length);
+    if (!slides.length) return;
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroProperties?.length) % heroProperties?.length);
+    if (!slides.length) return;
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleImageLoad = (index) => () => {
+    setLoadedSlides((prev) => ({
+      ...prev,
+      [index]: true,
+    }));
   };
 
   const handleWhatsAppClick = (property) => {
@@ -125,7 +241,7 @@ const HeroCarousel = () => {
   return (
     <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
       <div className="relative w-full h-full">
-        {(heroProperties?.length ? heroProperties : heroPropertiesStatic).map((property, index) => (
+        {slides.map((property, index) => (
           <div
             key={property?.id}
             className={`absolute inset-0 transition-all duration-1000 ${
@@ -138,16 +254,27 @@ const HeroCarousel = () => {
                 alt={property?.title}
                 wrapperClassName="w-full h-full"
                 imgClassName="w-full h-full object-cover object-center"
-                placeholderSrc={buildPlaceholderSrc(property?.image)}
-                fetchPriority={index === currentSlide ? 'high' : undefined}
+                placeholderSrc={property?.placeholder}
+                srcSet={property?.srcSet}
+                sizes={property?.sizes}
+                fetchPriority={index === 0 ? 'high' : undefined}
                 loading={index === 0 ? 'eager' : 'lazy'}
+                onLoad={handleImageLoad(index)}
               />
-              <div className="absolute inset-0 hero-overlay" />
+              <div
+                className={`absolute inset-0 hero-overlay transition-all duration-700 ${
+                  loadedSlides[index] ? 'opacity-90 blur-0' : 'opacity-70 blur-sm'
+                }`}
+              />
 
               {/* Volta a posição anterior (centrado verticalmente) */}
               <div className="absolute inset-0 flex items-center">
                 <div className="container-responsive">
-                  <div className="max-w-3xl text-white animate-fade-in-up">
+                  <div
+                    className={`max-w-3xl text-white transition-all duration-700 ${
+                      loadedSlides[index] ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-2'
+                    }`}
+                  >
                     <div className="mb-4">
                       <span className="inline-flex items-center px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-primary-foreground">
                         <Icon name="MapPin" size={16} className="mr-2" />
@@ -231,25 +358,25 @@ const HeroCarousel = () => {
       
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
-        {heroProperties?.map((_, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`transition-all duration-300 rounded-full ${
-              index === currentSlide 
+              index === currentSlide
                 ? 'w-8 h-3 bg-white' :'w-3 h-3 bg-white/50 hover:bg-white/70'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
-      
+
       {/* Progress Bar */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-        <div 
+        <div
           className="h-full gradient-primary transition-all duration-300"
-          style={{ 
-            width: `${((currentSlide + 1) / heroProperties?.length) * 100}%` 
+          style={{
+            width: `${slides.length ? ((currentSlide + 1) / slides.length) * 100 : 0}%`
           }}
         />
       </div>
