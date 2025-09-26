@@ -1,7 +1,30 @@
-export const getCsrf = () =>
-    typeof document !== 'undefined'
-        ? ((document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content ?? '')
-        : '';
+const getCookie = (name: string): string => {
+    if (typeof document === 'undefined') return '';
+
+    const target = `${name}=`;
+    const raw = document.cookie
+        .split(';')
+        .map((cookie) => cookie.trim())
+        .find((cookie) => cookie.startsWith(target));
+
+    if (!raw) return '';
+
+    const value = raw.slice(target.length);
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+};
+
+export const getCsrf = () => {
+    if (typeof document === 'undefined') return '';
+
+    const metaToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content;
+    if (metaToken) return metaToken;
+
+    return getCookie('XSRF-TOKEN');
+};
 
 export async function apiFetch<T = unknown>(def: { url: string; method?: string }, init?: RequestInit): Promise<T> {
     const method = (def.method ?? 'get').toUpperCase();

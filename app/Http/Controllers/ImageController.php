@@ -26,22 +26,23 @@ class ImageController extends Controller
         $disk = 'public';
 
         foreach ($request->file('images', []) as $file) {
-            $path = $file->store('images', $disk);
-            $filename = basename($path);
-            $size = $file->getSize();
-            $mime = $file->getMimeType();
-
             $width = null;
             $height = null;
             try {
-                $absolute = Storage::disk($disk)->path($path);
-                if (is_file($absolute)) {
-                    [$w, $h] = @getimagesize($absolute) ?: [null, null];
-                    $width = $w; $height = $h;
+                $realPath = $file->getRealPath();
+                if ($realPath && is_file($realPath)) {
+                    [$w, $h] = @getimagesize($realPath) ?: [null, null];
+                    $width = $w;
+                    $height = $h;
                 }
             } catch (\Throwable $e) {
                 // ignora falhas ao ler dimensões
             }
+
+            $path = $file->store('images', $disk);
+            $filename = basename($path);
+            $size = $file->getSize();
+            $mime = $file->getMimeType();
 
             $image = Image::create([
                 'disk'          => $disk,
