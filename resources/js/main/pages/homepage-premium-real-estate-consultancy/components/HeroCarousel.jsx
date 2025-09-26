@@ -73,36 +73,99 @@ const buildResponsiveSrcSet = (rawUrl) => {
   return undefined;
 };
 
+const HERO_SLIDES_CACHE_TTL = 1000 * 60 * 5;
+
+const heroSlidesCache = {
+  data: null,
+  fetchedAt: 0,
+  promise: null,
+};
+
+const mapHeroSlides = (data = []) =>
+  data.map((s) => ({
+    id: s.id,
+    title: s.title,
+    subtitle: s.subtitle,
+    // HeroSlide::image_url já carrega a foto enviada pelo painel de administração,
+    // evitando a necessidade de recorrer a imagens fictícias.
+    image: s.image_url,
+    price: s.price,
+    bedrooms: s.bedrooms,
+    bathrooms: s.bathrooms,
+    area: s.area,
+    neighborhood: s.neighborhood,
+    isNew: !!s.is_new,
+    placeholder: s.placeholder_url || s.thumbnail_url,
+  }));
+
+const shouldUseFreshCache = () =>
+  !!heroSlidesCache.data && Date.now() - heroSlidesCache.fetchedAt < HERO_SLIDES_CACHE_TTL;
+
+const fetchHeroSlides = async () => {
+  const res = await fetch('/api/hero-slides');
+  if (!res.ok) {
+    throw new Error('Failed to fetch hero slides');
+  }
+
+  const data = await res.json();
+  return mapHeroSlides(data || []);
+};
+
+const getHeroSlides = () => {
+  if (shouldUseFreshCache()) {
+    return Promise.resolve(heroSlidesCache.data);
+  }
+
+  if (heroSlidesCache.promise) {
+    return heroSlidesCache.promise;
+  }
+
+  heroSlidesCache.promise = fetchHeroSlides()
+    .then((slides) => {
+      heroSlidesCache.data = slides;
+      heroSlidesCache.fetchedAt = Date.now();
+      return slides;
+    })
+    .catch((error) => {
+      if (heroSlidesCache.data) {
+        return heroSlidesCache.data;
+      }
+
+      throw error;
+    })
+    .finally(() => {
+      heroSlidesCache.promise = null;
+    });
+
+  return heroSlidesCache.promise;
+};
+
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroProperties, setHeroProperties] = useState([]);
   const [loadedSlides, setLoadedSlides] = useState({});
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/hero-slides');
-        if (res.ok) {
-          const data = await res.json();
-          const mapped = (data || []).map((s) => ({
-            id: s.id,
-            title: s.title,
-            subtitle: s.subtitle,
-            // HeroSlide::image_url já carrega a foto enviada pelo painel de administração,
-            // evitando a necessidade de recorrer a imagens fictícias.
-            image: s.image_url,
-            price: s.price,
-            bedrooms: s.bedrooms,
-            bathrooms: s.bathrooms,
-            area: s.area,
-            neighborhood: s.neighborhood,
-            isNew: !!s.is_new,
-            placeholder: s.placeholder_url || s.thumbnail_url,
-          }));
-          setHeroProperties(mapped);
+    let isMounted = true;
+
+    if (heroSlidesCache.data) {
+      setHeroProperties(heroSlidesCache.data);
+    }
+
+    getHeroSlides()
+      .then((slides) => {
+        if (isMounted) {
+          setHeroProperties(slides);
         }
-      } catch {}
-    })();
+      })
+      .catch(() => {
+        // Já tentamos usar o cache acima; se a requisição falhar e não houver
+        // dados anteriores não podemos fazer muito além de manter o fallback.
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const slides = useMemo(() => {
