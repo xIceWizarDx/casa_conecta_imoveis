@@ -63,7 +63,7 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
             )}
 
             <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold text-primary">{price || 'R$ 0,00'}</div>
+                <div className="text-2xl font-bold text-emerald-600">{price || 'R$ 0,00'}</div>
                 <Button className="w-auto bg-accent hover:bg-accent/90" variant="default">
                     <MessageCircle className="mr-2 h-4 w-4" /> Ver Detalhes
                 </Button>
