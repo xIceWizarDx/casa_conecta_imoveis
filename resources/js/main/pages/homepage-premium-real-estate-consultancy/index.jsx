@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import Header from '../../components/ui/Header';
 import HeroCarousel from './components/HeroCarousel';
@@ -10,6 +10,8 @@ import ProcessTransparencySection from '../about-brand-story-credentials/compone
 import Footer from '../../components/Footer';
 
 const HomepagePremiumRealEstateConsultancy = () => {
+  const [isHeroReady, setIsHeroReady] = useState(false);
+
   useEffect(() => {
     // Smooth scroll behavior for anchor links
     const handleAnchorClick = (e) => {
@@ -31,7 +33,7 @@ const HomepagePremiumRealEstateConsultancy = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
       <Helmet>
         <title>Casa Conecta Imóveis | Consultoria Imobiliária Premium</title>
         <meta
@@ -39,44 +41,65 @@ const HomepagePremiumRealEstateConsultancy = () => {
           content="Descubra uma consultoria imobiliária premium com imóveis selecionados, atendimento personalizado e orientação especializada."
         />
       </Helmet>
-      {/* Header */}
-      <Header />
-      
-      {/* Main Content */}
-      <main>
-        {/* Hero Carousel - Full viewport section */}
-        <HeroCarousel />
-        
-        {/* Featured Properties - Well organized section */}
-        <section className="section-spacing">
-          <div className="container-responsive">
-            <FeaturedProperties />
-          </div>
-        </section>
+      <div
+        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-500 ${
+          isHeroReady ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+        aria-hidden={isHeroReady}
+      >
+        <img
+          src="/logo.png"
+          alt="Casa Conecta Imóveis"
+          className="w-32 h-auto mb-6"
+        />
+        <span className="sr-only">Carregando página inicial</span>
+        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
 
-        {/* Neighborhood Map - Interactive section */}
-        <section className="section-spacing">
-          <div className="container-responsive">
-            <NeighborhoodMap />
-          </div>
-        </section>
+      <div
+        className={`transition-opacity duration-500 ${
+          isHeroReady ? 'opacity-100' : 'opacity-0 pointer-events-none select-none'
+        }`}
+      >
+        {/* Header */}
+        <Header />
 
-        {/* Expertise Section - Professional spacing */}
-        <section className="section-spacing">
-          <div className="container-responsive">
-            <ExpertiseSection />
-          </div>
-        </section>
+        {/* Main Content */}
+        <main>
+          {/* Hero Carousel - Full viewport section */}
+          <HeroCarousel onFirstSlideReady={() => setIsHeroReady(true)} />
 
-        {/* Transparent Process Section */}
-        <ProcessTransparencySection />
-      </main>
+          {/* Featured Properties - Well organized section */}
+          <section className="section-spacing">
+            <div className="container-responsive">
+              <FeaturedProperties />
+            </div>
+          </section>
 
-      {/* Footer */}
-      <Footer />
-      
-      {/* WhatsApp Float Button */}
-      <WhatsAppFloat />
+          {/* Neighborhood Map - Interactive section */}
+          <section className="section-spacing">
+            <div className="container-responsive">
+              <NeighborhoodMap />
+            </div>
+          </section>
+
+          {/* Expertise Section - Professional spacing */}
+          <section className="section-spacing">
+            <div className="container-responsive">
+              <ExpertiseSection />
+            </div>
+          </section>
+
+          {/* Transparent Process Section */}
+          <ProcessTransparencySection />
+        </main>
+
+        {/* Footer */}
+        <Footer />
+
+        {/* WhatsApp Float Button */}
+        <WhatsAppFloat />
+      </div>
     </div>
   );
 };
