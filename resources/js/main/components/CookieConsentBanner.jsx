@@ -67,7 +67,7 @@ const CookieConsentBanner = () => {
         <button
           type="button"
           onClick={handleAccept}
-          className="order-1 inline-flex justify-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 sm:order-2"
+          className="order-1 inline-flex justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:order-2"
         >
           {CONSENT_COPY.accept}
         </button>
