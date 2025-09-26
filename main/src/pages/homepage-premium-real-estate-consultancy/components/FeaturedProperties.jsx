@@ -3,6 +3,29 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  try {
+    const [path, search = ""] = url.split('?');
+    const params = new URLSearchParams(search);
+
+    params.set('q', '30');
+
+    if (!params.has('auto')) {
+      params.set('auto', 'format');
+    }
+
+    if (!params.has('blur')) {
+      params.set('blur', '35');
+    }
+
+    return `${path}?${params.toString()}`;
+  } catch (error) {
+    return url;
+  }
+};
+
 const FeaturedProperties = () => {
   const [showMore, setShowMore] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
@@ -369,7 +392,9 @@ const FeaturedProperties = () => {
                       <Image
                         src={property?.image}
                         alt={property?.title}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        wrapperClassName="w-full h-64"
+                        imgClassName="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        placeholderSrc={buildPlaceholderSrc(property?.image)}
                       />
                     </div>
                     

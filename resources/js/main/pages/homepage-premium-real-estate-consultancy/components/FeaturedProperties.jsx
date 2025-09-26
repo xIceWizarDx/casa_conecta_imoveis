@@ -3,6 +3,29 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  try {
+    const [path, search = ""] = url.split('?');
+    const params = new URLSearchParams(search);
+
+    params.set('q', '30');
+
+    if (!params.has('auto')) {
+      params.set('auto', 'format');
+    }
+
+    if (!params.has('blur')) {
+      params.set('blur', '35');
+    }
+
+    return `${path}?${params.toString()}`;
+  } catch (error) {
+    return url;
+  }
+};
+
 const normalizeImageValue = (value) => {
   if (!value) return null;
   if (typeof value === 'string') return value;
@@ -585,7 +608,9 @@ const FeaturedProperties = () => {
                         <Image
                           src={primaryImage}
                           alt={property?.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          wrapperClassName="h-64 w-full"
+                          imgClassName="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          placeholderSrc={buildPlaceholderSrc(primaryImage)}
                           loading="lazy"
                         />
                         <span className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
@@ -701,7 +726,9 @@ const FeaturedProperties = () => {
                 <Image
                   src={activeGallery[activeImageIndex]}
                   alt={`${activeProperty.title} - imagem ${activeImageIndex + 1}`}
-                  className="h-[60vh] w-full object-cover"
+                  wrapperClassName="block w-full"
+                  imgClassName="h-[60vh] w-full object-cover"
+                  placeholderSrc={buildPlaceholderSrc(activeGallery[activeImageIndex])}
                 />
 
                 {hasGalleryNavigation && (
@@ -741,7 +768,9 @@ const FeaturedProperties = () => {
                       <Image
                         src={thumb}
                         alt={`${activeProperty.title} - miniatura ${index + 1}`}
-                        className="h-full w-full object-cover"
+                        wrapperClassName="h-full w-full"
+                        imgClassName="h-full w-full object-cover"
+                        placeholderSrc={buildPlaceholderSrc(thumb)}
                         loading="lazy"
                       />
                       {index === activeImageIndex && (

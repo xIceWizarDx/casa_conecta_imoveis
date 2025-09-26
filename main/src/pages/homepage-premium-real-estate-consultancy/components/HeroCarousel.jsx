@@ -3,6 +3,29 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  try {
+    const [path, search = ""] = url.split('?');
+    const params = new URLSearchParams(search);
+
+    params.set('q', '30');
+
+    if (!params.has('auto')) {
+      params.set('auto', 'format');
+    }
+
+    if (!params.has('blur')) {
+      params.set('blur', '40');
+    }
+
+    return `${path}?${params.toString()}`;
+  } catch (error) {
+    return url;
+  }
+};
+
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -88,7 +111,10 @@ const HeroCarousel = () => {
               <Image
                 src={property?.image}
                 alt={property?.title}
-                className="w-full h-full object-cover object-center"
+                wrapperClassName="w-full h-full"
+                imgClassName="w-full h-full object-cover object-center"
+                placeholderSrc={buildPlaceholderSrc(property?.image)}
+                fetchPriority={index === currentSlide ? 'high' : undefined}
                 loading={index === 0 ? 'eager' : 'lazy'}
               />
               <div className="absolute inset-0 hero-overlay" />

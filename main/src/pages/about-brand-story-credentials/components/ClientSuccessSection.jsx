@@ -2,6 +2,29 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  try {
+    const [path, search = ""] = url.split('?');
+    const params = new URLSearchParams(search);
+
+    params.set('q', '30');
+
+    if (!params.has('auto')) {
+      params.set('auto', 'format');
+    }
+
+    if (!params.has('blur')) {
+      params.set('blur', '20');
+    }
+
+    return `${path}?${params.toString()}`;
+  } catch (error) {
+    return url;
+  }
+};
+
 const ClientSuccessSection = () => {
   const [activeStory, setActiveStory] = useState(0);
 
@@ -133,7 +156,9 @@ const ClientSuccessSection = () => {
                     <Image
                       src={successStories?.[activeStory]?.clientImage}
                       alt={successStories?.[activeStory]?.clientName}
-                      className="w-full h-full object-cover"
+                      wrapperClassName="w-full h-full"
+                      imgClassName="w-full h-full object-cover"
+                      placeholderSrc={buildPlaceholderSrc(successStories?.[activeStory]?.clientImage)}
                     />
                   </div>
                   <h3 className="text-xl font-semibold text-text-primary mb-2">
@@ -217,7 +242,9 @@ const ClientSuccessSection = () => {
                     <Image
                       src={testimonial?.image}
                       alt={testimonial?.name}
-                      className="w-full h-full object-cover"
+                      wrapperClassName="w-full h-full"
+                      imgClassName="w-full h-full object-cover"
+                      placeholderSrc={buildPlaceholderSrc(testimonial?.image)}
                     />
                   </div>
                   <div className="flex-1">

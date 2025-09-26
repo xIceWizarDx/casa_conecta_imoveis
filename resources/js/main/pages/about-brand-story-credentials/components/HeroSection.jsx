@@ -3,6 +3,29 @@ import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import { openWhatsApp, openPhone, formatPhoneDisplay, useContactInfo } from '@/lib/contact';
 
+const buildPlaceholderSrc = (url) => {
+  if (!url) return null;
+
+  try {
+    const [path, search = ""] = url.split('?');
+    const params = new URLSearchParams(search);
+
+    params.set('q', '30');
+
+    if (!params.has('auto')) {
+      params.set('auto', 'format');
+    }
+
+    if (!params.has('blur')) {
+      params.set('blur', '35');
+    }
+
+    return `${path}?${params.toString()}`;
+  } catch (error) {
+    return url;
+  }
+};
+
 const HeroSection = () => {
   const contact = useContactInfo();
   const handleWhatsAppClick = () => {
@@ -73,7 +96,11 @@ const HeroSection = () => {
               <Image
                 src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop"
                 alt="Equipe Casa Conecta em frente ao Flamboyant Shopping"
-                className="w-full h-96 object-cover"
+                wrapperClassName="w-full h-96"
+                imgClassName="w-full h-full object-cover"
+                placeholderSrc={buildPlaceholderSrc('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop')}
+                loading="eager"
+                fetchPriority="high"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
