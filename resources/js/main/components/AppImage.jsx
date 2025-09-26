@@ -59,6 +59,20 @@ const AppImage = forwardRef(function AppImage({
   const [hasTriedFallback, setHasTriedFallback] = useState(false);
   const [hasConsent, setHasConsent] = useState(() => hasImageCacheConsent());
   const objectUrlRef = useRef(null);
+  const internalImgRef = useRef(null);
+
+  const setImgRefs = useCallback(
+    (node) => {
+      internalImgRef.current = node;
+
+      if (typeof ref === "function") {
+        ref(node);
+      } else if (ref && typeof ref === "object") {
+        ref.current = node;
+      }
+    },
+    [ref]
+  );
 
   const updateObjectUrl = useCallback((nextUrl) => {
     if (typeof window === "undefined") return;
@@ -154,10 +168,28 @@ const AppImage = forwardRef(function AppImage({
     };
   }, [src, hasConsent, updateObjectUrl]);
 
-  const handleLoad = (event) => {
-    setIsLoaded(true);
-    onLoadProp?.(event);
-  };
+  const handleLoad = useCallback(
+    (event) => {
+      if (isLoaded) return;
+
+      setIsLoaded(true);
+
+      if (event) {
+        onLoadProp?.(event);
+        return;
+      }
+
+      if (typeof onLoadProp === "function") {
+        const imageElement = internalImgRef.current;
+        onLoadProp({
+          type: "load",
+          target: imageElement,
+          currentTarget: imageElement,
+        });
+      }
+    },
+    [isLoaded, onLoadProp]
+  );
 
   const handleError = (event) => {
     if (!hasTriedFallback) {
@@ -199,6 +231,18 @@ const AppImage = forwardRef(function AppImage({
     placeholderClassName
   );
 
+  useEffect(() => {
+    const imageElement = internalImgRef.current;
+
+    if (!imageElement || !currentSrc || isLoaded) {
+      return;
+    }
+
+    if (imageElement.complete && imageElement.naturalWidth > 0) {
+      handleLoad();
+    }
+  }, [currentSrc, handleLoad, isLoaded]);
+
   return (
     <span className={resolvedWrapperClassName}>
       {placeholderSrc && (
@@ -213,7 +257,7 @@ const AppImage = forwardRef(function AppImage({
       )}
 
       <img
-        ref={ref}
+        ref={setImgRefs}
         src={currentSrc ?? undefined}
         alt={alt}
         className={cn("relative z-[2]", resolvedImgClassName)}
