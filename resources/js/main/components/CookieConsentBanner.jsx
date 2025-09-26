@@ -8,7 +8,7 @@ import {
 
 const CONSENT_COPY = {
   heading: "Permita armazenar imagens?",
-  body: "Podemos salvar imagens para acelerar sua navegação?",
+  body: "Permitir a utilização de cookies para acelerar sua navegação?",
   accept: "Aceitar e armazenar",
   decline: "Recusar",
 };
