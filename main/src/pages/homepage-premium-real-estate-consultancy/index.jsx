@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import Header from '../../components/ui/Header';
 import HeroCarousel from './components/HeroCarousel';
 import FeaturedProperties from './components/FeaturedProperties';
@@ -31,6 +32,13 @@ const HomepagePremiumRealEstateConsultancy = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Casa Conecta Imóveis | Consultoria Imobiliária Premium</title>
+        <meta
+          name="description"
+          content="Descubra uma consultoria imobiliária premium com imóveis selecionados, atendimento personalizado e orientação especializada."
+        />
+      </Helmet>
       {/* Header */}
       <Header />
       
