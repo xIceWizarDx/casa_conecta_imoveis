@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessUploadedImage;
 use App\Models\Image;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,19 +27,6 @@ class ImageController extends Controller
         $disk = 'public';
 
         foreach ($request->file('images', []) as $file) {
-            $width = null;
-            $height = null;
-            try {
-                $realPath = $file->getRealPath();
-                if ($realPath && is_file($realPath)) {
-                    [$w, $h] = @getimagesize($realPath) ?: [null, null];
-                    $width = $w;
-                    $height = $h;
-                }
-            } catch (\Throwable $e) {
-                // ignora falhas ao ler dimensões
-            }
-
             $path = $file->store('images', $disk);
             $filename = basename($path);
             $size = $file->getSize();
@@ -51,9 +39,11 @@ class ImageController extends Controller
                 'original_name' => $file->getClientOriginalName(),
                 'size'          => $size,
                 'mime_type'     => $mime,
-                'width'         => $width,
-                'height'        => $height,
+                'width'         => null,
+                'height'        => null,
             ]);
+
+            ProcessUploadedImage::dispatch($image);
 
             $saved[] = $image;
         }
