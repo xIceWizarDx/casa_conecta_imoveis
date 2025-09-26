@@ -10,8 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import HeaderStandalone from '@/main/components/ui/HeaderStandalone';
-import Footer from '@/main/components/Footer';
+import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { apiFetch } from '@/lib/api';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -22,6 +21,15 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
 import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
+import { type BreadcrumbItem } from '@/types';
+import { painel } from '@/routes';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Painel',
+        href: painel().url,
+    },
+];
 
 type Image = {
     id: number;
@@ -340,11 +348,10 @@ export default function Painel() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Painel" />
-            <HeaderStandalone />
 
-            <main className="container-responsive py-10 flex flex-col gap-6">
+            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
                 {notice && (
                     <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
                         <AlertTitle>{notice.title}</AlertTitle>
@@ -718,8 +725,7 @@ export default function Painel() {
                 </>
 
             </main>
-            <Footer />
-        </div>
+        </AppLayout>
     );
 }
 
