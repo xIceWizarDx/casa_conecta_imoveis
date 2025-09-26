@@ -263,7 +263,7 @@ export function getImageCacheConsent(): ImageCacheConsent {
     return cookie;
   }
 
-  return "unknown";
+  return "granted";
 }
 
 export function hasImageCacheConsent(): boolean {
