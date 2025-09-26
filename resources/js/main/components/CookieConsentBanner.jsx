@@ -8,7 +8,7 @@ import {
 
 const CONSENT_COPY = {
   heading: "Permita armazenar imagens?",
-  body: "Guardamos em cache as imagens de destaque e galerias no seu navegador usando cookies/localStorage. Isso acelera visitas futuras, mas só será feito se você concordar.",
+  body: "Podemos salvar imagens para acelerar sua navegação?",
   accept: "Aceitar e armazenar",
   decline: "Recusar",
 };
@@ -73,7 +73,7 @@ const CookieConsentBanner = () => {
         </button>
       </div>
       <p className="mt-3 text-xs text-neutral-500">
-        Você pode alterar essa decisão limpando os cookies do navegador. Sem consentimento, as páginas continuam funcionando, mas imagens pesadas serão baixadas novamente em cada visita.
+        Você pode revisar essa escolha depois nas configurações do seu navegador.
       </p>
     </div>
   );
