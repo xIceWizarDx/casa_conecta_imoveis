@@ -26,18 +26,21 @@ export default function HeaderStandalone() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const items = [
+    const navigationItems = [
         { name: 'Início', path: '/', icon: 'Home' },
         { name: 'Sobre Nós', path: '/about-brand-story-credentials', icon: 'Users' },
         { name: 'FAQ', path: '/faq-comprehensive-buyer-education', icon: 'HelpCircle' },
-        { name: 'Painel', path: '/painel', icon: 'Image', external: true },
     ];
+
+    const items = isLogged
+        ? [...navigationItems, { name: 'Painel', path: '/painel', icon: 'Image', external: true }]
+        : navigationItems;
 
     const isActivePath = (path) => (typeof window !== 'undefined' ? window.location?.pathname === path : false);
 
-    const handleWhatsAppClick = () => {
-        const message = encodeURIComponent('Olá! Gostaria de saber mais sobre os imóveis disponíveis.');
-        window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+    const openWhatsAppHeader = () => {
+        const message = 'Olá! Gostaria de saber mais sobre os imóveis disponíveis.';
+        openWhatsApp(message, { contact });
     };
 
     return (
@@ -50,31 +53,41 @@ export default function HeaderStandalone() {
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
                     <a href="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
-                            <Icon name="Home" size={24} color="white" strokeWidth={2.5} />
-                        </div>
+                        <img src="/logo.png" alt="Casa Conecta Imóveis" className="h-10 w-auto" />
                         <div className="hidden sm:block">
-                            <h1 className="text-text-primary text-xl font-bold">Casa Conecta</h1>
-                            <p className="text-text-secondary text-xs font-medium">Imóveis Premium</p>
+                            <h1 className="text-text-primary text-xl font-bold">Casa Conecta Imóveis</h1>
                         </div>
                     </a>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden items-center space-x-8 lg:flex">
-                        {items.filter((i) => i?.name !== 'Painel' || isLogged).map((item) => (
-                            <a
-                                key={item.path}
-                                href={item.path}
-                                className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                                    isActivePath(item.path)
-                                        ? 'bg-primary/10 text-primary'
-                                        : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
-                                }`}
-                            >
-                                <Icon name={item.icon} size={18} />
-                                <span>{item.name}</span>
-                            </a>
-                        ))}
+                        {items
+                            ?.filter((i) => i?.name !== 'Painel' || isLogged)
+                            .map((item) =>
+                                item?.external ? (
+                                    <a
+                                        key={item?.path}
+                                        href={item?.path}
+                                        className={`text-text-secondary flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-primary/5 hover:text-primary`}
+                                    >
+                                        <Icon name={item?.icon} size={18} />
+                                        <span>{item?.name}</span>
+                                    </a>
+                                ) : (
+                                    <a
+                                        key={item?.path}
+                                        href={item?.path}
+                                        className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                                            isActivePath(item?.path)
+                                                ? 'bg-primary/10 text-primary'
+                                                : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                                        }`}
+                                    >
+                                        <Icon name={item?.icon} size={18} />
+                                        <span>{item?.name}</span>
+                                    </a>
+                                ),
+                            )}
                     </nav>
 
                     {/* Desktop CTA */}
@@ -94,7 +107,7 @@ export default function HeaderStandalone() {
                             size="sm"
                             iconName="MessageCircle"
                             iconPosition="left"
-                            onClick={() => openWhatsApp('Olá! Gostaria de saber mais sobre os imóveis disponíveis.', { contact })}
+                            onClick={openWhatsAppHeader}
                             className="bg-accent hover:bg-accent/90"
                         >
                             WhatsApp
@@ -135,21 +148,35 @@ export default function HeaderStandalone() {
                     <div className="border-border bg-white lg:hidden">
                         <div className="container-responsive">
                             <div className="space-y-3 py-4">
-                                {items.filter((i) => i?.name !== 'Painel' || isLogged).map((item) => (
-                                    <a
-                                        key={item.path}
-                                        href={item.path}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`flex items-center space-x-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 ${
-                                            isActivePath(item.path)
-                                                ? 'bg-primary/10 text-primary'
-                                                : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
-                                        }`}
-                                    >
-                                        <Icon name={item.icon} size={20} />
-                                        <span>{item.name}</span>
-                                    </a>
-                                ))}
+                                {items
+                                    ?.filter((i) => i?.name !== 'Painel' || isLogged)
+                                    .map((item) =>
+                                        item?.external ? (
+                                            <a
+                                                key={item?.path}
+                                                href={item?.path}
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className={`text-text-secondary flex items-center space-x-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-primary/5 hover:text-primary`}
+                                            >
+                                                <Icon name={item?.icon} size={20} />
+                                                <span>{item?.name}</span>
+                                            </a>
+                                        ) : (
+                                            <a
+                                                key={item?.path}
+                                                href={item?.path}
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className={`flex items-center space-x-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 ${
+                                                    isActivePath(item?.path)
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                                                }`}
+                                            >
+                                                <Icon name={item?.icon} size={20} />
+                                                <span>{item?.name}</span>
+                                            </a>
+                                        ),
+                                    )}
 
                                 <div className="space-y-3 border-t border-border pt-4">
                                     <Button
@@ -172,7 +199,7 @@ export default function HeaderStandalone() {
                                         iconName="MessageCircle"
                                         iconPosition="left"
                                         onClick={() => {
-                                            openWhatsApp('Olá! Gostaria de saber mais sobre os imóveis disponíveis.', { contact });
+                                            openWhatsAppHeader();
                                             setIsMobileMenuOpen(false);
                                         }}
                                         fullWidth
