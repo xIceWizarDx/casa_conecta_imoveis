@@ -1,7 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
-import ScrollToTop from "@/main/components/ScrollToTop";
 import ErrorBoundary from "@/main/components/ErrorBoundary";
+import ScrollToTop from "@/main/components/ScrollToTop";
+import CookieConsentBanner from "@/main/components/CookieConsentBanner";
 import NotFound from "@/main/pages/NotFound";
 import FAQPage from './pages/faq-comprehensive-buyer-education';
 import AboutBrandStoryCredentials from './pages/about-brand-story-credentials';
@@ -20,6 +21,7 @@ const Routes = () => {
     <BrowserRouter>
       <ErrorBoundary>
         <ScrollToTop />
+        <CookieConsentBanner />
         <AnalyticsWrapper>
           <RouterRoutes>
             {/* Define your route here */}

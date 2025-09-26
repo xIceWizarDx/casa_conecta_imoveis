@@ -1,5 +1,12 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from "../utils/cn";
+import {
+  fetchAndCacheImage,
+  getCachedImageUrl,
+  hasImageCacheConsent,
+  IMAGE_CACHE_CONSENT_EVENT,
+  removeImageCacheEntry,
+} from "@/lib/imageCache";
 
 const FALLBACK_SRC = "/assets/images/no_image.png";
 
@@ -23,6 +30,12 @@ const FALLBACK_SRC = "/assets/images/no_image.png";
  *   duplicating logic in each consumer.
  * - Non-critical images default to `loading="lazy"` and `decoding="async"`
  *   to keep hero assets responsive while they stream in.
+ *
+ * Historically this component only orchestrated placeholders/responsive
+ * sources, forcing every visit to re-download heavy hero/gallery assets. The
+ * implementation now integrates with `imageCache` so that, once visitors grant
+ * consent for cookie/localStorage usage, high-resolution payloads are persisted
+ * and reused across sessions without disrupting the fade-in placeholder flow.
  */
 const AppImage = forwardRef(function AppImage({
   src,
@@ -41,15 +54,105 @@ const AppImage = forwardRef(function AppImage({
   decoding = "async",
   ...props
 }, ref) {
-  const [currentSrc, setCurrentSrc] = useState(src);
+  const [currentSrc, setCurrentSrc] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasTriedFallback, setHasTriedFallback] = useState(false);
+  const [hasConsent, setHasConsent] = useState(() => hasImageCacheConsent());
+  const objectUrlRef = useRef(null);
+
+  const updateObjectUrl = useCallback((nextUrl) => {
+    if (typeof window === "undefined") return;
+    if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") {
+      objectUrlRef.current = nextUrl ?? null;
+      return;
+    }
+    const currentUrl = objectUrlRef.current;
+    if (currentUrl && currentUrl !== nextUrl) {
+      URL.revokeObjectURL(currentUrl);
+    }
+    objectUrlRef.current = nextUrl ?? null;
+  }, []);
 
   useEffect(() => {
-    setCurrentSrc(src);
+    if (typeof window === "undefined") return undefined;
+
+    const handleConsentChange = (event) => {
+      const consent = event?.detail?.consent;
+      setHasConsent(consent === "granted");
+    };
+
+    window.addEventListener(IMAGE_CACHE_CONSENT_EVENT, handleConsentChange);
+
+    return () => {
+      window.removeEventListener(IMAGE_CACHE_CONSENT_EVENT, handleConsentChange);
+    };
+  }, []);
+
+  useEffect(() => () => updateObjectUrl(null), [updateObjectUrl]);
+
+  useEffect(() => {
     setIsLoaded(false);
     setHasTriedFallback(false);
   }, [src]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    updateObjectUrl(null);
+    setCurrentSrc(undefined);
+
+    if (!src) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    if (typeof window === "undefined" || !hasConsent) {
+      setCurrentSrc(src);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    (async () => {
+      try {
+        const cachedUrl = await getCachedImageUrl(src);
+        if (!isMounted) {
+          if (cachedUrl) {
+            updateObjectUrl(null);
+            if (typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function") {
+              URL.revokeObjectURL(cachedUrl);
+            }
+          }
+          return;
+        }
+
+        if (cachedUrl) {
+          updateObjectUrl(cachedUrl);
+          setCurrentSrc(cachedUrl);
+          return;
+        }
+
+        const objectUrl = await fetchAndCacheImage(src);
+        if (!isMounted) {
+          if (typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function") {
+            URL.revokeObjectURL(objectUrl);
+          }
+          return;
+        }
+
+        updateObjectUrl(objectUrl);
+        setCurrentSrc(objectUrl);
+      } catch (error) {
+        updateObjectUrl(null);
+        setCurrentSrc(src);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [src, hasConsent, updateObjectUrl]);
 
   const handleLoad = (event) => {
     setIsLoaded(true);
@@ -57,10 +160,23 @@ const AppImage = forwardRef(function AppImage({
   };
 
   const handleError = (event) => {
-    if (!hasTriedFallback && currentSrc !== FALLBACK_SRC) {
-      setHasTriedFallback(true);
-      setCurrentSrc(FALLBACK_SRC);
-      setIsLoaded(false);
+    if (!hasTriedFallback) {
+      if (currentSrc && currentSrc.startsWith("blob:") && src) {
+        setHasTriedFallback(true);
+        updateObjectUrl(null);
+        removeImageCacheEntry(src).catch(() => {});
+        setCurrentSrc(src);
+        setIsLoaded(false);
+        return;
+      }
+
+      if (currentSrc !== FALLBACK_SRC) {
+        setHasTriedFallback(true);
+        updateObjectUrl(null);
+        setCurrentSrc(FALLBACK_SRC);
+        setIsLoaded(false);
+        return;
+      }
     }
 
     onErrorProp?.(event);
@@ -98,7 +214,7 @@ const AppImage = forwardRef(function AppImage({
 
       <img
         ref={ref}
-        src={currentSrc}
+        src={currentSrc ?? undefined}
         alt={alt}
         className={cn("relative z-[2]", resolvedImgClassName)}
         onLoad={handleLoad}
