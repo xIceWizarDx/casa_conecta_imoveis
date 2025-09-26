@@ -268,8 +268,8 @@ const HeroCarousel = () => {
             wrapperClassName="w-full h-full"
             imgClassName="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 hero-overlay" />
-          <div className="absolute inset-0 flex items-center">
+          <div className="absolute inset-0 hero-overlay z-10" />
+          <div className="absolute inset-0 flex items-center z-20">
             <div className="container-responsive">
               <div className="max-w-2xl text-white space-y-6">
                 <h1 className="text-4xl sm:text-5xl font-bold leading-tight">
@@ -310,13 +310,13 @@ const HeroCarousel = () => {
                 onLoad={handleImageLoad(index)}
               />
               <div
-                className={`absolute inset-0 hero-overlay transition-all duration-700 ${
+                className={`absolute inset-0 hero-overlay transition-all duration-700 z-10 ${
                   loadedSlides[index] ? 'opacity-90 blur-0' : 'opacity-70 blur-sm'
                 }`}
               />
 
               {/* Volta a posição anterior (centrado verticalmente) */}
-              <div className="absolute inset-0 flex items-center">
+              <div className="absolute inset-0 flex items-center z-20">
                 <div className="container-responsive">
                   <div
                     className={`max-w-3xl text-white transition-all duration-700 ${
