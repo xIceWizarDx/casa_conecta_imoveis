@@ -10,10 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { apiFetch } from '@/lib/api';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import HeaderStandalone from '@/main/components/ui/HeaderStandalone';
 // Removido CSS legado para manter aparência consistente com as demais views
 // import '../../css/oldsite.css';
 
@@ -21,15 +21,6 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
 import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
-import { type BreadcrumbItem } from '@/types';
-import { painel } from '@/routes';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Painel',
-        href: painel().url,
-    },
-];
 
 type Image = {
     id: number;
@@ -348,15 +339,18 @@ export default function Painel() {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Painel" />
 
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-                {notice && (
-                    <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
-                        <AlertTitle>{notice.title}</AlertTitle>
-                        {notice.message && <AlertDescription>{notice.message}</AlertDescription>}
-                    </Alert>
+            <div className="flex min-h-screen w-full flex-col bg-background">
+                <HeaderStandalone />
+
+                <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
+                    {notice && (
+                        <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
+                            <AlertTitle>{notice.title}</AlertTitle>
+                            {notice.message && <AlertDescription>{notice.message}</AlertDescription>}
+                        </Alert>
                 )}
                 {/* Hero Slides */}
                 <>
@@ -723,9 +717,9 @@ export default function Painel() {
                             editing={editingFeatured}
                         />
                 </>
-
-            </main>
-        </AppLayout>
+                </main>
+            </div>
+        </>
     );
 }
 

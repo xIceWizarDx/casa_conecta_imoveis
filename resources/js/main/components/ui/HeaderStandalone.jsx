@@ -33,7 +33,7 @@ export default function HeaderStandalone() {
         { name: 'Painel', path: '/painel', icon: 'Image', external: true },
     ];
 
-    const isActivePath = (path) => window.location?.pathname === path;
+    const isActivePath = (path) => (typeof window !== 'undefined' ? window.location?.pathname === path : false);
 
     const handleWhatsAppClick = () => {
         const message = encodeURIComponent('Olá! Gostaria de saber mais sobre os imóveis disponíveis.');
