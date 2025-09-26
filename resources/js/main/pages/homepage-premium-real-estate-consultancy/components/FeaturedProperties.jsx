@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 
 const PLACEHOLDER_QUALITY = '10';
 const PLACEHOLDER_BLUR = '50';
+const DEFAULT_PLACEHOLDER_IMAGE = '/assets/images/no_image.png';
 
 const buildUnsplashUrl = (url, paramsToMerge = {}) => {
   if (!url) return null;
@@ -136,36 +137,89 @@ const extractThumbnailsFromRecord = (record) => {
 const buildGalleryEntries = (property) => {
   if (!property) return [];
 
-  const galleryUrls = extractGalleryFromRecord(property);
-  const fallbackImage = normalizeImageValue(property.image) || normalizeImageValue(property.image_url);
-  const imagesToUse = galleryUrls.length ? galleryUrls : fallbackImage ? [fallbackImage] : [];
   const thumbnails = extractThumbnailsFromRecord(property);
+  const fallbackImage =
+    normalizeImageValue(property.image) ||
+    normalizeImageValue(property.image_url) ||
+    null;
 
-  return imagesToUse.map((src, index) => {
-    const placeholderCandidate = thumbnails[index] || thumbnails[0];
-    const placeholder = placeholderCandidate || buildPlaceholderSrc(src);
+  const galleryCandidates = [];
 
-    return {
-      src,
-      placeholder,
-      srcSet: buildResponsiveSrcSet(src),
-    };
-  });
+  if (Array.isArray(property.gallery) && property.gallery.length) {
+    galleryCandidates.push(...property.gallery);
+  } else if (Array.isArray(property.galleryEntries) && property.galleryEntries.length) {
+    galleryCandidates.push(...property.galleryEntries);
+  }
+
+  if (!galleryCandidates.length) {
+    const extracted = extractGalleryFromRecord(property);
+    if (extracted.length) {
+      galleryCandidates.push(...extracted);
+    }
+  }
+
+  if (!galleryCandidates.length && fallbackImage) {
+    galleryCandidates.push(fallbackImage);
+  }
+
+  const entries = galleryCandidates
+    .map((candidate, index) => {
+      if (candidate && typeof candidate === 'object' && typeof candidate.src === 'string') {
+        const src = candidate.src;
+        const placeholder =
+          candidate.placeholder ||
+          candidate.placeholderSrc ||
+          candidate.placeholder_url ||
+          candidate.placeholderUrl ||
+          candidate.blurDataURL ||
+          candidate.blurDataUrl ||
+          thumbnails[index] ||
+          thumbnails[0] ||
+          buildPlaceholderSrc(src) ||
+          DEFAULT_PLACEHOLDER_IMAGE;
+
+        const srcSet =
+          candidate.srcSet ||
+          candidate.srcset ||
+          candidate.src_set ||
+          buildResponsiveSrcSet(src);
+
+        return {
+          ...candidate,
+          src,
+          placeholder,
+          srcSet,
+        };
+      }
+
+      const src = normalizeImageValue(candidate);
+      if (!src) return null;
+
+      const placeholderCandidate = thumbnails[index] || thumbnails[0];
+
+      return {
+        src,
+        placeholder: placeholderCandidate || buildPlaceholderSrc(src) || DEFAULT_PLACEHOLDER_IMAGE,
+        srcSet: buildResponsiveSrcSet(src),
+      };
+    })
+    .filter(Boolean);
+
+  if (entries.length) {
+    return entries;
+  }
+
+  return [
+    {
+      src: DEFAULT_PLACEHOLDER_IMAGE,
+      placeholder: DEFAULT_PLACEHOLDER_IMAGE,
+      srcSet: null,
+    },
+  ];
 };
-
-const isGalleryEntry = (value) => value && typeof value === 'object' && typeof value.src === 'string';
 
 const getPropertyGallery = (property) => {
   if (!property) return [];
-
-  if (Array.isArray(property.gallery) && property.gallery.every((item) => isGalleryEntry(item))) {
-    return property.gallery;
-  }
-
-  if (Array.isArray(property.galleryEntries) && property.galleryEntries.every((item) => isGalleryEntry(item))) {
-    return property.galleryEntries;
-  }
-
   return buildGalleryEntries(property);
 };
 
@@ -362,7 +416,10 @@ const FeaturedProperties = () => {
           const mapped = (data || []).map((p) => {
             const galleryEntries = buildGalleryEntries(p);
             const primaryImageEntry = galleryEntries[0] || null;
-            const fallbackImage = normalizeImageValue(p.image) || normalizeImageValue(p.image_url) || null;
+            const fallbackImage =
+              normalizeImageValue(p.image) ||
+              normalizeImageValue(p.image_url) ||
+              DEFAULT_PLACEHOLDER_IMAGE;
 
             return {
               id: p.id,
@@ -373,8 +430,12 @@ const FeaturedProperties = () => {
               bathrooms: p.bathrooms,
               area: p.area,
               type: p.type,
+              // O backend já entrega image_url e gallery com arquivos do storage; usamos o placeholder padrão só se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
-              imagePlaceholder: primaryImageEntry?.placeholder || buildPlaceholderSrc(fallbackImage),
+              imagePlaceholder:
+                primaryImageEntry?.placeholder ||
+                buildPlaceholderSrc(fallbackImage) ||
+                DEFAULT_PLACEHOLDER_IMAGE,
               imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(fallbackImage),
               gallery: galleryEntries,
               galleryEntries,
@@ -388,6 +449,8 @@ const FeaturedProperties = () => {
       } catch {}
     })();
   }, []);
+
+  // Caso a API não retorne imóveis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
 
   useEffect(() => {
     if (!isModalOpen || typeof document === 'undefined') {
@@ -489,168 +552,10 @@ const FeaturedProperties = () => {
 
   const hasActiveFilters = Object.values(filters).some((f) => f !== '');
 
-  const allPropertiesStatic = [
-    {
-      id: 1,
-      title: 'Casa de Luxo no Setor Bueno',
-      neighborhood: 'Setor Bueno',
-      price: 'R$ 1.850.000',
-      bedrooms: 4,
-      bathrooms: 3,
-      area: '320m²',
-      type: 'casa',
-      gallery: [
-        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1600585154603-2c5b938b00ec?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Piscina', 'Churrasqueira', 'Garagem 4 vagas'],
-      isNew: true,
-      priceRange: '1800000-2500000',
-    },
-    {
-      id: 2,
-      title: 'Apartamento Premium Jardim Goiás',
-      neighborhood: 'Jardim Goiás',
-      price: 'R$ 1.200.000',
-      bedrooms: 3,
-      bathrooms: 2,
-      area: '180m²',
-      type: 'apartamento',
-      gallery: [
-        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Vista panorâmica', 'Varanda gourmet', '2 vagas'],
-      isNew: false,
-      priceRange: '1200000-1800000',
-    },
-    {
-      id: 3,
-      title: 'Cobertura Alto da Glória',
-      neighborhood: 'Alto da Glória',
-      price: 'R$ 2.400.000',
-      bedrooms: 5,
-      bathrooms: 4,
-      area: '450m²',
-      type: 'cobertura',
-      gallery: [
-        'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1598620617137-b4c21cdd553a?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Terraço privativo', 'Piscina', 'Vista 360°'],
-      isNew: true,
-      priceRange: '2500000-3000000',
-    },
-    {
-      id: 4,
-      title: 'Casa Moderna Setor Marista',
-      neighborhood: 'Setor Marista',
-      price: 'R$ 1.650.000',
-      bedrooms: 4,
-      bathrooms: 3,
-      area: '280m²',
-      type: 'casa',
-      gallery: [
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Arquitetura moderna', 'Jardim', '3 vagas'],
-      isNew: false,
-      priceRange: '1200000-1800000',
-    },
-    {
-      id: 5,
-      title: 'Sobrado Park Lozandes',
-      neighborhood: 'Park Lozandes',
-      price: 'R$ 980.000',
-      bedrooms: 3,
-      bathrooms: 2,
-      area: '220m²',
-      type: 'sobrado',
-      gallery: [
-        'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Condomínio fechado', 'Área gourmet', '2 vagas'],
-      isNew: false,
-      priceRange: '800000-1200000',
-    },
-    {
-      id: 6,
-      title: 'Apartamento Setor Oeste',
-      neighborhood: 'Setor Oeste',
-      price: 'R$ 850.000',
-      bedrooms: 2,
-      bathrooms: 2,
-      area: '120m²',
-      type: 'apartamento',
-      gallery: [
-        'https://images.unsplash.com/photo-1600607687644-c7171b42498b?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Mobiliado', 'Sacada', '1 vaga'],
-      isNew: true,
-      priceRange: '800000-1200000',
-    },
-    {
-      id: 7,
-      title: 'Casa Condomínio Jardim Goiás',
-      neighborhood: 'Jardim Goiás',
-      price: 'R$ 2.100.000',
-      bedrooms: 4,
-      bathrooms: 4,
-      area: '380m²',
-      type: 'casa',
-      gallery: [
-        'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1616594039964-26e5f2267d43?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1599423300746-b62533397364?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Condomínio de luxo', 'Piscina', '4 vagas'],
-      isNew: false,
-      priceRange: '1800000-2500000',
-    },
-    {
-      id: 8,
-      title: 'Cobertura Setor Bueno',
-      neighborhood: 'Setor Bueno',
-      price: 'R$ 3.200.000',
-      bedrooms: 5,
-      bathrooms: 5,
-      area: '520m²',
-      type: 'cobertura',
-      gallery: [
-        'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1616594039964-26e5f2267d43?auto=format&fit=crop&w=1600&q=80',
-        'https://images.unsplash.com/photo-1600585154435-3d04e3f22864?auto=format&fit=crop&w=1600&q=80',
-      ],
-      features: ['Duplex', 'Piscina privativa', '6 vagas'],
-      isNew: true,
-      priceRange: '3000000+',
-    },
-  ].map((property) => {
-    const galleryEntries = buildGalleryEntries(property);
-    const primaryImageEntry = galleryEntries[0] || null;
+  const list = Array.isArray(remote) ? remote : [];
 
-    return {
-      ...property,
-      gallery: galleryEntries,
-      image: primaryImageEntry?.src || null,
-      imagePlaceholder: primaryImageEntry?.placeholder || buildPlaceholderSrc(primaryImageEntry?.src || null),
-      imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(primaryImageEntry?.src || null),
-    };
-  });
-
-  const list = remote?.length ? remote : allPropertiesStatic;
-
-  const filterProperties = (properties) => {
-    return properties?.filter((property) => {
+  const filterProperties = (properties = []) => {
+    return properties.filter((property) => {
       if (filters.neighborhood && property?.neighborhood?.toLowerCase()?.replace(/\s+/g, '-') !== filters.neighborhood) {
         return false;
       }
