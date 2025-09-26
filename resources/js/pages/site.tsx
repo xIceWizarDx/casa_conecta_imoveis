@@ -5,7 +5,7 @@ import '../../css/oldsite.css';
 export default function Site() {
   return (
     <div className="old-site">
-      <Head title="Site" />
+      <Head title="Casa Conecta Imóveis | Consultoria Imobiliária Premium" />
       <App />
     </div>
   );
