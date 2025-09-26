@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
@@ -140,10 +140,19 @@ const getHeroSlides = () => {
   return heroSlidesCache.promise;
 };
 
-const HeroCarousel = () => {
+const HeroCarousel = ({ onFirstSlideReady }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroProperties, setHeroProperties] = useState([]);
   const [loadedSlides, setLoadedSlides] = useState({});
+  const firstSlideReadyRef = useRef(false);
+
+  const notifyFirstSlideReady = useCallback(() => {
+    if (firstSlideReadyRef.current) return;
+    firstSlideReadyRef.current = true;
+    if (typeof onFirstSlideReady === 'function') {
+      onFirstSlideReady();
+    }
+  }, [onFirstSlideReady]);
 
   useEffect(() => {
     let isMounted = true;
@@ -188,6 +197,12 @@ const HeroCarousel = () => {
   useEffect(() => {
     setLoadedSlides({});
   }, [slides]);
+
+  useEffect(() => {
+    if (!slides.length) {
+      notifyFirstSlideReady();
+    }
+  }, [slides.length, notifyFirstSlideReady]);
 
   useEffect(() => {
     if (slides.length <= 1) return undefined;
@@ -251,6 +266,9 @@ const HeroCarousel = () => {
       ...prev,
       [index]: true,
     }));
+    if (index === 0) {
+      notifyFirstSlideReady();
+    }
   };
 
   const handleWhatsAppClick = (property) => {
