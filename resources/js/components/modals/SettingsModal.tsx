@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, usePage } from '@inertiajs/react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import InputError from '@/components/input-error';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import PasswordController from '@/actions/App/Http/Controllers/Settings/PasswordController';
 import { apiFetch } from '@/lib/api';
+import ContactController from '@/actions/App/Http/Controllers/Settings/ContactController';
+import { digitsOnly, formatBrazilPhoneFromDigits, setContactCache } from '@/lib/contact';
 
 type Props = {
   open: boolean;
@@ -19,14 +21,18 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
   const auth = page?.props?.auth;
   const [tab, setTab] = useState<'perfil' | 'senha' | 'contato'>('perfil');
   const [contact, setContact] = useState<{ email?: string | null; phone?: string | null; whatsapp?: string | null; whatsapp_link?: string | null }>({});
+  const [authSettings, setAuthSettings] = useState<{ registration_open?: boolean } | null>(null);
 
-  // Carrega contato ao abrir
   useEffect(() => {
     let ignore = false;
     if (open) {
-      apiFetch('/api/settings/contact')
+      apiFetch(ContactController.show.get())
         .then((res: any) => res?.contact)
         .then((c) => { if (!ignore && c) setContact(c); })
+        .catch(() => {});
+      fetch('/api/settings/auth')
+        .then((r) => r.ok ? r.json() : null)
+        .then((d) => { if (!ignore && d) setAuthSettings(d.auth || {}); })
         .catch(() => {});
     }
     return () => { ignore = true };
@@ -36,30 +42,14 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-xl" aria-describedby="settings-desc">
         <DialogHeader>
-          <DialogTitle>ConfiguraÃ§Ãµes</DialogTitle>
-          <DialogDescription id="settings-desc">Gerencie suas informaÃ§Ãµes de perfil e senha.</DialogDescription>
+          <DialogTitle>Configurações</DialogTitle>
+          <DialogDescription id="settings-desc">Gerencie suas informações de perfil, senha e contato.</DialogDescription>
         </DialogHeader>
 
-        {/* Tabs simples */}
         <div className="mb-4 flex items-center gap-2">
-          <button
-            className={`rounded-md px-3 py-1 text-sm ${tab === 'perfil' ? 'bg-black text-white' : 'bg-muted'}`}
-            onClick={() => setTab('perfil')}
-          >
-            Perfil
-          </button>
-          <button
-            className={`rounded-md px-3 py-1 text-sm ${tab === 'senha' ? 'bg-black text-white' : 'bg-muted'}`}
-            onClick={() => setTab('senha')}
-          >
-            Senha
-          </button>
-          <button
-            className={`rounded-md px-3 py-1 text-sm ${tab === 'contato' ? 'bg-black text-white' : 'bg-muted'}`}
-            onClick={() => setTab('contato')}
-          >
-            Contato
-          </button>
+          <button className={`rounded-md px-3 py-1 text-sm ${tab === 'perfil' ? 'bg-black text-white' : 'bg-muted'}`} onClick={() => setTab('perfil')}>Perfil</button>
+          <button className={`rounded-md px-3 py-1 text-sm ${tab === 'senha' ? 'bg-black text-white' : 'bg-muted'}`} onClick={() => setTab('senha')}>Senha</button>
+          <button className={`rounded-md px-3 py-1 text-sm ${tab === 'contato' ? 'bg-black text-white' : 'bg-muted'}`} onClick={() => setTab('contato')}>Contato</button>
         </div>
 
         {tab === 'perfil' && (
@@ -93,17 +83,17 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
                 <>
                   <div className="grid gap-2">
                     <Label htmlFor="current_password">Senha atual</Label>
-                    <Input id="current_password" type="password" name="current_password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                    <Input id="current_password" type="password" name="current_password" placeholder="••••••••" />
                     <InputError message={errors.current_password} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="password">Nova senha</Label>
-                    <Input id="password" type="password" name="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                    <Input id="password" type="password" name="password" placeholder="••••••••" />
                     <InputError message={errors.password} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="password_confirmation">Confirmar senha</Label>
-                    <Input id="password_confirmation" type="password" name="password_confirmation" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                    <Input id="password_confirmation" type="password" name="password_confirmation" placeholder="••••••••" />
                     <InputError message={errors.password_confirmation} />
                   </div>
                   <DialogFooter>
@@ -123,22 +113,48 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contact_phone">Telefone</Label>
-              <Input id="contact_phone" value={contact.phone ?? ''} onChange={(e) => setContact({ ...contact, phone: e.target.value })} placeholder="(62) 99999-9999" />
+              <Input id="contact_phone" value={contact.phone ?? ''} onChange={(e) => setContact({ ...contact, phone: formatBrazilPhoneFromDigits(digitsOnly(e.target.value)) })} placeholder="(62) 99999-9999" inputMode="tel" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="contact_whatsapp">WhatsApp (apenas nÃºmeros, com DDD e DDI)</Label>
-              <Input id="contact_whatsapp" value={contact.whatsapp ?? ''} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} placeholder="5562999999999" />
+              <Label htmlFor="contact_whatsapp">WhatsApp (apenas números, com DDD e DDI)</Label>
+              <Input id="contact_whatsapp" value={contact.whatsapp ?? ''} onChange={(e) => {
+                const d = digitsOnly(e.target.value);
+                const next: any = { ...contact, whatsapp: d };
+                if (!contact.whatsapp_link || String(contact.whatsapp_link).startsWith('https://wa.me/')) {
+                  next.whatsapp_link = d ? `https://wa.me/${d}` : '';
+                }
+                setContact(next);
+              }} placeholder="5562999999999" inputMode="numeric" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contact_whatsapp_link">Link WhatsApp (opcional)</Label>
               <Input id="contact_whatsapp_link" value={contact.whatsapp_link ?? ''} onChange={(e) => setContact({ ...contact, whatsapp_link: e.target.value })} placeholder="https://wa.me/5562999999999" />
             </div>
+            <div className="grid gap-2 pt-2">
+              <div className="flex items-center gap-2">
+                <input
+                  id="registration_open"
+                  type="checkbox"
+                  checked={!!authSettings?.registration_open}
+                  onChange={(e) => setAuthSettings({ ...(authSettings || {}), registration_open: e.target.checked })}
+                />
+                <Label htmlFor="registration_open">Permitir novos cadastros</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">Quando desmarcado, novos registros ficam bloqueados.</p>
+            </div>
             <DialogFooter>
               <Button
                 className="w-auto"
                 onClick={async () => {
-                  await apiFetch('/api/admin/settings/contact', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contact) });
+                  const payload = { ...contact } as any;
+                  if (!payload.whatsapp_link && payload.whatsapp) payload.whatsapp_link = `https://wa.me/${digitsOnly(payload.whatsapp)}`;
+                  await apiFetch(ContactController.update.patch(), { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                  if (authSettings) {
+                    await apiFetch({ url: '/api/admin/settings/auth', method: 'PATCH' }, { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ registration_open: !!authSettings.registration_open }) });
+                  }
+                  setContactCache(payload);
                   onOpenChange(false);
+                  try { setTimeout(() => window.location.reload(), 50); } catch {}
                 }}
               >
                 Salvar contato
@@ -150,7 +166,3 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
-
-
-
-

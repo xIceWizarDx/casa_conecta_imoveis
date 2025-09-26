@@ -1,8 +1,8 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../../wayfinder'
 /**
-* @see \App\Http\Controllers\Settings\ContactController::update
- * @see app/Http/Controllers/Settings/ContactController.php:24
- * @route '/api/admin/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::update
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:20
+ * @route '/api/admin/settings/auth'
  */
 export const update = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(options),
@@ -11,22 +11,22 @@ export const update = (options?: RouteQueryOptions): RouteDefinition<'patch'> =>
 
 update.definition = {
     methods: ["patch"],
-    url: '/api/admin/settings/contact',
+    url: '/api/admin/settings/auth',
 } satisfies RouteDefinition<["patch"]>
 
 /**
-* @see \App\Http\Controllers\Settings\ContactController::update
- * @see app/Http/Controllers/Settings/ContactController.php:24
- * @route '/api/admin/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::update
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:20
+ * @route '/api/admin/settings/auth'
  */
 update.url = (options?: RouteQueryOptions) => {
     return update.definition.url + queryParams(options)
 }
 
 /**
-* @see \App\Http\Controllers\Settings\ContactController::update
- * @see app/Http/Controllers/Settings/ContactController.php:24
- * @route '/api/admin/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::update
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:20
+ * @route '/api/admin/settings/auth'
  */
 update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(options),
@@ -34,9 +34,9 @@ update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 })
 
     /**
-* @see \App\Http\Controllers\Settings\ContactController::update
- * @see app/Http/Controllers/Settings/ContactController.php:24
- * @route '/api/admin/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::update
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:20
+ * @route '/api/admin/settings/auth'
  */
     const updateForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url({
@@ -49,9 +49,9 @@ update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     })
 
             /**
-* @see \App\Http\Controllers\Settings\ContactController::update
- * @see app/Http/Controllers/Settings/ContactController.php:24
- * @route '/api/admin/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::update
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:20
+ * @route '/api/admin/settings/auth'
  */
         updateForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url({
@@ -65,9 +65,9 @@ update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     
     update.form = updateForm
 /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
 export const show = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(options),
@@ -76,31 +76,31 @@ export const show = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 show.definition = {
     methods: ["get","head"],
-    url: '/api/settings/contact',
+    url: '/api/settings/auth',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
 show.url = (options?: RouteQueryOptions) => {
     return show.definition.url + queryParams(options)
 }
 
 /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
 show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(options),
     method: 'get',
 })
 /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
 show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(options),
@@ -108,9 +108,9 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
     const showForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: show.url(options),
@@ -118,18 +118,18 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
         showForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(options),
             method: 'get',
         })
             /**
-* @see \App\Http\Controllers\Settings\ContactController::show
- * @see app/Http/Controllers/Settings/ContactController.php:11
- * @route '/api/settings/contact'
+* @see \App\Http\Controllers\Settings\AuthSettingsController::show
+ * @see app/Http/Controllers/Settings/AuthSettingsController.php:12
+ * @route '/api/settings/auth'
  */
         showForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url({
@@ -142,6 +142,6 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     show.form = showForm
-const ContactController = { update, show }
+const AuthSettingsController = { update, show }
 
-export default ContactController
+export default AuthSettingsController

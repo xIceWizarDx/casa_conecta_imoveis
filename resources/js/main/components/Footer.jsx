@@ -1,11 +1,12 @@
 import Icon from './AppIcon';
+import { openWhatsApp, openPhone, formatPhoneDisplay, useContactInfo } from '@/lib/contact';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+    const contact = useContactInfo();
 
     const handleWhatsAppClick = () => {
-        const message = encodeURIComponent('Olá! Gostaria de saber mais sobre os serviços da Casa Conecta.');
-        window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+        openWhatsApp('Olá! Gostaria de saber mais sobre os serviços da Casa Conecta.', { contact });
     };
 
     return (
@@ -37,11 +38,12 @@ const Footer = () => {
                                 <span className="font-medium">WhatsApp</span>
                             </button>
                             <a
-                                href="tel:+5562999999999"
+                                onClick={(e) => { e.preventDefault(); openPhone({ contact }); }}
+                                href="#"
                                 className="flex w-full items-center justify-center space-x-2 rounded-lg bg-primary px-4 py-3 text-white transition-colors hover:bg-primary/90 sm:w-auto"
                             >
                                 <Icon name="Phone" size={20} />
-                                <span className="font-medium">Ligar Agora</span>
+                                <span className="font-medium">Ligar {formatPhoneDisplay(contact)}</span>
                             </a>
                         </div>
                     </div>
@@ -51,16 +53,10 @@ const Footer = () => {
                     <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
                         <div className="text-sm text-gray-400">© {currentYear} Casa Conecta Imóveis. Todos os direitos reservados.</div>
                         <div className="flex items-center space-x-6 text-sm text-gray-400">
-                            <a href="#" className="transition-colors hover:text-white">
-                                Política de Privacidade
-                            </a>
-                            <a href="#" className="transition-colors hover:text-white">
-                                Termos de Uso
-                            </a>
+                            <a href="#" className="transition-colors hover:text-white">Política de Privacidade</a>
+                            <a href="#" className="transition-colors hover:text-white">Termos de Uso</a>
                             {/* Acesso discreto ao login */}
-                            <a href="/login" className="opacity-60 transition-opacity hover:opacity-100">
-                                Área restrita
-                            </a>
+                            <a href="/login" className="opacity-60 transition-opacity hover:opacity-100">Área restrita</a>
                         </div>
                     </div>
                 </div>
@@ -70,3 +66,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

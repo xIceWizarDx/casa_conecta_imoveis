@@ -7,6 +7,7 @@ import ServicePhilosophySection from './components/ServicePhilosophySection';
 import ClientSuccessSection from './components/ClientSuccessSection';
 import ContactSection from './components/ContactSection';
 import Footer from '../../components/Footer';
+import { openWhatsApp } from '@/lib/contact';
 
 const AboutBrandStoryCredentials = () => {
   useEffect(() => {
@@ -14,17 +15,16 @@ const AboutBrandStoryCredentials = () => {
   }, []);
 
   const handleWhatsAppFloat = () => {
-    const message = encodeURIComponent('Olá! Gostaria de conhecer mais sobre a Casa Conecta e seus serviços especializados.');
-    window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+    openWhatsApp('Olá! Gostaria de conhecer mais sobre a Casa Conecta e seus serviços especializados.');
   };
 
   return (
     <>
       <Helmet>
         <title>Sobre Nós - Casa Conecta | Consultoria Imobiliária Premium em Goiânia</title>
-        <meta 
-          name="description" 
-          content="Conheça a história da Casa Conecta, nossa equipe especializada e credenciais. 6 anos conectando famílias aos seus lares ideais em Goiânia com atendimento personalizado via WhatsApp." 
+        <meta
+          name="description"
+          content="Conheça a história da Casa Conecta, nossa equipe especializada e credenciais. 6 anos conectando famílias aos seus lares ideais em Goiânia com atendimento personalizado via WhatsApp."
         />
         <meta name="keywords" content="Casa Conecta, sobre nós, equipe, CRECI, consultoria imobiliária, Goiânia, história, credenciais" />
         <meta property="og:title" content="Sobre Nós - Casa Conecta | Consultoria Imobiliária Premium" />
@@ -34,7 +34,7 @@ const AboutBrandStoryCredentials = () => {
       </Helmet>
       <div className="min-h-screen bg-background">
         <Header />
-        
+
         <main>
           <HeroSection />
           <TimelineSection />
@@ -54,7 +54,6 @@ const AboutBrandStoryCredentials = () => {
           </svg>
         </button>
 
-        {/* Footer */}
         <Footer />
       </div>
     </>
@@ -62,3 +61,4 @@ const AboutBrandStoryCredentials = () => {
 };
 
 export default AboutBrandStoryCredentials;
+

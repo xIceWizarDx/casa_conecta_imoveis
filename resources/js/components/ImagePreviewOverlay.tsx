@@ -1,6 +1,7 @@
 import { Bath, Bed, MapPin, MessageCircle, Phone, Square } from 'lucide-react';
 import { Icon } from './icon';
 import { Button } from './ui/button';
+import { openWhatsApp, openPhone } from '@/lib/contact';
 
 interface OverlayProps {
     titulo?: string | null;
@@ -22,8 +23,8 @@ export default function ImagePreviewOverlay({
     bairro,
 }: OverlayProps) {
     const handleWhatsAppClick = () => {
-        const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`);
-        window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+        const message = `Olá! Tenho interesse no imóvel: ${titulo ?? ''} - ${preco ?? ''}. Gostaria de mais informações.`;
+        openWhatsApp(message);
     };
 
     return (
@@ -83,7 +84,7 @@ export default function ImagePreviewOverlay({
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => window.open('tel:+5562999999999')}
+                                    onClick={() => openPhone()}
                                     className="border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:text-white"
                                 >
                                     <Icon iconNode={Phone} size={16} className="mr-2" />
@@ -97,3 +98,4 @@ export default function ImagePreviewOverlay({
         </>
     );
 }
+

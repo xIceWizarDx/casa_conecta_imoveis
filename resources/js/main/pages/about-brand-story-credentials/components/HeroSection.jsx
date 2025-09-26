@@ -1,11 +1,12 @@
 import React from 'react';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
+import { openWhatsApp, openPhone, formatPhoneDisplay, useContactInfo } from '@/lib/contact';
 
 const HeroSection = () => {
+  const contact = useContactInfo();
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent('Olá! Vi o perfil da Casa Conecta e gostaria de conhecer mais sobre os serviços de consultoria imobiliária.');
-    window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+    openWhatsApp('Olá! Vi o perfil da Casa Conecta e gostaria de conhecer mais sobre os serviços de consultoria imobiliária.', { contact });
   };
 
   return (
@@ -19,12 +20,11 @@ const HeroSection = () => {
                 <span className="text-sm font-medium text-primary">Desde 2018 em Goiânia</span>
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-text-primary leading-tight">
-                Conectando famílias aos seus 
-                <span className="text-primary"> lares ideais</span>
+                Conectando famílias aos seus <span className="text-primary"> lares ideais</span>
               </h1>
               <p className="text-lg text-text-secondary leading-relaxed">
-                Somos mais que uma imobiliária. Somos consultores especializados em imóveis premium, 
-                dedicados a transformar o sonho da casa própria em realidade através de atendimento 
+                Somos mais que uma imobiliária. Somos consultores especializados em imóveis premium,
+                dedicados a transformar o sonho da casa própria em realidade através de atendimento
                 personalizado e expertise local incomparável.
               </p>
             </div>
@@ -60,9 +60,9 @@ const HeroSection = () => {
                 size="lg"
                 iconName="Phone"
                 iconPosition="left"
-                onClick={() => window.open('tel:+5562999999999')}
+                onClick={() => openPhone({ contact })}
               >
-                (62) 99999-9999
+                {formatPhoneDisplay(contact)}
               </Button>
             </div>
           </div>
@@ -77,7 +77,7 @@ const HeroSection = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
-            
+
             {/* Floating Card */}
             <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-6 max-w-xs">
               <div className="flex items-center space-x-3">
@@ -98,3 +98,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+

@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import SettingsModal from '@/components/modals/SettingsModal';
+import { openWhatsApp as openWhatsAppUtil, openPhone, formatPhoneDisplay } from '@/lib/contact';
 import Icon from '../AppIcon';
 import Button from './Button';
 import { usePage } from '@inertiajs/react';
@@ -35,7 +36,16 @@ const Header = () => {
             .then((r) => r.json())
             .then((d) => setContact(d.contact))
             .catch(() => {});
+        const handler = (e) => setContact(e?.detail || null);
+        window.addEventListener('contact:updated', handler);
+        return () => window.removeEventListener('contact:updated', handler);
     }, []);
+
+    // Centraliza abertura do WhatsApp usando dados salvos no modal
+    const openWhatsAppHeader = () => {
+        const message = 'Olá! Gostaria de saber mais sobre os imóveis disponíveis.';
+        openWhatsAppUtil(message, { contact });
+    };
 
     const openWhatsApp = () => {
         const base = contact?.whatsapp_link || (contact?.whatsapp ? `https://wa.me/${contact.whatsapp}` : 'https://wa.me/5562999999999');
@@ -62,7 +72,7 @@ const Header = () => {
     ];
 
     // Itens de navegação (inclui atalho para o painel)
-    const items = [...navigationItems, { name: 'Painel', path: '/painel', icon: 'Image', external: true }];
+    const items = isLogged ? [...navigationItems, { name: 'Painel', path: '/painel', icon: 'Image', external: true }] : navigationItems;
 
     const isActivePath = (path) => {
         return location?.pathname === path;
@@ -91,7 +101,7 @@ const Header = () => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden items-center space-x-8 lg:flex">
-                        {items?.map((item) =>
+                        {items?.filter((i) => i?.name !== 'Painel' || isLogged).map((item) =>
                             item?.external ? (
                                 <a
                                     key={item?.path}
@@ -125,17 +135,17 @@ const Header = () => {
                             size="sm"
                             iconName="Phone"
                             iconPosition="left"
-                            onClick={() => window.open(`tel:${contact?.phone || '+5562999999999'}`)}
+                            onClick={() => openPhone({ contact })}
                             className="text-text-secondary border-border hover:border-primary hover:text-primary"
                         >
-                            {contact?.phone || '(62) 99999-9999'}
+                            {formatPhoneDisplay(contact)}
                         </Button>
                         <Button
                             variant="default"
                             size="sm"
                             iconName="MessageCircle"
                             iconPosition="left"
-                            onClick={openWhatsApp}
+                            onClick={openWhatsAppHeader}
                             className="bg-accent hover:bg-accent/90"
                         >
                             WhatsApp
@@ -176,7 +186,7 @@ const Header = () => {
                     <div className="border-t border-border bg-white lg:hidden">
                         <div className="container-responsive">
                             <div className="space-y-3 py-4">
-                                {items?.map((item) =>
+                                {items?.filter((i) => i?.name !== 'Painel' || isLogged).map((item) =>
                                     item?.external ? (
                                         <a
                                             key={item?.path}
@@ -211,13 +221,13 @@ const Header = () => {
                                         iconName="Phone"
                                         iconPosition="left"
                                         onClick={() => {
-                                            window.open('tel:+5562999999999');
+                                            openPhone({ contact });
                                             setIsMobileMenuOpen(false);
                                         }}
                                         fullWidth
                                         className="text-text-secondary justify-start border-border hover:border-primary hover:text-primary"
                                     >
-                                        (62) 99999-9999
+                                        {formatPhoneDisplay(contact)}
                                     </Button>
                                     <Button
                                         variant="default"
@@ -225,7 +235,7 @@ const Header = () => {
                                         iconName="MessageCircle"
                                         iconPosition="left"
                                         onClick={() => {
-                                            handleWhatsAppClick();
+                                            openWhatsAppHeader();
                                             setIsMobileMenuOpen(false);
                                         }}
                                         fullWidth
@@ -244,6 +254,3 @@ const Header = () => {
 };
 
 export default Header;
-
-
-

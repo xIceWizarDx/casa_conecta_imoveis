@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import { openWhatsApp } from '@/lib/contact';
 
 const FAQItem = ({ question, answer, category, hasWhatsAppCTA = false, hasConsultationCTA = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent(`Olá! Tenho uma dúvida sobre: ${question}`);
-    window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+    openWhatsApp(`Olá! Tenho uma dúvida sobre: ${question}`);
   };
 
   const handleConsultationClick = () => {
-    // Scroll to consultation section or open modal
     const consultationSection = document.getElementById('consultation-section');
     if (consultationSection) {
       consultationSection?.scrollIntoView({ behavior: 'smooth' });
@@ -78,3 +77,4 @@ const FAQItem = ({ question, answer, category, hasWhatsAppCTA = false, hasConsul
 };
 
 export default FAQItem;
+

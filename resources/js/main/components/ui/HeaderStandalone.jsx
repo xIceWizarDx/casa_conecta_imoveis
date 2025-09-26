@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Icon from '../AppIcon';
 import Button from './Button';
 import SettingsModal from '@/components/modals/SettingsModal';
+import { openWhatsApp, openPhone, formatPhoneDisplay, useContactInfo } from '@/lib/contact';
 import { usePage } from '@inertiajs/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +18,7 @@ export default function HeaderStandalone() {
     const isLogged = !!auth?.user;
     const getInitials = useInitials();
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const contact = useContactInfo();
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -59,7 +61,7 @@ export default function HeaderStandalone() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden items-center space-x-8 lg:flex">
-                        {items.map((item) => (
+                        {items.filter((i) => i?.name !== 'Painel' || isLogged).map((item) => (
                             <a
                                 key={item.path}
                                 href={item.path}
@@ -82,17 +84,17 @@ export default function HeaderStandalone() {
                             size="sm"
                             iconName="Phone"
                             iconPosition="left"
-                            onClick={() => window.open('tel:+5562999999999')}
+                            onClick={() => openPhone({ contact })}
                             className="text-text-secondary border-border hover:border-primary hover:text-primary"
                         >
-                            (62) 99999-9999
+                            {formatPhoneDisplay(contact)}
                         </Button>
                         <Button
                             variant="default"
                             size="sm"
                             iconName="MessageCircle"
                             iconPosition="left"
-                            onClick={handleWhatsAppClick}
+                            onClick={() => openWhatsApp('Olá! Gostaria de saber mais sobre os imóveis disponíveis.', { contact })}
                             className="bg-accent hover:bg-accent/90"
                         >
                             WhatsApp
@@ -133,7 +135,7 @@ export default function HeaderStandalone() {
                     <div className="border-border bg-white lg:hidden">
                         <div className="container-responsive">
                             <div className="space-y-3 py-4">
-                                {items.map((item) => (
+                                {items.filter((i) => i?.name !== 'Painel' || isLogged).map((item) => (
                                     <a
                                         key={item.path}
                                         href={item.path}
@@ -156,13 +158,13 @@ export default function HeaderStandalone() {
                                         iconName="Phone"
                                         iconPosition="left"
                                         onClick={() => {
-                                            window.open('tel:+5562999999999');
+                                            openPhone({ contact });
                                             setIsMobileMenuOpen(false);
                                         }}
                                         fullWidth
                                         className="text-text-secondary justify-start border-border hover:border-primary hover:text-primary"
                                     >
-                                        (62) 99999-9999
+                                        {formatPhoneDisplay(contact)}
                                     </Button>
                                     <Button
                                         variant="default"
@@ -170,7 +172,7 @@ export default function HeaderStandalone() {
                                         iconName="MessageCircle"
                                         iconPosition="left"
                                         onClick={() => {
-                                            handleWhatsAppClick();
+                                            openWhatsApp('Olá! Gostaria de saber mais sobre os imóveis disponíveis.', { contact });
                                             setIsMobileMenuOpen(false);
                                         }}
                                         fullWidth

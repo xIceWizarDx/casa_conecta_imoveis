@@ -5,6 +5,7 @@ use App\Http\Controllers\HeroSlideController;
 use App\Http\Controllers\FeaturedPropertyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Settings\ContactController;
+use App\Http\Controllers\Settings\AuthSettingsController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -23,9 +24,8 @@ Route::get('/homepage-premium-real-estate-consultancy', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Manter compatibilidade: redireciona /dashboard para /painel
+    Route::redirect('dashboard', 'painel')->name('dashboard');
 
     // Página do painel (antes: imagens)
     Route::get('painel', function () {
@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
         // Settings protegidos
         Route::patch('admin/settings/contact', [ContactController::class, 'update']);
+        Route::patch('admin/settings/auth', [AuthSettingsController::class, 'update']);
     });
 
     // Endpoints admin para Hero Slides
@@ -69,6 +70,7 @@ Route::get('api/hero-slides', [HeroSlideController::class, 'publicIndex']);
 Route::get('api/featured-properties', [FeaturedPropertyController::class, 'publicIndex']);
 // Endpoint público para configurações de contato
 Route::get('api/settings/contact', [ContactController::class, 'show']);
+Route::get('api/settings/auth', [\App\Http\Controllers\Settings\AuthSettingsController::class, 'show']);
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
+import { openWhatsApp, openPhone, formatPhoneDisplay, useContactInfo } from '@/lib/contact';
 
 const ConsultationSection = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const ConsultationSection = () => {
     question: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const contact = useContactInfo();
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -22,23 +24,15 @@ const ConsultationSection = () => {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // WhatsApp integration with form data
-    const message = encodeURIComponent(
-      `Olá! Gostaria de agendar uma consulta.\n\nNome: ${formData?.name}\nEmail: ${formData?.email}\nTelefone: ${formData?.phone}\nDúvida: ${formData?.question}`
-    );
-    window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
-    
+    const message = `Olá! Gostaria de agendar uma consulta.\n\nNome: ${formData?.name}\nEmail: ${formData?.email}\nTelefone: ${formData?.phone}\nDúvida: ${formData?.question}`;
+    openWhatsApp(message, { contact });
     setIsSubmitting(false);
     setFormData({ name: '', email: '', phone: '', question: '' });
   };
 
   const handleWhatsAppDirect = () => {
-    const message = encodeURIComponent('Olá! Não encontrei a resposta para minha dúvida no FAQ. Podem me ajudar?');
-    window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
+    openWhatsApp('Olá! Não encontrei a resposta para minha dúvida no FAQ. Podem me ajudar?', { contact });
   };
 
   return (
@@ -48,80 +42,29 @@ const ConsultationSection = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
             <Icon name="HelpCircle" size={32} className="text-primary" />
           </div>
-          <h2 className="text-3xl font-bold text-text-primary mb-4">
-            Não encontrou sua resposta?
-          </h2>
+          <h2 className="text-3xl font-bold text-text-primary mb-4">Não encontrou sua resposta?</h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Nossa expertise vai além das perguntas padrão. Cada família tem necessidades únicas, 
-            e estamos aqui para oferecer orientação personalizada sobre sua situação específica.
+            Nossa expertise vai além das perguntas padrão. Cada família tem necessidades únicas, e estamos aqui para oferecer orientação personalizada sobre sua situação específica.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
-          {/* Contact Form */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-text-primary mb-6">
-              Agende uma Consulta Gratuita
-            </h3>
-            
+            <h3 className="text-xl font-semibold text-text-primary mb-6">Agende uma Consulta Gratuita</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Nome completo"
-                type="text"
-                placeholder="Seu nome completo"
-                value={formData?.name}
-                onChange={(e) => handleInputChange('name', e?.target?.value)}
-                required
-              />
-              
-              <Input
-                label="E-mail"
-                type="email"
-                placeholder="seu@email.com"
-                value={formData?.email}
-                onChange={(e) => handleInputChange('email', e?.target?.value)}
-                required
-              />
-              
-              <Input
-                label="Telefone/WhatsApp"
-                type="tel"
-                placeholder="(62) 99999-9999"
-                value={formData?.phone}
-                onChange={(e) => handleInputChange('phone', e?.target?.value)}
-                required
-              />
-              
+              <Input label="Nome completo" type="text" placeholder="Seu nome completo" value={formData?.name} onChange={(e) => handleInputChange('name', e?.target?.value)} required />
+              <Input label="E-mail" type="email" placeholder="seu@email.com" value={formData?.email} onChange={(e) => handleInputChange('email', e?.target?.value)} required />
+              <Input label="Telefone/WhatsApp" type="tel" placeholder="(62) 99999-9999" value={formData?.phone} onChange={(e) => handleInputChange('phone', e?.target?.value)} required />
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Sua dúvida específica
-                </label>
-                <textarea
-                  placeholder="Descreva sua situação ou dúvida específica..."
-                  value={formData?.question}
-                  onChange={(e) => handleInputChange('question', e?.target?.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
-                  required
-                />
+                <label className="block text-sm font-medium text-text-primary mb-2">Sua dúvida específica</label>
+                <textarea placeholder="Descreva sua situação ou dúvida específica..." value={formData?.question} onChange={(e) => handleInputChange('question', e?.target?.value)} rows={4} className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none" required />
               </div>
-              
-              <Button
-                type="submit"
-                variant="default"
-                size="lg"
-                loading={isSubmitting}
-                iconName="Send"
-                iconPosition="right"
-                fullWidth
-                className="bg-primary hover:bg-secondary"
-              >
+              <Button type="submit" variant="default" size="lg" loading={isSubmitting} iconName="Send" iconPosition="right" fullWidth className="bg-primary hover:bg-secondary">
                 {isSubmitting ? 'Enviando...' : 'Agendar Consulta Gratuita'}
               </Button>
             </form>
           </div>
 
-          {/* Quick Contact Options */}
           <div className="space-y-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-start space-x-4">
@@ -129,22 +72,9 @@ const ConsultationSection = () => {
                   <Icon name="MessageCircle" size={24} className="text-accent" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-text-primary mb-2">
-                    WhatsApp Imediato
-                  </h4>
-                  <p className="text-text-secondary mb-4">
-                    Resposta rápida para dúvidas urgentes. Nosso time está online de segunda a sábado.
-                  </p>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    iconName="MessageCircle"
-                    iconPosition="left"
-                    onClick={handleWhatsAppDirect}
-                    className="bg-accent hover:bg-accent/90"
-                  >
-                    Falar Agora
-                  </Button>
+                  <h4 className="text-lg font-semibold text-text-primary mb-2">WhatsApp Imediato</h4>
+                  <p className="text-text-secondary mb-4">Resposta rápida para dúvidas urgentes. Nosso time está online de segunda a sábado.</p>
+                  <Button variant="default" size="sm" iconName="MessageCircle" iconPosition="left" onClick={handleWhatsAppDirect} className="bg-accent hover:bg-accent/90">Falar Agora</Button>
                 </div>
               </div>
             </div>
@@ -155,22 +85,9 @@ const ConsultationSection = () => {
                   <Icon name="Phone" size={24} className="text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-text-primary mb-2">
-                    Ligação Direta
-                  </h4>
-                  <p className="text-text-secondary mb-4">
-                    Prefere falar por telefone? Ligue diretamente para nossa equipe especializada.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    iconName="Phone"
-                    iconPosition="left"
-                    onClick={() => window.open('tel:+5562999999999')}
-                    className="border-primary text-primary hover:bg-primary hover:text-white"
-                  >
-                    (62) 99999-9999
-                  </Button>
+                  <h4 className="text-lg font-semibold text-text-primary mb-2">Ligação Direta</h4>
+                  <p className="text-text-secondary mb-4">Prefere falar por telefone? Ligue diretamente para nossa equipe especializada.</p>
+                  <Button variant="outline" size="sm" iconName="Phone" iconPosition="left" onClick={() => openPhone({ contact })} className="border-primary text-primary hover:bg-primary hover:text-white">{formatPhoneDisplay(contact)}</Button>
                 </div>
               </div>
             </div>
@@ -194,3 +111,4 @@ const ConsultationSection = () => {
 };
 
 export default ConsultationSection;
+
