@@ -42,6 +42,12 @@ export async function apiFetch<T = unknown>(def: { url: string; method?: string 
         const text = await res.text();
         throw new Error(text || `HTTP ${res.status}`);
     }
+
     const ct = res.headers.get('content-type') || '';
-    return (ct.includes('application/json') ? res.json() : (null as unknown)) as T;
+    if (!ct.toLowerCase().includes('application/json')) {
+        const bodyText = (await res.text()).trim();
+        throw new Error(bodyText || 'Resposta inesperada do servidor');
+    }
+
+    return (await res.json()) as T;
 }

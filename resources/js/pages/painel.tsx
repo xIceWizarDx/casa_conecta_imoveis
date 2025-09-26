@@ -165,6 +165,9 @@ export default function Painel() {
         setImagesUploading(true);
         try {
             const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+            if (!Array.isArray(uploaded)) {
+                throw new Error('Resposta inesperada do servidor');
+            }
             setNotice({ type: 'success', title: 'Imagens enviadas com sucesso' });
             return uploaded;
         } catch (e) {
