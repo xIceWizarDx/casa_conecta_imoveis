@@ -134,7 +134,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\ImageController::destroy
- * @see app/Http/Controllers/ImageController.php:63
+ * @see app/Http/Controllers/ImageController.php:64
  * @route '/api/images/{image}'
  */
 export const destroy = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -149,7 +149,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\ImageController::destroy
- * @see app/Http/Controllers/ImageController.php:63
+ * @see app/Http/Controllers/ImageController.php:64
  * @route '/api/images/{image}'
  */
 destroy.url = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -182,7 +182,7 @@ destroy.url = (args: { image: number | { id: number } } | [image: number | { id:
 
 /**
 * @see \App\Http\Controllers\ImageController::destroy
- * @see app/Http/Controllers/ImageController.php:63
+ * @see app/Http/Controllers/ImageController.php:64
  * @route '/api/images/{image}'
  */
 destroy.delete = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -192,7 +192,7 @@ destroy.delete = (args: { image: number | { id: number } } | [image: number | { 
 
     /**
 * @see \App\Http\Controllers\ImageController::destroy
- * @see app/Http/Controllers/ImageController.php:63
+ * @see app/Http/Controllers/ImageController.php:64
  * @route '/api/images/{image}'
  */
     const destroyForm = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -207,7 +207,7 @@ destroy.delete = (args: { image: number | { id: number } } | [image: number | { 
 
             /**
 * @see \App\Http\Controllers\ImageController::destroy
- * @see app/Http/Controllers/ImageController.php:63
+ * @see app/Http/Controllers/ImageController.php:64
  * @route '/api/images/{image}'
  */
         destroyForm.delete = (args: { image: number | { id: number } } | [image: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
