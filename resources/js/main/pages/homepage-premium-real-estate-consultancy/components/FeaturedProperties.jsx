@@ -393,12 +393,16 @@ const FeaturedProperties = () => {
   const [filters, setFilters] = useState({
     neighborhood: '',
     priceRange: '',
-    propertyType: ''
+    propertyType: '',
+    lotAreaRange: '',
+    privateAreaRange: ''
   });
   const [formFilters, setFormFilters] = useState({
     neighborhood: '',
     priceRange: '',
-    propertyType: ''
+    propertyType: '',
+    lotAreaRange: '',
+    privateAreaRange: ''
   });
   const [remote, setRemote] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -421,6 +425,32 @@ const FeaturedProperties = () => {
               normalizeImageValue(p.image_url) ||
               DEFAULT_PLACEHOLDER_IMAGE;
 
+            // Helpers to parse numeric values from strings like "120 m²" or "R$ 1.200.000"
+            const parseArea = (val) => {
+              if (val == null) return null;
+              const m = String(val).match(/([0-9]+([\.,][0-9]+)?)/);
+              return m ? parseFloat(m[1].replace('.', '').replace(',', '.')) : null;
+            };
+            const parsePrice = (val) => {
+              if (val == null) return null;
+              const m = String(val).match(/([0-9\.\,]+)/);
+              if (!m) return null;
+              return Number(m[1].replace(/\./g, '').replace(',', '.')) || null;
+            };
+            const lotArea = parseArea(p.lot_area ?? p.lotArea ?? p.terreno ?? p.landSize ?? null);
+            const privateArea = parseArea(p.private_area ?? p.privateArea ?? p.area_privativa ?? p.areaPrivativa ?? p.area ?? null);
+            const priceNumber = parsePrice(p.price);
+            const resolvePriceRange = () => {
+              if (p.price_range) return p.price_range;
+              if (typeof priceNumber !== 'number' || Number.isNaN(priceNumber)) return '';
+              if (priceNumber >= 3000000) return '3000000+';
+              if (priceNumber >= 2500000) return '2500000-3000000';
+              if (priceNumber >= 1800000) return '1800000-2500000';
+              if (priceNumber >= 1200000) return '1200000-1800000';
+              if (priceNumber >= 800000) return '800000-1200000';
+              return '';
+            };
+
             return {
               id: p.id,
               title: p.title,
@@ -429,6 +459,8 @@ const FeaturedProperties = () => {
               bedrooms: p.bedrooms,
               bathrooms: p.bathrooms,
               area: p.area,
+              lotArea,
+              privateArea,
               type: p.type,
               // O backend já entrega image_url e gallery com arquivos do storage; usamos o placeholder padrão só se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
@@ -441,7 +473,7 @@ const FeaturedProperties = () => {
               galleryEntries,
               features: Array.isArray(p.features) ? p.features : [],
               isNew: !!p.is_new,
-              priceRange: p.price_range || '',
+              priceRange: resolvePriceRange(),
             };
           });
           setRemote(mapped);
@@ -503,17 +535,26 @@ const FeaturedProperties = () => {
   }, [activeGallery.length]);
 
   const neighborhoods = [
-    { value: '', label: 'Todos os Bairros' },
-    { value: 'setor-bueno', label: 'Setor Bueno' },
-    { value: 'jardim-goias', label: 'Jardim Goiás' },
-    { value: 'alto-da-gloria', label: 'Alto da Glória' },
-    { value: 'setor-marista', label: 'Setor Marista' },
-    { value: 'setor-oeste', label: 'Setor Oeste' },
-    { value: 'park-lozandes', label: 'Park Lozandes' },
+    { value: '', label: 'Todas as Regiões' },
+    { value: 'regiao-parque-cascavel', label: 'Região – Próximo ao Parque Cascavel' },
+    { value: 'aparecida-av-sao-paulo', label: 'Aparecida – Próximo à Av. São Paulo' },
+    { value: 'aparecida-sitio-santa-luzia', label: 'Aparecida – Sítio Santa Luzia' },
+    { value: 'aparecida-outros', label: 'Aparecida – Outros' },
+    { value: 'noroeste-prox-hugol', label: 'Noroeste – Próximo ao Hugol' },
+    { value: 'norte-prox-campus', label: 'Norte – Próximo ao Campus' },
+    { value: 'norte-prox-passeio-das-aguas', label: 'Norte – Próximo ao Passeio das Águas' },
+    { value: 'norte-prox-embrapa', label: 'Norte – Próximo à Embrapa' },
+    { value: 'go020-prox-flamboyant', label: 'Região GO 020 – Próximo ao Flamboyant' },
+    { value: 'go020-prox-sunset-wake-park', label: 'Região GO 020 – Próximo ao Sunset Wake Park' },
+    { value: 'go020-novos-jardins', label: 'Região GO 020 – Novos Jardins' },
+    { value: 'sul-saida-hidrolandia', label: 'Região Sul – Saída para Hidrolândia' },
+    { value: 'sul-saida-aragoiania', label: 'Região Sul – Saída para Aragoiânia' },
+    { value: 'oeste-saida-trindade', label: 'Região Oeste – Saída para Trindade' },
+    { value: 'sudeste-saida-bonfinopolis-leopoldo', label: 'Região Sudeste – Saída para Bonfinópolis/Leopoldo de Bulhões' },
   ];
 
   const priceRanges = [
-    { value: '', label: 'Qualquer Valor' },
+    { value: '', label: 'Qualquer valor' },
     { value: '800000-1200000', label: 'R$ 800.000 - R$ 1.200.000' },
     { value: '1200000-1800000', label: 'R$ 1.200.000 - R$ 1.800.000' },
     { value: '1800000-2500000', label: 'R$ 1.800.000 - R$ 2.500.000' },
@@ -522,12 +563,26 @@ const FeaturedProperties = () => {
   ];
 
   const propertyTypes = [
-    { value: '', label: 'Todos os Tipos' },
-    { value: 'casa', label: 'Casa' },
-    { value: 'apartamento', label: 'Apartamento' },
-    { value: 'cobertura', label: 'Cobertura' },
-    { value: 'sobrado', label: 'Sobrado' },
-    { value: 'terreno', label: 'Terreno' },
+    { value: '', label: 'Todos os tipos' },
+    { value: 'condominio-casas-sobrados', label: 'Condomínio de Casas/Sobrados' },
+    { value: 'condominios-lotes', label: 'Condomínios de lotes' },
+    { value: 'sitios-lazer', label: 'Sítios de lazer' },
+  ];
+
+  const lotAreaRanges = [
+    { value: '', label: 'Qualquer metragem (terreno)' },
+    { value: '0-200', label: 'Até 200 m²' },
+    { value: '200-400', label: '200 a 400 m²' },
+    { value: '400-600', label: '400 a 600 m²' },
+    { value: '600+', label: 'Acima de 600 m²' },
+  ];
+
+  const privateAreaRanges = [
+    { value: '', label: 'Qualquer metragem (área privativa)' },
+    { value: '0-80', label: 'Até 80 m²' },
+    { value: '80-120', label: '80 a 120 m²' },
+    { value: '120-200', label: '120 a 200 m²' },
+    { value: '200+', label: 'Acima de 200 m²' },
   ];
 
   const handleFilterChange = (type, value) => {
@@ -539,7 +594,7 @@ const FeaturedProperties = () => {
   };
 
   const clearFilters = () => {
-    const cleared = { neighborhood: '', priceRange: '', propertyType: '' };
+    const cleared = { neighborhood: '', priceRange: '', propertyType: '', lotAreaRange: '', privateAreaRange: '' };
     setFormFilters(cleared);
     setFilters(cleared);
   };
@@ -555,15 +610,59 @@ const FeaturedProperties = () => {
   const list = Array.isArray(remote) ? remote : [];
 
   const filterProperties = (properties = []) => {
+    const slugify = (s) =>
+      String(s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    const parseRange = (value) => {
+      if (!value) return [null, null];
+      if (value.endsWith('+')) return [Number(value.replace('+','')), null];
+      const [min, max] = value.split('-').map((v) => Number(v));
+      return [Number.isFinite(min) ? min : null, Number.isFinite(max) ? max : null];
+    };
+
+    const [lotMin, lotMax] = parseRange(filters.lotAreaRange);
+    const [privMin, privMax] = parseRange(filters.privateAreaRange);
+
     return properties.filter((property) => {
-      if (filters.neighborhood && property?.neighborhood?.toLowerCase()?.replace(/\s+/g, '-') !== filters.neighborhood) {
-        return false;
+      if (filters.neighborhood) {
+        const pSlug = slugify(property?.neighborhood);
+        if (!pSlug.includes(filters.neighborhood)) {
+          return false;
+        }
       }
       if (filters.priceRange && property?.priceRange !== filters.priceRange) {
         return false;
       }
       if (filters.propertyType && property?.type !== filters.propertyType) {
         return false;
+      }
+      if (filters.lotAreaRange) {
+        const value = property?.lotArea;
+        if (value == null) {
+          // If data doesn't have lot area, we don't include/exclude; skip filtering by lot area
+        } else {
+          if (lotMin != null && value < lotMin) return false;
+          if (lotMax != null && value > lotMax) return false;
+        }
+      }
+      if (filters.privateAreaRange) {
+        const value = property?.privateArea ?? (typeof property?.area === 'number' ? property.area : null);
+        if (value == null) {
+          // try parsing if area is a string
+          const m = String(property?.area ?? '').match(/([0-9]+([\.,][0-9]+)?)/);
+          const parsed = m ? parseFloat(m[1].replace('.', '').replace(',', '.')) : null;
+          if (parsed != null) {
+            if (privMin != null && parsed < privMin) return false;
+            if (privMax != null && parsed > privMax) return false;
+          }
+        } else {
+          if (privMin != null && value < privMin) return false;
+          if (privMax != null && value > privMax) return false;
+        }
       }
       return true;
     });
@@ -631,11 +730,13 @@ const FeaturedProperties = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Imóveis em Destaque
+            Diferenciais de cada imovel
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia,
-            próximos ao Flamboyant Shopping e principais centros comerciais
+            Seleção exclusiva de imóveis por região, com detalhes que vão além do básico.
+            <span className="block mt-2 font-semibold italic text-gray-900">
+              Quer descobrir o que ninguém te conta ou receber um filtro personalizado para as necessidades da sua família? Fale conosco.
+            </span>
           </p>
           {filteredProperties?.length > 0 && (
             <p className="text-sm text-primary font-medium mt-2">
@@ -646,11 +747,11 @@ const FeaturedProperties = () => {
         </div>
 
         <div className="mb-12 w-full rounded-2xl p-6">
-          <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
+          <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(5,1fr)_auto]">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="MapPin" size={16} className="mr-2 inline" />
-                Bairro
+                Região
               </label>
               <select
                 value={formFilters.neighborhood}
@@ -668,7 +769,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="DollarSign" size={16} className="mr-2 inline" />
-                Faixa de Preço
+                Valor
               </label>
               <select
                 value={formFilters.priceRange}
@@ -701,41 +802,93 @@ const FeaturedProperties = () => {
               </select>
             </div>
 
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                <Icon name="Square" size={16} className="mr-2 inline" />
+                Metragem do terreno
+              </label>
+              <select
+                value={formFilters.lotAreaRange}
+                onChange={(e) => handleFilterChange('lotAreaRange', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+              >
+                {lotAreaRanges.map((range) => (
+                  <option key={range.value} value={range.value}>
+                    {range.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                <Icon name="Square" size={16} className="mr-2 inline" />
+                Metragem da área privativa
+              </label>
+              <select
+                value={formFilters.privateAreaRange}
+                onChange={(e) => handleFilterChange('privateAreaRange', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary"
+              >
+                {privateAreaRanges.map((range) => (
+                  <option key={range.value} value={range.value}>
+                    {range.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex items-end justify-center">
-              <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
+            <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
                 Buscar Imóveis
-              </Button>
+            </Button>
             </div>
           </div>
 
           {hasActiveFilters && (
             <>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {filters.neighborhood && (
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                    {neighborhoods.find((n) => n.value === filters.neighborhood)?.label}
-                    <button onClick={() => removeFilter('neighborhood')} className="ml-2 hover:text-primary/80">
-                      <Icon name="X" size={14} />
-                    </button>
-                  </span>
-                )}
-                {filters.priceRange && (
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                    {priceRanges.find((p) => p.value === filters.priceRange)?.label}
-                    <button onClick={() => removeFilter('priceRange')} className="ml-2 hover:text-primary/80">
-                      <Icon name="X" size={14} />
-                    </button>
-                  </span>
-                )}
-                {filters.propertyType && (
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                    {propertyTypes.find((t) => t.value === filters.propertyType)?.label}
-                    <button onClick={() => removeFilter('propertyType')} className="ml-2 hover:text-primary/80">
-                      <Icon name="X" size={14} />
-                    </button>
-                  </span>
-                )}
-              </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {filters.neighborhood && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {neighborhoods.find((n) => n.value === filters.neighborhood)?.label}
+                  <button onClick={() => removeFilter('neighborhood')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.priceRange && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {priceRanges.find((p) => p.value === filters.priceRange)?.label}
+                  <button onClick={() => removeFilter('priceRange')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.propertyType && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {propertyTypes.find((t) => t.value === filters.propertyType)?.label}
+                  <button onClick={() => removeFilter('propertyType')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.lotAreaRange && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {lotAreaRanges.find((r) => r.value === filters.lotAreaRange)?.label}
+                  <button onClick={() => removeFilter('lotAreaRange')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+              {filters.privateAreaRange && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                  {privateAreaRanges.find((r) => r.value === filters.privateAreaRange)?.label}
+                  <button onClick={() => removeFilter('privateAreaRange')} className="ml-2 hover:text-primary/80">
+                    <Icon name="X" size={14} />
+                  </button>
+                </span>
+              )}
+            </div>
 
               <div className="mt-4 flex justify-end">
                 <Button variant="outline" iconName="RotateCcw" iconPosition="left" onClick={clearFilters}>
