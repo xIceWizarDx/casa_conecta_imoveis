@@ -56,8 +56,7 @@ const ServicePhilosophySection = () => {
             Nossa Filosofia de Atendimento
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Mais que uma imobiliária, somos consultores especializados em conectar 
-            famílias aos seus lares ideais através de uma abordagem única no mercado
+            “Nosso papel não é vender imóveis, mas fornecer clareza e informações confiáveis para que sua família escolha com segurança e tranquilidade.”
           </p>
         </div>
 

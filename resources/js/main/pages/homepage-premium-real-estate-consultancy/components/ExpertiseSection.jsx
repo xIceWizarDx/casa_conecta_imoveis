@@ -8,25 +8,25 @@ const ExpertiseSection = () => {
       icon: "Award",
       title: "CRECI Certificado",
       description: "Registro profissional ativo no Conselho Regional de Corretores de Imóveis",
-      highlight: "CRECI/GO 12.345"
+      highlight: "CRECI 39.061"
     },
     {
       icon: "Calendar",
-      title: "15+ Anos de Experiência",
-      description: "Mais de uma década atuando no mercado imobiliário de Goiânia",
-      highlight: "Desde 2009"
+      title: "3+ Anos de Dedicação",
+      description: "3 anos dedicados a proteger o patrimônio de cada cliente, com:",
+      highlight: "informações claras e decisões seguras"
     },
     {
       icon: "Home",
-      title: "500+ Imóveis Vendidos",
-      description: "Centenas de famílias realizaram o sonho da casa própria conosco",
-      highlight: "R$ 180M+ negociados"
+      title: "Filtro Personalizado 👇 ",
+      description: "Assim você economiza tempo, evita frustrações e garante uma:",
+      highlight: "escolha e inteligente"
     },
     {
       icon: "MapPin",
-      title: "Especialista em Goiânia",
-      description: "Conhecimento profundo dos melhores bairros e regiões da cidade",
-      highlight: "Foco premium"
+      title: "Orientação Financeira ",
+      description: "Conheço a fundo o financiamento bancário e apresento também:",
+      highlight: "alternativas inteligentes de crédito"
     }
   ];
 
@@ -34,25 +34,25 @@ const ExpertiseSection = () => {
     {
       step: "01",
       title: "Consulta Personalizada",
-      description: "Entendemos suas necessidades, orçamento e preferências através do WhatsApp ou presencialmente",
+      description: "Entendemos seu timing, suas necessidades e orçamento; ajustamos tudo ao que existe de melhor disponível no mercado.",
       icon: "MessageCircle"
     },
     {
       step: "02",
       title: "Seleção Curada",
-      description: "Apresentamos apenas imóveis que atendem seus critérios, economizando seu tempo",
+      description: "Apresentamos apenas imóveis que se alinham ao seu perfil e ao estilo de vida da sua família, poupando seu tempo e evitando escolhas equivocadas.”",
       icon: "Filter"
     },
     {
       step: "03",
       title: "Visitas Acompanhadas",
-      description: "Agendamos e acompanhamos todas as visitas, fornecendo insights sobre cada propriedade",
+      description: "Agendamos e acompanhamos cada visita, destacando pontos fortes e riscos que muitas vezes passam despercebidos. Assim, você toma decisões com mais segurança e clareza.",
       icon: "Eye"
     },
     {
       step: "04",
       title: "Negociação Expert",
-      description: "Negociamos as melhores condições e acompanhamos todo o processo até a entrega das chaves",
+      description: "Negociamos as melhores condições financeiras e jurídicas, defendendo seus interesses em cada detalhe.",
       icon: "Handshake"
     }
   ];
@@ -63,7 +63,7 @@ const ExpertiseSection = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Por Que Escolher a Casa Conecta?
+            Seis motivos para escolher a Casa Conecta
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Mais que uma imobiliária, somos consultores especializados em conectar você ao imóvel dos seus sonhos 
@@ -98,7 +98,7 @@ const ExpertiseSection = () => {
               Nosso Processo Personalizado
             </h3>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Um método comprovado que garante que você encontre o imóvel ideal com segurança e agilidade
+              Um método claro e estruturado que conecta sua família ao imóvel ideal com segurança, transparência e agilidade.
             </p>
           </div>
 

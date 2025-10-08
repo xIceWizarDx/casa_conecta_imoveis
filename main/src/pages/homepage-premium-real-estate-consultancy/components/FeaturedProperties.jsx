@@ -351,7 +351,7 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
               {property?.bathrooms}
             </div>
             <div className="flex items-center">
-              <Icon name="Square" size={16} className="mr-1" />
+              <Icon name="Ruler" size={16} className="mr-1" />
               {property?.area}
             </div>
           </div>
@@ -646,8 +646,8 @@ const FeaturedProperties = () => {
         </div>
 
         <div className="mb-12 w-full rounded-2xl p-6">
-          <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,1fr)_auto]">
-            <div className="space-y-2">
+          <div className="mb-6 grid w-full grid-cols-1 gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-end">
+            <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="MapPin" size={16} className="mr-2 inline" />
                 Bairro
@@ -665,7 +665,7 @@ const FeaturedProperties = () => {
               </select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="DollarSign" size={16} className="mr-2 inline" />
                 Faixa de Preço
@@ -683,7 +683,7 @@ const FeaturedProperties = () => {
               </select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="Home" size={16} className="mr-2 inline" />
                 Tipo de Imóvel
@@ -701,7 +701,7 @@ const FeaturedProperties = () => {
               </select>
             </div>
 
-            <div className="flex items-end justify-center">
+            <div className="flex items-end justify-end">
               <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
                 Buscar Imóveis
               </Button>
@@ -860,7 +860,7 @@ const FeaturedProperties = () => {
                     {activeProperty.bathrooms}
                   </span>
                   <span className="flex items-center">
-                    <Icon name="Square" size={16} className="mr-1" />
+                    <Icon name="Ruler" size={16} className="mr-1" />
                     {activeProperty.area}
                   </span>
                 </div>
