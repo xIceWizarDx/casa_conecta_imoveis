@@ -46,24 +46,24 @@ const HeroSection = () => {
                 Conectando famílias aos seus <span className="text-primary"> lares ideais</span>
               </h1>
               <p className="text-lg text-text-secondary leading-relaxed">
-                Somos mais que uma imobiliária. Somos consultores especializados em imóveis premium,
-                dedicados a transformar o sonho da casa própria em realidade através de atendimento
-                personalizado e expertise local incomparável.
+                Mais que uma imobiliária, somos consultores que defendem o patrimônio e os interesses da sua família.
+                Nosso foco não é mostrar todos os imóveis, mas selecionar                 os que realmente fazem sentido para você — com                transparência, análise criteriosa e atendimento               personalizado.
+                Combinamos expertise local incomparável e um processo                 estruturado para transformar a escolha da casa própria em                 uma decisão segura, estratégica e sem arrependimentos
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">500+</div>
-                <div className="text-sm text-text-secondary">Famílias Atendidas</div>
+                <div className="text-3xl font-bold text-primary">Desde 2021</div>
+                <div className="text-sm text-text-secondary">ajudando famílias a escolher com clareza</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">6</div>
-                <div className="text-sm text-text-secondary">Anos de Mercado</div>
+                <div className="text-3xl font-bold text-primary">Consultoria financeira inclusa</div>
+                <div className="text-sm text-text-secondary">avaliando crédito e alternativas de financiamento</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">98%</div>
-                <div className="text-sm text-text-secondary">Satisfação</div>
+                <div className="text-3xl font-bold text-primary">Rede de parceiros confiáveis</div>
+                <div className="text-sm text-text-secondary">para dar suporte após a compra</div>
               </div>
             </div>
 
