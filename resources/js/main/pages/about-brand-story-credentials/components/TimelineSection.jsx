@@ -5,7 +5,7 @@ const TimelineSection = () => {
   const milestones = [
     {
       year: "2018",
-      title: "Fundação da Casa Conecta",
+      title: "📌 Nossa Trajetória",
       description: "Iniciamos nossa jornada com o objetivo de revolucionar o mercado imobiliário de Goiânia, focando em atendimento personalizado e consultoria especializada.",
       icon: "Home",
       stats: "Primeiros 50 clientes atendidos"
@@ -41,7 +41,7 @@ const TimelineSection = () => {
             Nossa Trajetória de Sucesso
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Seis anos construindo relacionamentos sólidos e conectando famílias aos seus lares ideais
+            Três anos dedicados a transformar escolhas em decisões seguras, construindo relacionamentos sólidos e conectando famílias aos seus lares ideais
           </p>
         </div>
 

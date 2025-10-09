@@ -10,10 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Head } from '@inertiajs/react';
+import { Helmet } from 'react-helmet';
 import { apiFetch } from '@/lib/api';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import HeaderStandalone from '@/main/components/ui/HeaderStandalone';
+import Header from '@/main/components/ui/Header';
 // Removido CSS legado para manter aparência consistente com as demais views
 // import '../../css/oldsite.css';
 
@@ -340,10 +340,12 @@ export default function Painel() {
 
     return (
         <>
-            <Head title="Painel" />
+            <Helmet>
+                <title>Painel</title>
+            </Helmet>
 
             <div className="flex min-h-screen w-full flex-col bg-background">
-                <HeaderStandalone />
+                <Header />
 
                 <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
                     {notice && (
@@ -722,4 +724,3 @@ export default function Painel() {
         </>
     );
 }
-

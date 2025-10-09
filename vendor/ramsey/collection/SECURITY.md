@@ -29,9 +29,9 @@ contribution of external security researchers.
 If you believe you've found a security issue in software that is maintained in
 this repository, we encourage you to notify us.
 
-| Version | In scope | Source code |
-| ------- | :------: | ----------- |
-| latest  | ✅        | https://github.com/ramsey/collection |
+| Version | In scope | Source code                          |
+| ------- | :------: | ------------------------------------ |
+| latest  |    ✅    | https://github.com/ramsey/collection |
 
 ## How to Submit a Report
 
@@ -56,13 +56,13 @@ Your submission will be reviewed and validated by a member of our team.
 
 We support safe harbor for security researchers who:
 
-* Make a good faith effort to avoid privacy violations, destruction of data, and
+- Make a good faith effort to avoid privacy violations, destruction of data, and
   interruption or degradation of our services.
-* Only interact with accounts you own or with explicit permission of the account
+- Only interact with accounts you own or with explicit permission of the account
   holder. If you do encounter Personally Identifiable Information (PII) contact
   us immediately, do not proceed with access, and immediately purge any local
   information.
-* Provide us with a reasonable amount of time to resolve vulnerabilities prior
+- Provide us with a reasonable amount of time to resolve vulnerabilities prior
   to any disclosure to the public or a third party.
 
 We will consider activities conducted consistent with this policy to constitute
@@ -91,10 +91,10 @@ with or unaddressed by this policy.
         or not.
 -->
 
-* Please provide detailed reports with reproducible steps and a clearly defined
+- Please provide detailed reports with reproducible steps and a clearly defined
   impact.
-* Include the version number of the vulnerable package in your report
-* Social engineering (e.g. phishing, vishing, smishing) is prohibited.
+- Include the version number of the vulnerable package in your report
+- Social engineering (e.g. phishing, vishing, smishing) is prohibited.
 
 <!--
     References
@@ -136,7 +136,7 @@ PVSrMZJe1t+knrEGnEdrXWzlg4lCJJCtemGv+pKBUomnyISXSdqyoRCCzvQjqyig
 QtPJrjbY1++OznBc0GRpfeUkGoU1cbRl1bnepnFIZMTDLkrVW6I1Y4q8ZVwX3BkE
 N81ctFrRpHBlU36EdHvjPQmGtuiL77Qq3fWmMv7yTvK1wHJAXfEb0ZJWHZCbck3w
 l0CVq0Z+UUAOM8Rp1N0N8m92xtapav0qCFU9qzf2J5qX6GRmWv+d29wPgFHzDWBm
-nnrYYIA4wJLx00U6SMcVBSnNe91B+RfGY5XQhbWPjQQecOGCSDsxaFAq2MeOVJyZ
+nnrYYIA4wJLx00U6SMcVBSnNe91B+RfGY5XQhbWPjQQecOGCSDsxaFAQ2MeOVJyZ
 bIjLYfG9GxoLKr5R7oLRJvZI4nKKBc1Kci/crZbdiSdQhSQGlDz88F1OHeCIdQQQ
 EQgAHRYhBOhdAxHd+lus86YQ57Atl5icjAcbBQJfmfdIAAoJELAtl5icjAcbFVcA
 /1LqB3ZjsnXDAvvAXZVjSPqofSlpMLeRQP6IM/A9Odq0AQCZrtZc1knOMGEcjppK

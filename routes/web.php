@@ -13,7 +13,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Rotas públicas do SPA antigo para suportar navegação direta
-Route::get('/faq-comprehensive-buyer-education', function () {
+Route::get('/FAQ-comprehensive-buyer-education', function () {
     return Inertia::render('site');
 });
 Route::get('/about-brand-story-credentials', function () {
@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Página do painel (antes: imagens)
     Route::get('painel', function () {
-        return Inertia::render('painel');
+        return Inertia::render('site');
     })->name('painel');
 
     // Redirecionamentos para evitar links quebrados
@@ -72,5 +72,5 @@ Route::get('api/featured-properties', [FeaturedPropertyController::class, 'publi
 Route::get('api/settings/contact', [ContactController::class, 'show']);
 Route::get('api/settings/auth', [\App\Http\Controllers\Settings\AuthSettingsController::class, 'show']);
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

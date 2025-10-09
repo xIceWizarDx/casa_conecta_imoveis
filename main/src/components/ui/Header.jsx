@@ -19,7 +19,7 @@ const Header = () => {
 
   const navigationItems = [
     {
-      name: 'Início',
+      name: 'Imóveis',
       path: '/',
       icon: 'Home'
     },
@@ -30,7 +30,7 @@ const Header = () => {
     },
     {
       name: 'FAQ',
-      path: '/faq-comprehensive-buyer-education',
+      path: '/FAQ-comprehensive-buyer-education',
       icon: 'HelpCircle'
     }
   ];

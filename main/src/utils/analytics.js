@@ -47,9 +47,9 @@ export const trackConsultationRequest = (consultationType, additionalParams = {}
 };
 
 export const trackFAQInteraction = (question, category, additionalParams = {}) => {
-  trackEvent('faq_interaction', {
-    faq_question: question,
-    faq_category: category,
+  trackEvent('FAQ_interaction', {
+    FAQ_question: question,
+    FAQ_category: category,
     ...additionalParams,
   });
 };

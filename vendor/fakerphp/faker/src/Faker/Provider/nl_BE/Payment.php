@@ -25,7 +25,7 @@ class Payment extends \Faker\Provider\Payment
      *
      * @example 'BE0123456789', ('spaced') 'BE 0123456789'
      *
-     * @see http://ec.europa.eu/taxation_customs/vies/faq.html?locale=en#item_11
+     * @see http://ec.europa.eu/taxation_customs/vies/FAQ.html?locale=en#item_11
      * @see http://www.iecomputersystems.com/ordering/eu_vat_numbers.htm
      * @see http://en.wikipedia.org/wiki/VAT_identification_number
      *

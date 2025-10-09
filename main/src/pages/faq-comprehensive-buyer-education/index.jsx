@@ -21,7 +21,7 @@ const FAQPage = () => {
     'Serviços Casa Conecta'
   ];
 
-  const faqData = [
+  const FAQData = [
     // Financiamento
     {
       id: 1,
@@ -423,17 +423,17 @@ Nosso compromisso não termina na entrega das chaves. Queremos que você tenha u
   ];
 
   const filteredFAQs = useMemo(() => {
-    let filtered = faqData;
+    let filtered = FAQData;
     
     if (activeCategory !== 'Todos') {
-      filtered = filtered?.filter(faq => faq?.category === activeCategory);
+      filtered = filtered?.filter(FAQ => FAQ?.category === activeCategory);
     }
     
     if (searchTerm) {
-      filtered = filtered?.filter(faq => 
-        faq?.question?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-        faq?.answer?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-        faq?.category?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+      filtered = filtered?.filter(FAQ => 
+        FAQ?.question?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+        FAQ?.answer?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+        FAQ?.category?.toLowerCase()?.includes(searchTerm?.toLowerCase())
       );
     }
     
@@ -517,14 +517,14 @@ Nosso compromisso não termina na entrega das chaves. Queremos que você tenha u
                 </div>
                 
                 <div className="space-y-4">
-                  {filteredFAQs?.map((faq) => (
+                  {filteredFAQs?.map((FAQ) => (
                     <FAQItem
-                      key={faq?.id}
-                      question={faq?.question}
-                      answer={faq?.answer}
-                      category={faq?.category}
-                      hasWhatsAppCTA={faq?.hasWhatsAppCTA}
-                      hasConsultationCTA={faq?.hasConsultationCTA}
+                      key={FAQ?.id}
+                      question={FAQ?.question}
+                      answer={FAQ?.answer}
+                      category={FAQ?.category}
+                      hasWhatsAppCTA={FAQ?.hasWhatsAppCTA}
+                      hasConsultationCTA={FAQ?.hasConsultationCTA}
                     />
                   ))}
                 </div>

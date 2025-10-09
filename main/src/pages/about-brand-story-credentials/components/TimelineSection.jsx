@@ -4,33 +4,37 @@ import Icon from '../../../components/AppIcon';
 const TimelineSection = () => {
   const milestones = [
     {
-      year: "2018",
-      title: "Fundação da Casa Conecta",
-      description: "Iniciamos nossa jornada com o objetivo de revolucionar o mercado imobiliário de Goiânia, focando em atendimento personalizado e consultoria especializada.",
-      icon: "Home",
-      stats: "Primeiros 50 clientes atendidos"
+      year: '2022',
+      title: 'Imóveis no Mercado Premium',
+      description:
+        'Primeiros atendimentos em construtoras e plantões de lançamento no segmento médio e alto padrão. Foco em lançamentos verticais e experiência prática no atendimento a clientes exigentes.',
+      icon: 'Building2',
+      stats: 'Lançamentos verticais premium',
     },
     {
-      year: "2020",
-      title: "Expansão Digital",
-      description: "Implementamos atendimento via WhatsApp 24/7 e plataforma digital completa, mantendo o toque humano que nos diferencia no mercado.",
-      icon: "Smartphone",
-      stats: "200+ famílias conectadas"
+      year: '2023',
+      title: 'Expansão para o MCMV',
+      description:
+        'Atuação no mercado de Minha Casa Minha Vida, desenvolvendo expertise em financiamentos Faixa 1, 2 e 3. Consultoria especializada para aprovação de crédito e reversão de avaliações negativas.',
+      icon: 'Banknote',
+      stats: 'Crédito Faixa 1–3 (MCMV)',
     },
     {
-      year: "2022",
-      title: "Especialização Premium",
-      description: "Focamos exclusivamente em imóveis premium nas melhores regiões de Goiânia, desenvolvendo expertise incomparável no segmento alto padrão.",
-      icon: "Award",
-      stats: "350+ imóveis comercializados"
+      year: '2024',
+      title: 'Entrada no Mercado de Horizontais',
+      description:
+        'Primeiros trabalhos com sítios de lazer e empreendimentos horizontais, ampliando o portfólio e adquirindo experiência em terrenos e casas fora do modelo vertical tradicional.',
+      icon: 'Trees',
+      stats: 'Sítios de lazer e horizontais',
     },
     {
-      year: "2024",
-      title: "Liderança Regional",
-      description: "Consolidamos nossa posição como referência em consultoria imobiliária premium, com reconhecimento do mercado e clientes.",
-      icon: "Trophy",
-      stats: "500+ famílias satisfeitas"
-    }
+      year: '2025',
+      title: 'Consolidação e Diversificação',
+      description:
+        'Intensificação na atuação em horizontais de primeira moradia, com ou sem construção. Imóveis no mercado de revenda, ampliando a consultoria para diferentes perfis de cliente e consolidando uma visão completa do mercado imobiliário.',
+      icon: 'Layers',
+      stats: 'Horizontais 1ª moradia e revenda',
+    },
   ];
 
   return (
@@ -41,7 +45,7 @@ const TimelineSection = () => {
             Nossa Trajetória de Sucesso
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Seis anos construindo relacionamentos sólidos e conectando famílias aos seus lares ideais
+            Quatro anos dedicados a transformar escolhas em decisões seguras, construindo relacionamentos sólidos e conectando famílias aos seus lares ideais
           </p>
         </div>
 
@@ -51,9 +55,10 @@ const TimelineSection = () => {
 
           <div className="space-y-12">
             {milestones?.map((milestone, index) => (
-              <div key={milestone?.year} className={`relative flex items-center ${
-                index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
-              }`}>
+              <div
+                key={milestone?.year}
+                className={`relative flex items-center ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}
+              >
                 {/* Timeline Dot */}
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-white shadow-lg hidden lg:block z-10"></div>
 
@@ -71,12 +76,8 @@ const TimelineSection = () => {
                           <span className="text-2xl font-bold text-primary">{milestone?.year}</span>
                           <div className="h-px bg-border flex-1"></div>
                         </div>
-                        <h3 className="text-xl font-semibold text-text-primary mb-3">
-                          {milestone?.title}
-                        </h3>
-                        <p className="text-text-secondary mb-4 leading-relaxed">
-                          {milestone?.description}
-                        </p>
+                        <h3 className="text-xl font-semibold text-text-primary mb-3">{milestone?.title}</h3>
+                        <p className="text-text-secondary mb-4 leading-relaxed">{milestone?.description}</p>
                         <div className="inline-flex items-center px-3 py-1 bg-primary/10 rounded-full">
                           <span className="text-sm font-medium text-primary">{milestone?.stats}</span>
                         </div>
@@ -97,3 +98,4 @@ const TimelineSection = () => {
 };
 
 export default TimelineSection;
+

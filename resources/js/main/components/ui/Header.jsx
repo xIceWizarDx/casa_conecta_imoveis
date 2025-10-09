@@ -1,6 +1,8 @@
 ﻿import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import SettingsModal from '@/components/modals/SettingsModal';
+import { Link, useInRouterContext } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+// Lazy-load SettingsModal to reduce initial bundle size
+const SettingsModal = lazy(() => import('@/components/modals/SettingsModal'));
 import { openWhatsApp as openWhatsAppUtil, openPhone, formatPhoneDisplay } from '@/lib/contact';
 import Icon from '../AppIcon';
 import Button from './Button';
@@ -14,7 +16,13 @@ const Header = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const location = useLocation();
+    const inRouter = (() => {
+        try {
+            return useInRouterContext();
+        } catch {
+            return false;
+        }
+    })();
     const page = usePage();
     const auth = page?.props?.auth;
     const isLogged = !!auth?.user;
@@ -55,7 +63,7 @@ const Header = () => {
 
     const navigationItems = [
         {
-            name: 'Início',
+            name: 'Imóveis',
             path: '/',
             icon: 'Home',
         },
@@ -65,17 +73,31 @@ const Header = () => {
             icon: 'Users',
         },
         {
-            name: 'FAQ',
-            path: '/faq-comprehensive-buyer-education',
+            name: 'Duvidas',
+            path: '/FAQ-comprehensive-buyer-education',
             icon: 'HelpCircle',
         },
     ];
 
     // Itens de navegação (inclui atalho para o painel)
-    const items = isLogged ? [...navigationItems, { name: 'Painel', path: '/painel', icon: 'Image', external: true }] : navigationItems;
+    const items = isLogged ? [...navigationItems, { name: 'Painel', path: '/painel', icon: 'Image' }] : navigationItems;
 
-    const isActivePath = (path) => {
-        return location?.pathname === path;
+    const isActivePath = (path) => (typeof window !== 'undefined' ? window.location?.pathname === path : false);
+
+    // Adapter para link: usa React Router se estiver em um Router, senão <a>
+    const LinkAdapter = ({ to, children, className, onClick }) => {
+        if (inRouter) {
+            return (
+                <Link to={to} className={className} onClick={onClick}>
+                    {children}
+                </Link>
+            );
+        }
+        return (
+            <a href={to} className={className} onClick={onClick}>
+                {children}
+            </a>
+        );
     };
 
     const handleWhatsAppClick = () => {
@@ -101,31 +123,20 @@ const Header = () => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden items-center space-x-8 lg:flex">
-                        {items?.filter((i) => i?.name !== 'Painel' || isLogged).map((item) =>
-                            item?.external ? (
-                                <a
-                                    key={item?.path}
-                                    href={item?.path}
-                                    className={`text-text-secondary flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-primary/5 hover:text-primary`}
-                                >
-                                    <Icon name={item?.icon} size={18} />
-                                    <span>{item?.name}</span>
-                                </a>
-                            ) : (
-                                <Link
-                                    key={item?.path}
-                                    to={item?.path}
-                                    className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                                        isActivePath(item?.path)
-                                            ? 'bg-primary/10 text-primary'
-                                            : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
-                                    }`}
-                                >
-                                    <Icon name={item?.icon} size={18} />
-                                    <span>{item?.name}</span>
-                                </Link>
-                            ),
-                        )}
+                        {items?.filter((i) => i?.name !== 'Painel' || isLogged).map((item) => (
+                            <LinkAdapter
+                                key={item?.path}
+                                to={item?.path}
+                                className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                                    isActivePath(item?.path)
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                                }`}
+                            >
+                                <Icon name={item?.icon} size={18} />
+                                <span>{item?.name}</span>
+                            </LinkAdapter>
+                        ))}
                     </nav>
 
                     {/* Desktop CTA */}
@@ -169,7 +180,11 @@ const Header = () => {
                             </DropdownMenu>
                         )}
                     </div>
-                    <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+                    {settingsOpen && (
+                        <Suspense fallback={null}>
+                            <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+                        </Suspense>
+                    )}
 
                     {/* Mobile Menu Button */}
                     <button
@@ -186,19 +201,10 @@ const Header = () => {
                     <div className="border-t border-border bg-white lg:hidden">
                         <div className="container-responsive">
                             <div className="space-y-3 py-4">
-                                {items?.filter((i) => i?.name !== 'Painel' || isLogged).map((item) =>
-                                    item?.external ? (
-                                        <a
-                                            key={item?.path}
-                                            href={item?.path}
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className={`text-text-secondary flex items-center space-x-3 rounded-md px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-primary/5 hover:text-primary`}
-                                        >
-                                            <Icon name={item?.icon} size={20} />
-                                            <span>{item?.name}</span>
-                                        </a>
-                                    ) : (
-                                        <Link
+                                {items
+                                    ?.filter((i) => i?.name !== 'Painel' || isLogged)
+                                    .map((item) => (
+                                        <LinkAdapter
                                             key={item?.path}
                                             to={item?.path}
                                             onClick={() => setIsMobileMenuOpen(false)}
@@ -210,9 +216,8 @@ const Header = () => {
                                         >
                                             <Icon name={item?.icon} size={20} />
                                             <span>{item?.name}</span>
-                                        </Link>
-                                    ),
-                                )}
+                                        </LinkAdapter>
+                                    ))}
 
                                 <div className="space-y-3 border-t border-border pt-4">
                                     <Button

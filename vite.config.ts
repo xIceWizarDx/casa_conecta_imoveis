@@ -29,4 +29,9 @@ export default defineConfig({
   esbuild: {
     jsx: 'automatic',
   },
+  build: {
+    // Avoid noisy warnings while we split heavy chunks
+    chunkSizeWarningLimit: 1024,
+    // Use Vite's default chunking to avoid circular deps between vendor chunks
+  },
 });

@@ -9,7 +9,7 @@ class Payment extends \Faker\Provider\Payment
      *
      * @example 'FR12123456789', ('spaced') 'FR 12 123 456 789'
      *
-     * @see http://ec.europa.eu/taxation_customs/vies/faq.html?locale=en#item_11
+     * @see http://ec.europa.eu/taxation_customs/vies/FAQ.html?locale=en#item_11
      * @see http://www.iecomputersystems.com/ordering/eu_vat_numbers.htm
      * @see http://en.wikipedia.org/wiki/VAT_identification_number
      *
