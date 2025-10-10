@@ -11,6 +11,23 @@ import Footer from '../../components/Footer';
 const FAQPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const NEW_CATEGORIES = [
+    'Todos',
+    'Condomínios',
+    'Regras do Condomínio',
+    'Segurança Jurídica',
+    'Construção',
+    'Valorização',
+    'Consultoria',
+    'Atendimento',
+    'Pós-venda',
+    // legados
+    'Financiamento',
+    'Processo Legal',
+    'Bairros',
+    'Investimento',
+    'Serviços Casa Conecta',
+  ];
 
   const categories = [
     'Todos',
@@ -422,8 +439,112 @@ Nosso compromisso não termina na entrega das chaves. Queremos que você tenha u
     }
   ];
 
+  // Override dataset with curated questions for Goiânia condomínios and serviços
+  const NEW_FAQ = [
+    {
+      id: 1,
+      category: 'Bairros',
+      question: 'Quantos condomínios horizontais existem em Goiânia?',
+      answer: `Segundo a Associação de Desenvolvedores Urbanos (ADU), Goiânia está entre as 5 cidades brasileiras — e a primeira no Centro-Oeste — com maior número de condomínios horizontais. De 362 empreendimentos em Goiás, 255 (mais de 70%) estão na Grande Goiânia.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 2,
+      category: 'Processo Legal',
+      question: 'O que acontece se um vizinho não pagar a taxa ou descumprir regras?',
+      answer: `O Regimento Interno e a Convenção do Condomínio preveem multas progressivas e cobrança administrativa/judicial em caso de inadimplência e infrações. Isso protege o bem‑estar coletivo e a valorização do patrimônio de todos.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 3,
+      category: 'Processo Legal',
+      question: 'Qual a segurança jurídica de entrega das obras no prazo?',
+      answer: `Trabalhamos com cronograma auditado e registrado em cartório. Há relatórios mensais de evolução e garantias legais de entrega. Você acompanha cada etapa com transparência.`,
+      hasConsultationCTA: true
+    },
+    {
+      id: 4,
+      category: 'Processo Legal',
+      question: 'Como são definidas as regras de construção para manter o padrão?',
+      answer: `Plano Diretor + normas da construtora/incorporadora definem recuos, altura, volumetria e diretrizes estéticas. Você tem autonomia para criar seu projeto dentro dessas regras, preservando a harmonia arquitetônica e o valor de mercado.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 5,
+      category: 'Processo Legal',
+      question: "Existe um prazo máximo para começar a construir?",
+      answer: `Em geral há prazos definidos em Regimento/Convenção. Essa regra traz previsibilidade e evita vizinhança com obras indefinidas. Informamos o prazo exato de cada condomínio.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 6,
+      category: 'Processo Legal',
+      question: 'O que a lei garante contra defeitos construtivos?',
+      answer: `A compra na planta é protegida pelo Código Civil e pelo CDC. Para vícios estruturais (solidez/segurança), a garantia é de 5 anos a partir da entrega. Para vícios aparentes, o prazo para notificação é de 90 dias; para vícios ocultos, conta‑se 90 dias a partir da descoberta. Sempre documente e notifique formalmente.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 7,
+      category: 'Processo Legal',
+      question: 'Posso receber hóspedes, fazer eventos ou usar a área como eu quiser?',
+      answer: `Em sítios/propriedades sem condomínio, a autonomia é ampla, observando leis municipais e ambientais. Em Loteamentos de Acesso Controlado, a Associação de Moradores define regras de uso das vias e áreas comuns. Esclarecemos as condições de cada imóvel.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 8,
+      category: 'Investimento',
+      question: 'Por que condomínios horizontais valorizam tanto na região?',
+      answer: `Preferência cultural por casas, segurança, lazer completo e novos vetores urbanos (como a GO‑020) impulsionam demanda e valorização consistente, acima da inflação no histórico da região.`,
+      hasConsultationCTA: true
+    },
+    {
+      id: 9,
+      category: 'Investimento',
+      question: 'O que mais valoriza meu lote ou casa dentro do condomínio?',
+      answer: `Gestão eficiente, infraestrutura superior (rede subterrânea, lazer diferenciado) e Regimento Interno eficaz preservam padrão estético/funcional. Localização ajuda, mas o conjunto bem cuidado sustenta o valor no longo prazo.`,
+      hasConsultationCTA: true
+    },
+    {
+      id: 10,
+      category: 'Bairros',
+      question: 'Quais regiões têm maior índice de valorização?',
+      answer: `O principal vetor é o eixo da GO‑020 (saída para Bela Vista). Também se destacam áreas com novos projetos e infraestrutura na Região Metropolitana, como trechos de Aparecida de Goiânia e Senador Canedo.`,
+      hasConsultationCTA: true
+    },
+    {
+      id: 11,
+      category: 'Investimento',
+      question: 'Por que o m² em condomínio fechado é mais caro?',
+      answer: `O preço reflete não só o lote, mas o rateio da segurança 24h, infraestrutura de alto padrão e lazer exclusivo. Você compra segurança, privacidade e qualidade de vida — fatores que elevam demanda e valorização.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 12,
+      category: 'Serviços Casa Conecta',
+      question: 'Como funciona a consultoria personalizada da Casa Conecta Imóveis?',
+      answer: `Processo em 5 etapas: 1) Diagnóstico (perfil, finanças, critérios); 2) Curadoria (seleção e, se preciso, avaliação de crédito/permuta); 3) Tours (visitas com análise técnica); 4) Negociação estratégica; 5) Acompanhamento completo (jurídico, financiamento e entrega das chaves).`,
+      hasConsultationCTA: true,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 13,
+      category: 'Serviços Casa Conecta',
+      question: 'Qual é o padrão de atendimento via WhatsApp da Casa Conecta Imóveis?',
+      answer: `Resposta garantida em horário comercial em até 15 min (fora do horário: retorno até as 22h e a partir das 7h; fins de semana com prioridade para visitas). Consultor dedicado, supervisão de qualidade, histórico registrado e respeito à LGPD. Agendamentos e envio de documentos pelo WhatsApp.`,
+      hasWhatsAppCTA: true
+    },
+    {
+      id: 14,
+      category: 'Serviços Casa Conecta',
+      question: 'A Casa Conecta Imóveis oferece suporte pós‑venda?',
+      answer: `Sim. Suporte imediato (30 dias) para mudança/documentação e orientação de serviços; suporte contínuo (até 12 meses) com monitoramento de valorização, rede de parceiros e consultoria para melhorias/seguros. Canais: WhatsApp dedicado e e‑mail (24h).`,
+      hasWhatsAppCTA: true,
+      hasConsultationCTA: true
+    },
+  ];
+
   const filteredFAQs = useMemo(() => {
-    let filtered = FAQData;
+    let filtered = NEW_FAQ;
     
     if (activeCategory !== 'Todos') {
       filtered = filtered?.filter(FAQ => FAQ?.category === activeCategory);
@@ -493,7 +614,7 @@ Nosso compromisso não termina na entrega das chaves. Queremos que você tenha u
               />
               
               <CategoryFilter 
-                categories={categories}
+                categories={NEW_CATEGORIES}
                 activeCategory={activeCategory}
                 onCategoryChange={setActiveCategory}
               />

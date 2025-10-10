@@ -4,11 +4,19 @@ import Icon from '../../../components/AppIcon';
 const CategoryFilter = ({ categories, activeCategory, onCategoryChange }) => {
   const categoryIcons = {
     'Todos': 'Grid3X3',
+    'Condomínios': 'Home',
+    'Regras do Condomínio': 'Shield',
+    'Segurança Jurídica': 'FileText',
+    'Construção': 'Wrench',
+    'Valorização': 'TrendingUp',
+    'Consultoria': 'Calendar',
+    'Atendimento': 'MessageCircle',
+    'Pós-venda': 'CheckCircle',
+    'Serviços Casa Conecta': 'Home',
     'Financiamento': 'CreditCard',
     'Processo Legal': 'FileText',
     'Bairros': 'MapPin',
     'Investimento': 'TrendingUp',
-    'Serviços Casa Conecta': 'Home'
   };
 
   return (
@@ -36,3 +44,4 @@ const CategoryFilter = ({ categories, activeCategory, onCategoryChange }) => {
 };
 
 export default CategoryFilter;
+

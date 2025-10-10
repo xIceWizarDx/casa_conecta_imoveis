@@ -19,6 +19,7 @@ type Image = {
     height?: number | null;
 };
 
+
 export type FeaturedProperty = {
     id: number;
     image_id: number;
@@ -72,12 +73,13 @@ export default function FeaturedPropertiesModal({
     const [featureInput, setFeatureInput] = useState('');
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [images, setImages] = useState<Image[]>([]);
+    const [videos, setVideos] = useState<any[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
-        const digits = value.replace(/\D/g, '');
+        const digits = value.replace(/disabled={uploadingImages}D/g, '');
         if (!digits) return '';
         const number = Number(digits) / 100;
         try {
@@ -88,7 +90,7 @@ export default function FeaturedPropertiesModal({
     };
 
     const formatAreaNumber = (value: string) => {
-        const digits = value.replace(/\D/g, '');
+        const digits = value.replace(/disabled={uploadingImages}D/g, '');
         if (!digits) return '';
         const n = parseInt(digits, 10);
         try {
@@ -99,7 +101,7 @@ export default function FeaturedPropertiesModal({
     };
 
     const buildAreaWithSuffix = (value?: string | null) => {
-        const digits = (value ?? '').replace(/\D/g, '');
+        const digits = (value ?? '').replace(/disabled={uploadingImages}D/g, '');
         if (!digits) return null;
         const n = parseInt(digits, 10);
         const formatted = (() => {
@@ -327,6 +329,26 @@ export default function FeaturedPropertiesModal({
                             <span>{`${listCount} itens`}</span>
                         </div>
                     </div>
+                    {videos.length > 0 && (
+                        <>
+                            <Label className="mt-6 block">Vídeos</Label>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {videos.map((vid) => (
+                                    <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
+                                        <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
+                                        <button
+                                            type="button"
+                                            className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                            onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
+                                            aria-label="Remover vídeo"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
                     Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
@@ -471,7 +493,7 @@ export default function FeaturedPropertiesModal({
                             ref={uploadInputRef}
                             type="file"
                             multiple
-                            accept="image/*"
+                            accept="image/*,video/*"
                             className="hidden"
                             onChange={handleUploadChange}
                         />
@@ -566,6 +588,26 @@ export default function FeaturedPropertiesModal({
                         )}
                     </div>
                 </div>
+                {videos.length > 0 && (
+                    <>
+                        <Label className="mt-6 block">Vídeos</Label>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {videos.map((vid) => (
+                                <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
+                                    <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
+                                    <button
+                                        type="button"
+                                        className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                        onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
+                                        aria-label="Remover vídeo"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
                 <DialogFooter>
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar

@@ -102,4 +102,3 @@ class HeroSlideController extends Controller
         return response()->json(['message' => 'Reordered']);
     }
 }
-

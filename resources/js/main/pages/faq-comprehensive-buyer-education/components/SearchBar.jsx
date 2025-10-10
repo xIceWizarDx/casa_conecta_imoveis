@@ -13,7 +13,7 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
         />
         <Input
           type="search"
-          placeholder="Busque por dúvidas sobre financiamento, documentação, bairros..."
+          placeholder="Busque por dúvidas: condomínios, construção, valorização, serviços..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e?.target?.value)}
           className="pl-12 pr-4 py-4 w-full text-base border-2 border-border focus:border-primary rounded-xl bg-white shadow-sm"
@@ -24,3 +24,4 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
 };
 
 export default SearchBar;
+

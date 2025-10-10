@@ -40,6 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('images', [ImageController::class, 'index'])->name('images.index');
         Route::post('images', [ImageController::class, 'store'])->name('images.store');
         Route::delete('images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
+        
+        
         // Settings protegidos
         Route::patch('admin/settings/contact', [ContactController::class, 'update']);
         Route::patch('admin/settings/auth', [AuthSettingsController::class, 'update']);

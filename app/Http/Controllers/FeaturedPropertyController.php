@@ -63,6 +63,7 @@ class FeaturedPropertyController extends Controller
             $item->images()->attach($attach);
         }
 
+
         $item->load(['image', 'images']);
         return response()->json($item, 201);
     }
@@ -100,6 +101,7 @@ class FeaturedPropertyController extends Controller
             }
             $featuredProperty->images()->sync($sync);
         }
+
 
         $featuredProperty->load(['image', 'images']);
         return response()->json($featuredProperty);

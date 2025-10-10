@@ -39,6 +39,7 @@ class HeroSlide extends Model
         return $this->belongsTo(Image::class);
     }
 
+
     public function getImageUrlAttribute(): ?string
     {
         if (!$this->relationLoaded('image')) {
@@ -48,5 +49,5 @@ class HeroSlide extends Model
         if (!$image) return null;
         return Storage::disk($image->disk)->url($image->path);
     }
-}
 
+}
