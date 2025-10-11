@@ -3,6 +3,7 @@
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\HeroSlideController;
 use App\Http\Controllers\FeaturedPropertyController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Settings\ContactController;
 use App\Http\Controllers\Settings\AuthSettingsController;
@@ -40,6 +41,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('images', [ImageController::class, 'index'])->name('images.index');
         Route::post('images', [ImageController::class, 'store'])->name('images.store');
         Route::delete('images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
+        // Videos
+        Route::get('videos', [VideoController::class, 'index'])->name('videos.index');
+        Route::post('videos', [VideoController::class, 'store'])->name('videos.store');
+        Route::delete('videos/{video}', [VideoController::class, 'destroy'])->name('videos.destroy');
         
         
         // Settings protegidos

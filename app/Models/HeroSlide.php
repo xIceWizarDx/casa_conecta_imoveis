@@ -13,6 +13,7 @@ class HeroSlide extends Model
 
     protected $fillable = [
         'image_id',
+        'video_id',
         'title',
         'subtitle',
         'price',
@@ -32,11 +33,17 @@ class HeroSlide extends Model
 
     protected $appends = [
         'image_url',
+        'video_url',
     ];
 
     public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class);
+    }
+
+    public function video(): BelongsTo
+    {
+        return $this->belongsTo(Video::class);
     }
 
 
@@ -48,6 +55,16 @@ class HeroSlide extends Model
         $image = $this->getRelation('image');
         if (!$image) return null;
         return Storage::disk($image->disk)->url($image->path);
+    }
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        if (!$this->relationLoaded('video')) {
+            $this->load('video');
+        }
+        $video = $this->getRelation('video');
+        if (!$video) return null;
+        return Storage::disk($video->disk)->url($video->path);
     }
 
 }

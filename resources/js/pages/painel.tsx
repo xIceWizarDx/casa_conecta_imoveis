@@ -21,6 +21,7 @@ import Header from '@/main/components/ui/Header';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
 import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
+import * as VideoActions from '@/actions/App/Http/Controllers/VideoController';
 
 type Image = {
     id: number;
@@ -35,6 +36,8 @@ type HeroSlide = {
     id: number;
     image_id: number;
     image_url?: string | null;
+    video_id?: number | null;
+    video_url?: string | null;
     title: string;
     subtitle?: string | null;
     price: string;
@@ -79,6 +82,7 @@ export default function Painel() {
     const [creatingSlide, setCreatingSlide] = useState(false);
     const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
     const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
+    const [selectedSlideVideo, setSelectedSlideVideo] = useState<{ id: number; url: string } | null>(null);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
@@ -179,14 +183,62 @@ export default function Painel() {
         }
     };
 
-    const handleHeroUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const uploaded = await uploadImages(event.target.files);
-        event.target.value = '';
-        if (uploaded.length > 0) {
-            const [first] = uploaded;
-            setSelectedSlideImage(first);
-            setNewSlide((s) => ({ ...s, image_id: first.id }));
+    const uploadVideos = async (fileList: FileList | null): Promise<{ id: number; url: string }[]> => {
+        if (!fileList || fileList.length === 0) return [];
+        const fd = new FormData();
+        Array.from(fileList).forEach((f) => fd.append('videos[]', f));
+        setImagesUploading(true);
+        try {
+            const uploaded = await apiFetch<{ id: number; url: string }[]>(VideoActions.store(), { body: fd });
+            setNotice({ type: 'success', title: 'Vídeos enviados com sucesso' });
+            return uploaded;
+        } catch (e) {
+            setNotice({
+                type: 'error',
+                title: 'Falha ao enviar vídeos',
+                message: e instanceof Error ? e.message : String(e),
+            });
+            return [];
+        } finally {
+            setImagesUploading(false);
         }
+    };
+
+    const handleHeroUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+        const imageFiles: File[] = [];
+        const videoFiles: File[] = [];
+        Array.from(files).forEach((f) => {
+            if (f.type.startsWith('video/')) videoFiles.push(f);
+            else if (f.type.startsWith('image/')) imageFiles.push(f);
+        });
+
+        let selected = false;
+        if (videoFiles.length > 0) {
+            const dt = new DataTransfer();
+            videoFiles.forEach((f) => dt.items.add(f));
+            const vids = await uploadVideos(dt.files);
+            if (vids.length > 0) {
+                const v = vids[0];
+                setSelectedSlideVideo(v);
+                setSelectedSlideImage(null);
+                setNewSlide((s) => ({ ...s, video_id: v.id }));
+                selected = true;
+            }
+        }
+        if (!selected && imageFiles.length > 0) {
+            const dt = new DataTransfer();
+            imageFiles.forEach((f) => dt.items.add(f));
+            const imgs = await uploadImages(dt.files);
+            if (imgs.length > 0) {
+                const img = imgs[0];
+                setSelectedSlideImage(img);
+                setSelectedSlideVideo(null);
+                setNewSlide((s) => ({ ...s, image_id: img.id }));
+            }
+        }
+        event.target.value = '';
     };
 
     const submitSlide = async () => {
@@ -229,6 +281,50 @@ export default function Painel() {
         }
     };
 
+    // Versão com suporte a vídeo
+    const submitSlideV2 = async () => {
+        const hasMedia = !!selectedSlideImage?.id || !!selectedSlideVideo?.id;
+        if (!hasMedia || !newSlide.title || !newSlide.price) {
+            alert('Selecione uma imagem ou vídeo, título e preço.');
+            return;
+        }
+        setCreatingSlide(true);
+        try {
+            const body = JSON.stringify({
+                image_id: selectedSlideImage?.id ?? null,
+                video_id: selectedSlideVideo?.id ?? null,
+                title: newSlide.title,
+                subtitle: newSlide.subtitle ?? null,
+                price: newSlide.price,
+                bedrooms: newSlide.bedrooms ?? null,
+                bathrooms: newSlide.bathrooms ?? null,
+                area: newSlide.area ?? null,
+                neighborhood: newSlide.neighborhood ?? null,
+                is_new: !!newSlide.is_new,
+                is_published: newSlide.id ? !!newSlide.is_published : true,
+            });
+            if (newSlide.id) {
+                await apiFetch(HeroActions.update({ heroSlide: newSlide.id }), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                setNotice({ type: 'success', title: 'Slide atualizado' });
+            } else {
+                await apiFetch(HeroActions.store(), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                setNotice({ type: 'success', title: 'Slide adicionado' });
+            }
+            setNewSlide({});
+            setSelectedSlideImage(null);
+            setSelectedSlideVideo(null);
+            await refreshSlides();
+        } finally {
+            setCreatingSlide(false);
+        }
+    };
+
     const toggleSlidePublish = async (id: number) => {
         await apiFetch(HeroActions.togglePublish({ heroSlide: id }));
         await refreshSlides();
@@ -244,6 +340,10 @@ export default function Painel() {
         const fullSlide = slides.find((item) => item.id === slide.id) ?? null;
         if (fullSlide) {
             setNewSlide(fullSlide);
+            if ((fullSlide as any).video_id && (fullSlide as any).video_url) {
+                setSelectedSlideVideo({ id: (fullSlide as any).video_id as number, url: (fullSlide as any).video_url as string });
+                setSelectedSlideImage(null);
+            }
             setSelectedSlideImage(
                 fullSlide.image_id && fullSlide.image_url
                     ? { id: fullSlide.image_id, url: fullSlide.image_url, original_name: '', filename: '' }
@@ -653,8 +753,8 @@ export default function Painel() {
                                         {/* Checkbox "Publicado" removido: novos slides serão publicados automaticamente */}
                                     </div>
                                     <div>
-                                        <Label>Imagem</Label>
-                                        <p className="mt-2 text-sm text-muted-foreground">Envie uma imagem utilizando o botão abaixo.</p>
+                                        <Label>Mídia (Imagem ou Vídeo)</Label>
+                                        <p className="mt-2 text-sm text-muted-foreground">Envie uma imagem (inclui GIF) ou um vídeo.</p>
                                         <Button
                                             type="button"
                                             variant="secondary"
@@ -668,17 +768,30 @@ export default function Painel() {
                                             ref={heroUploadInputRef}
                                             type="file"
                                             multiple
-                                            accept="image/*"
+                                            accept="image/*,video/*"
                                             className="hidden"
                                             onChange={handleHeroUploadChange}
                                         />
                                         <div
                                             className={cn(
                                                 'mt-4 aspect-video w-full overflow-hidden rounded-2xl shadow-lg',
-                                                !selectedSlideImage && 'border-2 border-dashed',
+                                                !selectedSlideImage && !selectedSlideVideo && 'border-2 border-dashed',
                                             )}
                                         >
-                                            {selectedSlideImage && (
+                                            {selectedSlideVideo ? (
+                                                <div className="relative h-full w-full">
+                                                    <video src={selectedSlideVideo.url} className="h-full w-full object-cover" autoPlay muted loop playsInline />
+                                                    <ImagePreviewOverlay
+                                                        titulo={newSlide.title}
+                                                        subtitulo={newSlide.subtitle}
+                                                        preco={newSlide.price}
+                                                        quartos={newSlide.bedrooms}
+                                                        banheiros={newSlide.bathrooms}
+                                                        area={newSlide.area}
+                                                        bairro={newSlide.neighborhood}
+                                                    />
+                                                </div>
+                                            ) : selectedSlideImage ? (
                                                 <ImageEditor src={selectedSlideImage.url} sizeClass="w-full" aspect="video">
                                                     <ImagePreviewOverlay
                                                         titulo={newSlide.title}
@@ -690,7 +803,7 @@ export default function Painel() {
                                                         bairro={newSlide.neighborhood}
                                                     />
                                                 </ImageEditor>
-                                            )}
+                                            ) : null}
                                         </div>
                                     </div>
                                 </div>
@@ -698,7 +811,7 @@ export default function Painel() {
                                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => setHeroModalOpen(false)}>
                                         Fechar
                                     </Button>
-                                    <Button className="w-auto" onClick={submitSlide} disabled={creatingSlide} title="Adicionar Slide">
+                                    <Button className="w-auto" onClick={submitSlideV2} disabled={creatingSlide} title="Adicionar Slide">
                                         {creatingSlide ? 'Publicando.' : 'Publicar'}
                                     </Button>
                                 </DialogFooter>
@@ -715,7 +828,9 @@ export default function Painel() {
                             onRefreshFeatured={refreshFeatured}
                             onNotice={(n) => setNotice(n)}
                             onUploadImages={uploadImages}
+                            onUploadVideos={uploadVideos}
                             uploadingImages={imagesUploading}
+                            uploadingVideos={imagesUploading}
                             editing={editingFeatured}
                         />
                 </>

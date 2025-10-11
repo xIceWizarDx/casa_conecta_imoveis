@@ -5,6 +5,8 @@ export type Slide = {
     id: number;
     image_id?: number;
     image_url?: string | null;
+    video_id?: number | null;
+    video_url?: string | null;
     title: string;
     price: string;
     is_published?: boolean;
@@ -21,7 +23,16 @@ export default function SlideCard({ slide, onEdit, onToggle, onDelete }: SlideCa
     const [menuOpen, setMenuOpen] = useState(false);
     return (
         <div className="relative overflow-hidden rounded-md border">
-            {slide.image_url ? (
+            {slide.video_url ? (
+                <video
+                    src={slide.video_url}
+                    className="aspect-square w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                />
+            ) : slide.image_url ? (
                 <img src={slide.image_url} alt={slide.title} className="aspect-square w-full object-cover" />
             ) : (
                 <div className="aspect-square w-full bg-muted" />

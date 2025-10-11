@@ -91,6 +91,7 @@ const HeroCarousel = () => {
             // HeroSlide::image_url já carrega a foto enviada pelo painel de administração,
             // evitando a necessidade de recorrer a imagens fictícias.
             image: s.image_url,
+            video: s.video_url,
             price: s.price,
             bedrooms: s.bedrooms,
             bathrooms: s.bathrooms,
@@ -126,15 +127,29 @@ const HeroCarousel = () => {
     setLoadedSlides({});
   }, [slides]);
 
+  // Avanço automático condicional: imagem por tempo; vídeo ao terminar
   useEffect(() => {
     if (slides.length <= 1) return undefined;
+
+    const current = slides[currentSlide];
+    if (!current) return undefined;
+
+    if (current.video) {
+      const videoEl = document.querySelector(`video[data-hero-slide="${current.id}"]`);
+      if (!videoEl) return undefined;
+      const onEnded = () => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      };
+      videoEl.addEventListener('ended', onEnded);
+      try { videoEl.play(); } catch {}
+      return () => videoEl.removeEventListener('ended', onEnded);
+    }
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
-
     return () => clearInterval(interval);
-  }, [slides.length]);
+  }, [currentSlide, slides]);
 
   useEffect(() => {
     if (currentSlide >= slides.length && slides.length) {
@@ -234,8 +249,19 @@ const HeroCarousel = () => {
             }`}
           >
             <div className="relative w-full h-full">
-              <Image
-                src={property?.image}
+              {property?.video ? (
+                <video
+                  src={property.video}
+                  className="w-full h-full object-cover object-center"
+                  autoPlay
+                  muted
+                  playsInline
+                  data-hero-slide={property.id}
+                  onLoadedData={handleImageLoad(index)}
+                />
+              ) : (
+                <Image
+                  src={property?.image}
                 alt={property?.title}
                 wrapperClassName="w-full h-full"
                 imgClassName="w-full h-full object-cover object-center"
@@ -246,6 +272,7 @@ const HeroCarousel = () => {
                 loading={index === 0 ? 'eager' : 'lazy'}
                 onLoad={handleImageLoad(index)}
               />
+              )}
               <div
                 className={`absolute inset-0 hero-overlay transition-all duration-700 ${
                   loadedSlides[index] ? 'opacity-90 blur-0' : 'opacity-70 blur-sm'

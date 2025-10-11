@@ -10,7 +10,7 @@ class HeroSlideController extends Controller
 {
     public function publicIndex(): JsonResponse
     {
-        $slides = HeroSlide::with('image')
+        $slides = HeroSlide::with(['image', 'video'])
             ->where('is_published', true)
             ->orderBy('position')
             ->orderBy('id')
@@ -21,7 +21,7 @@ class HeroSlideController extends Controller
 
     public function index(): JsonResponse
     {
-        $slides = HeroSlide::with('image')
+        $slides = HeroSlide::with(['image', 'video'])
             ->orderBy('position')
             ->orderBy('id')
             ->get();
@@ -32,7 +32,8 @@ class HeroSlideController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'image_id'     => ['required', 'exists:images,id'],
+            'image_id'     => ['nullable', 'exists:images,id'],
+            'video_id'     => ['nullable', 'exists:videos,id'],
             'title'        => ['required', 'string', 'max:255'],
             'subtitle'     => ['nullable', 'string', 'max:255'],
             'price'        => ['required', 'string', 'max:100'],
@@ -44,11 +45,15 @@ class HeroSlideController extends Controller
             'is_published' => ['nullable', 'boolean'],
         ]);
 
+        if (empty($data['image_id']) && empty($data['video_id'])) {
+            return response()->json(['message' => 'image_id ou video_id é obrigatório'], 422);
+        }
+
         $maxPosition = (int) HeroSlide::max('position');
         $data['position'] = $maxPosition + 1;
 
         $slide = HeroSlide::create($data);
-        $slide->load('image');
+        $slide->load(['image', 'video']);
 
         return response()->json($slide, 201);
     }
@@ -56,7 +61,8 @@ class HeroSlideController extends Controller
     public function update(Request $request, HeroSlide $heroSlide): JsonResponse
     {
         $data = $request->validate([
-            'image_id'     => ['sometimes', 'required', 'exists:images,id'],
+            'image_id'     => ['nullable', 'exists:images,id'],
+            'video_id'     => ['nullable', 'exists:videos,id'],
             'title'        => ['sometimes', 'required', 'string', 'max:255'],
             'subtitle'     => ['nullable', 'string', 'max:255'],
             'price'        => ['sometimes', 'required', 'string', 'max:100'],
@@ -68,8 +74,12 @@ class HeroSlideController extends Controller
             'is_published' => ['nullable', 'boolean'],
         ]);
 
+        if (empty($data['image_id']) && empty($data['video_id'])) {
+            // no media change
+        }
+
         $heroSlide->update($data);
-        $heroSlide->load('image');
+        $heroSlide->load(['image', 'video']);
 
         return response()->json($heroSlide);
     }

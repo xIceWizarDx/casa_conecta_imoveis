@@ -53,7 +53,9 @@ interface Props {
     onRefreshFeatured: () => Promise<void>;
     onNotice?: (n: Notice) => void;
     onUploadImages: (files: FileList | null) => Promise<Image[]>;
+    onUploadVideos?: (files: FileList | null) => Promise<{ id: number; url: string }[]>;
     uploadingImages?: boolean;
+    uploadingVideos?: boolean;
     editing?: FeaturedProperty | null;
 }
 
@@ -64,7 +66,9 @@ export default function FeaturedPropertiesModal({
     onRefreshFeatured,
     onNotice,
     onUploadImages,
+    onUploadVideos,
     uploadingImages = false,
+    uploadingVideos = false,
     editing = null,
 }: Props) {
     const [creating, setCreating] = useState(false);
@@ -76,6 +80,7 @@ export default function FeaturedPropertiesModal({
     const [videos, setVideos] = useState<any[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadInputRef = useRef<HTMLInputElement | null>(null);
+    const uploadVideoRef = useRef<HTMLInputElement | null>(null);
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -141,6 +146,10 @@ export default function FeaturedPropertiesModal({
             : [];
         const ordered = cover ? [cover, ...gallery] : gallery;
         setImages(ordered);
+        const vids: any[] = Array.isArray((editing as any).videos)
+            ? ((editing as any).videos as any[]).map((v) => ({ id: Number(v?.id), url: String(v?.url ?? v?.video_url ?? ''), filename: String(v?.filename ?? ''), original_name: String(v?.original_name ?? '') })).filter((v) => v.id && v.url)
+            : [];
+        setVideos(vids);
         setSelectedImageAndForm(ordered[0] ?? null);
         setForm({
             id: editing.id,
@@ -172,6 +181,19 @@ export default function FeaturedPropertiesModal({
                     setSelectedImageAndForm(merged[0] ?? null);
                 }
                 return merged;
+            });
+        }
+    };
+
+    const handleVideoUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        if (!onUploadVideos) return;
+        const uploaded = await onUploadVideos(event.target.files);
+        event.target.value = '';
+        if (uploaded.length > 0) {
+            setVideos((prev) => {
+                const existingIds = new Set(prev.map((v) => v.id));
+                const additions = uploaded.filter((v) => !existingIds.has(v.id));
+                return [...prev, ...additions];
             });
         }
     };
@@ -298,6 +320,7 @@ export default function FeaturedPropertiesModal({
                 is_new: !!form.is_new,
                 is_published: editing?.id ? !!form.is_published : true,
                 gallery_image_ids: images.slice(1).map((img) => img.id),
+                gallery_video_ids: videos.map((v) => v.id),
             });
             if (editing?.id) {
                 await apiFetch(FeaturedActions.update({ featuredProperty: editing.id }), { body, headers: { 'Content-Type': 'application/json' } });
@@ -329,7 +352,7 @@ export default function FeaturedPropertiesModal({
                             <span>{`${listCount} itens`}</span>
                         </div>
                     </div>
-                    {videos.length > 0 && (
+                    {false && videos.length > 0 && (
                         <>
                             <Label className="mt-6 block">Vídeos</Label>
                             <div className="mt-2 flex flex-wrap gap-2">
@@ -489,13 +512,30 @@ export default function FeaturedPropertiesModal({
                         >
                             {uploadingImages ? 'Enviando…' : 'Escolher imagens'}
                         </Button>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-2 ml-2 w-auto bg-black text-white hover:bg-black/80"
+                            onClick={() => uploadVideoRef.current?.click()}
+                            disabled={uploadingVideos}
+                        >
+                            {uploadingVideos ? 'Enviando…' : 'Escolher vídeos'}
+                        </Button>
                         <input
                             ref={uploadInputRef}
                             type="file"
                             multiple
-                            accept="image/*,video/*"
+                            accept="image/*"
                             className="hidden"
                             onChange={handleUploadChange}
+                        />
+                        <input
+                            ref={uploadVideoRef}
+                            type="file"
+                            multiple
+                            accept="video/*"
+                            className="hidden"
+                            onChange={handleVideoUploadChange}
                         />
                         <div
                             className={cn(
@@ -588,7 +628,7 @@ export default function FeaturedPropertiesModal({
                         )}
                     </div>
                 </div>
-                {videos.length > 0 && (
+                {false && videos.length > 0 && (
                     <>
                         <Label className="mt-6 block">Vídeos</Label>
                         <div className="mt-2 flex flex-wrap gap-2">

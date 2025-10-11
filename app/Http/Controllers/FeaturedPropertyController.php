@@ -10,7 +10,7 @@ class FeaturedPropertyController extends Controller
 {
     public function publicIndex(): JsonResponse
     {
-        $items = FeaturedProperty::with(['image', 'images'])
+        $items = FeaturedProperty::with(['image', 'images', 'videos'])
             ->where('is_published', true)
             ->orderBy('position')
             ->orderBy('id')
@@ -20,7 +20,7 @@ class FeaturedPropertyController extends Controller
 
     public function index(): JsonResponse
     {
-        $items = FeaturedProperty::with(['image', 'images'])
+        $items = FeaturedProperty::with(['image', 'images', 'videos'])
             ->orderBy('position')
             ->orderBy('id')
             ->get();
@@ -45,6 +45,8 @@ class FeaturedPropertyController extends Controller
             'is_published' => ['nullable', 'boolean'],
             'gallery_image_ids' => ['nullable', 'array'],
             'gallery_image_ids.*' => ['integer', 'exists:images,id'],
+            'gallery_video_ids' => ['nullable', 'array'],
+            'gallery_video_ids.*' => ['integer', 'exists:videos,id'],
         ]);
 
         $data['features'] = $data['features'] ?? [];
@@ -63,8 +65,18 @@ class FeaturedPropertyController extends Controller
             $item->images()->attach($attach);
         }
 
+        // Attach gallery videos preserving order
+        $videoIds = collect($request->input('gallery_video_ids', []))->values();
+        if ($videoIds->count() > 0) {
+            $vattach = [];
+            foreach ($videoIds as $idx => $vid) {
+                $vattach[$vid] = ['position' => $idx + 1];
+            }
+            $item->videos()->attach($vattach);
+        }
 
-        $item->load(['image', 'images']);
+
+        $item->load(['image', 'images', 'videos']);
         return response()->json($item, 201);
     }
 
@@ -86,6 +98,8 @@ class FeaturedPropertyController extends Controller
             'is_published' => ['nullable', 'boolean'],
             'gallery_image_ids' => ['nullable', 'array'],
             'gallery_image_ids.*' => ['integer', 'exists:images,id'],
+            'gallery_video_ids' => ['nullable', 'array'],
+            'gallery_video_ids.*' => ['integer', 'exists:videos,id'],
         ]);
         $featuredProperty->update($data);
 
@@ -102,8 +116,18 @@ class FeaturedPropertyController extends Controller
             $featuredProperty->images()->sync($sync);
         }
 
+        // Sync videos when provided
+        if ($request->has('gallery_video_ids')) {
+            $videoIds = collect($request->input('gallery_video_ids', []))->values();
+            $vsync = [];
+            foreach ($videoIds as $idx => $vid) {
+                $vsync[$vid] = ['position' => $idx + 1];
+            }
+            $featuredProperty->videos()->sync($vsync);
+        }
 
-        $featuredProperty->load(['image', 'images']);
+
+        $featuredProperty->load(['image', 'images', 'videos']);
         return response()->json($featuredProperty);
     }
 

@@ -22,6 +22,8 @@ export type HeroSlide = {
     id: number;
     image_id: number;
     image_url?: string | null;
+    video_id?: number | null;
+    video_url?: string | null;
     title: string;
     subtitle?: string | null;
     price: string;
@@ -302,5 +304,4 @@ export default function HeroSlidesModal({
         </Dialog>
     );
 }
-
 

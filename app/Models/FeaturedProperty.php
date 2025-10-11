@@ -52,6 +52,14 @@ class FeaturedProperty extends Model
             ->withTimestamps();
     }
 
+    public function videos(): BelongsToMany
+    {
+        return $this->belongsToMany(Video::class, 'featured_property_videos')
+            ->withPivot('position')
+            ->orderBy('featured_property_videos.position')
+            ->withTimestamps();
+    }
+
     public function getGalleryAttribute(): array
     {
         if (!$this->relationLoaded('image') || !$this->relationLoaded('images')) {
