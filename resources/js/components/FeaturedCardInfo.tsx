@@ -1,4 +1,4 @@
-import { Bath, Bed, MapPin, MessageCircle, Square } from 'lucide-react';
+import { Bath, Bed, MapPin, MessageCircle, Square, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export type FeaturedCardInfoProps = {
@@ -7,11 +7,12 @@ export type FeaturedCardInfoProps = {
     bedrooms?: number | string | null;
     bathrooms?: number | string | null;
     area?: string | null;
+    built_area?: string | null;
     features?: string[];
     price?: string | null;
 };
 
-export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathrooms, area, features, price }: FeaturedCardInfoProps) {
+export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathrooms, area, built_area, features, price }: FeaturedCardInfoProps) {
     const shown = (features ?? []).slice(0, 2);
     const extra = Math.max((features?.length ?? 0) - shown.length, 0);
 
@@ -26,7 +27,7 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                 </div>
             )}
 
-            {(bedrooms || bathrooms || area) && (
+            {(bedrooms || bathrooms || area || built_area) && (
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                         {(bedrooms ?? '') !== '' && (
@@ -41,10 +42,22 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                                 <span>{bathrooms}</span>
                             </div>
                         )}
+                        {(built_area || '').trim() && (
+                            <div className="flex flex-col items-start" title="Área construída">
+                                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Área construída</span>
+                                <div className="flex items-center">
+                                    <Ruler className="mr-1 h-4 w-4" />
+                                    <span>{built_area}</span>
+                                </div>
+                            </div>
+                        )}
                         {(area || '').trim() && (
-                            <div className="flex items-center">
-                                <Square className="mr-1 h-4 w-4" />
-                                <span>{area}</span>
+                            <div className="flex flex-col items-start" title="Metragem total do terreno">
+                                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Metragem total</span>
+                                <div className="flex items-center">
+                                    <Square className="mr-1 h-4 w-4" />
+                                    <span>{area}</span>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -71,4 +84,3 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
         </div>
     );
 }
-

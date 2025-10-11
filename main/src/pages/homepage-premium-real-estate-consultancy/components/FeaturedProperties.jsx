@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
@@ -350,10 +350,18 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
               <Icon name="Bath" size={16} className="mr-1" />
               {property?.bathrooms}
             </div>
-            <div className="flex items-center">
-              <Icon name="Ruler" size={16} className="mr-1" />
-              {property?.area}
-            </div>
+            {property?.builtAreaText && (
+              <div className="flex items-center">
+                <Icon name="Ruler" size={16} className="mr-1" />
+                {property.builtAreaText}
+              </div>
+            )}
+            {property?.area && (
+              <div className="flex items-center">
+                <Icon name="Square" size={16} className="mr-1" />
+                {property.area}
+              </div>
+            )}
           </div>
         </div>
 
@@ -430,7 +438,8 @@ const FeaturedProperties = () => {
               bathrooms: p.bathrooms,
               area: p.area,
               type: p.type,
-              // O backend já entrega image_url e gallery com arquivos do storage; usamos o placeholder padrão só se nada estiver cadastrado.
+              builtAreaText: typeof p.built_area === "string" ? p.built_area : null,
+              // O backend jÃ¡ entrega image_url e gallery com arquivos do storage; usamos o placeholder padrÃ£o sÃ³ se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
               imagePlaceholder:
                 primaryImageEntry?.placeholder ||
@@ -450,7 +459,7 @@ const FeaturedProperties = () => {
     })();
   }, []);
 
-  // Caso a API não retorne imóveis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
+  // Caso a API nÃ£o retorne imÃ³veis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
 
   useEffect(() => {
     if (!isModalOpen || typeof document === 'undefined') {
@@ -505,8 +514,8 @@ const FeaturedProperties = () => {
   const neighborhoods = [
     { value: '', label: 'Todos os Bairros' },
     { value: 'setor-bueno', label: 'Setor Bueno' },
-    { value: 'jardim-goias', label: 'Jardim Goiás' },
-    { value: 'alto-da-gloria', label: 'Alto da Glória' },
+    { value: 'jardim-goias', label: 'Jardim GoiÃ¡s' },
+    { value: 'alto-da-gloria', label: 'Alto da GlÃ³ria' },
     { value: 'setor-marista', label: 'Setor Marista' },
     { value: 'setor-oeste', label: 'Setor Oeste' },
     { value: 'park-lozandes', label: 'Park Lozandes' },
@@ -584,7 +593,7 @@ const FeaturedProperties = () => {
   };
 
   const handleWhatsAppClick = (property) => {
-    const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
+    const message = encodeURIComponent(`OlÃ¡! Tenho interesse no imÃ³vel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
@@ -631,16 +640,16 @@ const FeaturedProperties = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Imóveis em Destaque
+            ImÃ³veis em Destaque
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia,
-            próximos ao Flamboyant Shopping e principais centros comerciais
+            SeleÃ§Ã£o exclusiva de propriedades premium nos melhores bairros de GoiÃ¢nia,
+            prÃ³ximos ao Flamboyant Shopping e principais centros comerciais
           </p>
           {filteredProperties?.length > 0 && (
             <p className="text-sm text-primary font-medium mt-2">
               {filteredProperties?.length}{' '}
-              {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+              {filteredProperties?.length === 1 ? 'imÃ³vel encontrado' : 'imÃ³veis encontrados'}
             </p>
           )}
         </div>
@@ -668,7 +677,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="DollarSign" size={16} className="mr-2 inline" />
-                Faixa de Preço
+                Faixa de PreÃ§o
               </label>
               <select
                 value={formFilters.priceRange}
@@ -686,7 +695,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="Home" size={16} className="mr-2 inline" />
-                Tipo de Imóvel
+                Tipo de ImÃ³vel
               </label>
               <select
                 value={formFilters.propertyType}
@@ -703,7 +712,7 @@ const FeaturedProperties = () => {
 
             <div className="flex items-end justify-end">
               <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
-                Buscar Imóveis
+                Buscar ImÃ³veis
               </Button>
             </div>
           </div>
@@ -750,17 +759,17 @@ const FeaturedProperties = () => {
           <div className="py-12 text-center">
             <Icon name="Search" size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="mb-2 text-xl font-semibold text-gray-900">
-              Nenhum imóvel encontrado
+              Nenhum imÃ³vel encontrado
             </h3>
             <p className="mb-6 text-gray-600">
-              Tente ajustar os filtros ou entre em contato conosco para mais opções
+              Tente ajustar os filtros ou entre em contato conosco para mais opÃ§Ãµes
             </p>
             <Button
               variant="default"
               iconName="MessageCircle"
               iconPosition="left"
               onClick={() => {
-                const message = encodeURIComponent('Olá! Não encontrei imóveis com os filtros selecionados. Podem me ajudar a encontrar outras opções?');
+                const message = encodeURIComponent('OlÃ¡! NÃ£o encontrei imÃ³veis com os filtros selecionados. Podem me ajudar a encontrar outras opÃ§Ãµes?');
                 window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
               }}
               className="bg-accent hover:bg-accent/90"
@@ -827,7 +836,7 @@ const FeaturedProperties = () => {
                       type="button"
                       onClick={handleModalNext}
                       className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                      aria-label="Próxima imagem"
+                      aria-label="PrÃ³xima imagem"
                     >
                       <Icon name="ChevronRight" size={22} />
                     </button>
@@ -859,10 +868,18 @@ const FeaturedProperties = () => {
                     <Icon name="Bath" size={16} className="mr-1" />
                     {activeProperty.bathrooms}
                   </span>
-                  <span className="flex items-center">
-                    <Icon name="Ruler" size={16} className="mr-1" />
-                    {activeProperty.area}
-                  </span>
+                  {activeProperty?.builtAreaText && (
+                    <span className="flex items-center">
+                      <Icon name="Ruler" size={16} className="mr-1" />
+                      {activeProperty.builtAreaText}
+                    </span>
+                  )}
+                  {activeProperty?.area && (
+                    <span className="flex items-center">
+                      <Icon name="Square" size={16} className="mr-1" />
+                      {activeProperty.area}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {activeProperty.features?.map((feature, index) => (
@@ -893,3 +910,5 @@ const FeaturedProperties = () => {
 };
 
 export default FeaturedProperties;
+
+

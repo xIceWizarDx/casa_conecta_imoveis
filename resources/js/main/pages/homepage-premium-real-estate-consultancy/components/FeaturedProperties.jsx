@@ -350,10 +350,18 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
               <Icon name="Bath" size={16} className="mr-1" />
               {property?.bathrooms}
             </div>
-            <div className="flex items-center">
-              <Icon name="Ruler" size={16} className="mr-1" />
-              {property?.area}
-            </div>
+            {property?.builtAreaText && (
+              <div className="flex flex-col items-start">
+                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Área construída</span>
+                <span className="flex items-center"><Icon name="Ruler" size={16} className="mr-1" />{property.builtAreaText}</span>
+              </div>
+            )}
+            {property?.area && (
+              <div className="flex flex-col items-start">
+                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Metragem total</span>
+                <span className="flex items-center"><Icon name="Square" size={16} className="mr-1" />{property.area}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -438,7 +446,7 @@ const FeaturedProperties = () => {
               return Number(m[1].replace(/\./g, '').replace(',', '.')) || null;
             };
             const lotArea = parseArea(p.lot_area ?? p.lotArea ?? p.terreno ?? p.landSize ?? null);
-            const privateArea = parseArea(p.private_area ?? p.privateArea ?? p.area_privativa ?? p.areaPrivativa ?? p.area ?? null);
+            const privateArea = parseArea(p.built_area ?? p.private_area ?? p.privateArea ?? p.area_privativa ?? p.areaPrivativa ?? p.area ?? null);
             const priceNumber = parsePrice(p.price);
             const resolvePriceRange = () => {
               if (p.price_range) return p.price_range;
@@ -459,6 +467,7 @@ const FeaturedProperties = () => {
               bedrooms: p.bedrooms,
               bathrooms: p.bathrooms,
               area: p.area,
+              builtAreaText: typeof p.built_area === 'string' ? p.built_area : (privateArea != null ? `${privateArea} m²` : null),
               lotArea,
               privateArea,
               type: p.type,
@@ -1010,10 +1019,18 @@ const FeaturedProperties = () => {
                     <Icon name="Bath" size={16} className="mr-1" />
                     {activeProperty.bathrooms}
                   </span>
-                  <span className="flex items-center">
-                    <Icon name="Ruler" size={16} className="mr-1" />
-                    {activeProperty.area}
-                  </span>
+                  {activeProperty?.builtAreaText && (
+                    <span className="flex flex-col items-start">
+                      <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Área construída</span>
+                      <span className="flex items-center"><Icon name="Ruler" size={16} className="mr-1" />{activeProperty.builtAreaText}</span>
+                    </span>
+                  )}
+                  {activeProperty?.area && (
+                    <span className="flex flex-col items-start">
+                      <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Metragem total</span>
+                      <span className="flex items-center"><Icon name="Square" size={16} className="mr-1" />{activeProperty.area}</span>
+                    </span>
+                  )}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {activeProperty.features?.map((feature, index) => (

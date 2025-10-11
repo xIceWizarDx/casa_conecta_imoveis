@@ -60,6 +60,7 @@ type FeaturedProperty = {
     bedrooms?: number | null;
     bathrooms?: number | null;
     area?: string | null;
+    built_area?: string | null;
     type?: string | null;
     features?: string[];
     price_range?: string | null;
@@ -642,6 +643,7 @@ export default function Painel() {
                                             bedrooms={bedrooms}
                                             bathrooms={bathrooms}
                                             area={f.area ?? undefined}
+                                            built_area={f.built_area ?? undefined}
                                             features={features}
                                             price={f.price}
                                         />

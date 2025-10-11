@@ -1,4 +1,4 @@
-import ImageEditor from '@/components/ImageEditor';
+﻿import ImageEditor from '@/components/ImageEditor';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
 // Heart icon removed
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export type FeaturedProperty = {
     bedrooms?: number | null;
     bathrooms?: number | null;
     area?: string | null;
+    built_area?: string | null;
     type?: string | null;
     features?: string[];
     price_range?: string | null;
@@ -84,7 +85,7 @@ export default function FeaturedPropertiesModal({
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
-        const digits = value.replace(/disabled={uploadingImages}D/g, '');
+        const digits = value.replace(/\\D/g, '');
         if (!digits) return '';
         const number = Number(digits) / 100;
         try {
@@ -95,7 +96,7 @@ export default function FeaturedPropertiesModal({
     };
 
     const formatAreaNumber = (value: string) => {
-        const digits = value.replace(/disabled={uploadingImages}D/g, '');
+        const digits = value.replace(/\\D/g, '');
         if (!digits) return '';
         const n = parseInt(digits, 10);
         try {
@@ -106,7 +107,7 @@ export default function FeaturedPropertiesModal({
     };
 
     const buildAreaWithSuffix = (value?: string | null) => {
-        const digits = (value ?? '').replace(/disabled={uploadingImages}D/g, '');
+        const digits = (value ?? '').replace(/\\D/g, '');
         if (!digits) return null;
         const n = parseInt(digits, 10);
         const formatted = (() => {
@@ -126,7 +127,7 @@ export default function FeaturedPropertiesModal({
         });
     };
 
-    // Preenche dados quando em modo de edição (capa + galeria)
+    // Preenche dados quando em modo de ediÃ§Ã£o (capa + galeria)
     useEffect(() => {
         if (!open || !editing) return;
         const cover: Image | null = editing.image_id && editing.image_url
@@ -160,6 +161,7 @@ export default function FeaturedPropertiesModal({
             bedrooms: editing.bedrooms ?? undefined,
             bathrooms: editing.bathrooms ?? undefined,
             area: editing.area ?? undefined,
+            built_area: (editing as any).built_area ?? undefined,
             type: editing.type ?? undefined,
             features: Array.isArray(editing.features) ? editing.features : [],
             price_range: editing.price_range ?? undefined,
@@ -311,6 +313,7 @@ export default function FeaturedPropertiesModal({
                 bedrooms: form.bedrooms ?? null,
                 bathrooms: form.bathrooms ?? null,
                 area: buildAreaWithSuffix(form.area),
+                built_area: buildAreaWithSuffix((form as any).built_area),
                 type: form.type ?? null,
                 features: [
                     ...((form.features ?? []) as string[]),
@@ -363,9 +366,9 @@ export default function FeaturedPropertiesModal({
                                             type="button"
                                             className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
                                             onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                            aria-label="Remover vídeo"
+                                            aria-label="Remover vÃ­deo"
                                         >
-                                            ×
+                                            Ã—
                                         </button>
                                     </div>
                                 ))}
@@ -374,7 +377,7 @@ export default function FeaturedPropertiesModal({
                     )}
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
-                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
+                    Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
                 </DialogDescription>
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -383,7 +386,7 @@ export default function FeaturedPropertiesModal({
                             <Input
                                 value={form.title ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                                placeholder="Ex: Apartamento premium no Jardim Goiás"
+                                placeholder="Ex: Apartamento premium no Jardim GoiÃ¡s"
                             />
                         </div>
                         <div>
@@ -391,7 +394,7 @@ export default function FeaturedPropertiesModal({
                             <Input
                                 value={form.neighborhood ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
-                                placeholder="Ex: Jardim Goiás"
+                                placeholder="Ex: Jardim GoiÃ¡s"
                             />
                         </div>
                         <div>
@@ -426,14 +429,27 @@ export default function FeaturedPropertiesModal({
                             />
                         </div>
                         <div>
-                            <Label>Área</Label>
+                            <Label>Metragem total (terreno)</Label>
                             <div className="relative">
                                 <Input
                                     className="pr-10"
                                     value={form.area ?? ''}
                                     onChange={(e) => setForm((s) => ({ ...s, area: formatAreaNumber(e.target.value) }))}
                                     inputMode="numeric"
-                                    placeholder="Ex: 120"
+                                    placeholder="Ex: 300"
+                                />
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+                            </div>
+                        </div>
+                        <div>
+                            <Label>Área construída</Label>
+                            <div className="relative">
+                                <Input
+                                    className="pr-10"
+                                    value={form.built_area ?? ''}
+                                    onChange={(e) => setForm((s) => ({ ...s, built_area: formatAreaNumber(e.target.value) }))}
+                                    inputMode="numeric"
+                                    placeholder="Ex: 180"
                                 />
                                 <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
                             </div>
@@ -445,16 +461,16 @@ export default function FeaturedPropertiesModal({
                                 value={form.type ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, type: e.target.value }))}
                             >
-                                <option value="">Selecione…</option>
+                                <option value="">Selecione</option>
                                 <option value="casa">Casa</option>
                                 <option value="apartamento">Apartamento</option>
                                 <option value="sobrado">Sobrado</option>
                                 <option value="cobertura">Cobertura</option>
                             </select>
                         </div>
-                        {/* Características ao lado do campo de Tipo */}
+                        {/* CaracterÃ­sticas ao lado do campo de Tipo */}
                         <div className="md:col-span-1 lg:col-span-2">
-                            <Label>Características (features)</Label>
+                            <Label>CaracterÃ­sticas (features)</Label>
                             <div className="mt-2 flex items-center gap-2">
                                 <Input className="flex-1" value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
                                 <Button
@@ -482,7 +498,7 @@ export default function FeaturedPropertiesModal({
                                                 className="rounded-full bg-black px-1 text-white hover:bg-black/80"
                                                 onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
                                             >
-                                                ×
+                                                Ã—
                                             </button>
                                         </span>
                                     ))}
@@ -495,13 +511,13 @@ export default function FeaturedPropertiesModal({
                             <input type="checkbox" checked={!!form.is_new} onChange={(e) => setForm((s) => ({ ...s, is_new: e.target.checked }))} />
                             Novo
                         </label>
-                        {/* Checkbox "Publicado" removido: novas publicações serão publicadas automaticamente */}
+                        {/* Checkbox "Publicado" removido: novas publicaÃ§Ãµes serÃ£o publicadas automaticamente */}
                     </div>
-                    {/* Seção de características movida ao lado do campo de Tipo */}
+                    {/* SeÃ§Ã£o de caracterÃ­sticas movida ao lado do campo de Tipo */}
                     <div>
                         <Label>Imagens</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Arraste para ordenar as imagens. A primeira imagem será usada como capa.
+                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa.
                         </p>
                         <Button
                             type="button"
@@ -510,7 +526,7 @@ export default function FeaturedPropertiesModal({
                             onClick={() => uploadInputRef.current?.click()}
                             disabled={uploadingImages}
                         >
-                            {uploadingImages ? 'Enviando…' : 'Escolher imagens'}
+                            {uploadingImages ? 'Enviando...' : 'Escolher imagens'}
                         </Button>
                         <Button
                             type="button"
@@ -519,7 +535,7 @@ export default function FeaturedPropertiesModal({
                             onClick={() => uploadVideoRef.current?.click()}
                             disabled={uploadingVideos}
                         >
-                            {uploadingVideos ? 'Enviando…' : 'Escolher vídeos'}
+                            {uploadingVideos ? 'Enviando...' : 'Escolher vídeos'}
                         </Button>
                         <input
                             ref={uploadInputRef}
@@ -570,7 +586,8 @@ export default function FeaturedPropertiesModal({
                                             neighborhood={form.neighborhood}
                                             bedrooms={form.bedrooms}
                                             bathrooms={form.bathrooms}
-                                            area={form.area}
+                                            area={buildAreaWithSuffix(form.area) ?? undefined}
+                                            built_area={buildAreaWithSuffix((form as any).built_area) ?? undefined}
                                             features={[
                                                 ...((form.features ?? []) as string[]),
                                                 ...(featureInput.trim() ? [featureInput.trim()] : []),
@@ -611,7 +628,7 @@ export default function FeaturedPropertiesModal({
                                                     onClick={() => handleRemoveImage(img.id)}
                                                     aria-label="Remover imagem"
                                                 >
-                                                    ×
+                                                    Ã—
                                                 </button>
                                                 {isCover && (
                                                     <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] font-medium text-white">
@@ -639,9 +656,9 @@ export default function FeaturedPropertiesModal({
                                         type="button"
                                         className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
                                         onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                        aria-label="Remover vídeo"
+                                        aria-label="Remover vÃ­deo"
                                     >
-                                        ×
+                                        Ã—
                                     </button>
                                 </div>
                             ))}
@@ -658,7 +675,7 @@ export default function FeaturedPropertiesModal({
                         disabled={creating}
                         title={editing?.id ? 'Atualizar destaque' : 'Publicar destaque'}
                     >
-                        {editing?.id ? (creating ? 'Atualizando…' : 'Atualizar') : (creating ? 'Publicando…' : 'Publicar')}
+                        {editing?.id ? (creating ? 'Atualizando...' : 'Atualizar') : (creating ? 'Publicando...' : 'Publicar')}
                     </Button>
                 </DialogFooter>
 
@@ -666,3 +683,14 @@ export default function FeaturedPropertiesModal({
         </Dialog>
     );
 }
+
+
+
+
+
+
+
+
+
+
+
