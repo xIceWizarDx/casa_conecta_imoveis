@@ -438,7 +438,18 @@ const FeaturedProperties = () => {
               bathrooms: p.bathrooms,
               area: p.area,
               type: p.type,
-              builtAreaText: typeof p.built_area === "string" ? p.built_area : null,
+              builtAreaText: (() => {
+                const M2 = 'm' + String.fromCharCode(178);
+                const raw = p.built_area;
+                if (raw != null) {
+                  const digits = String(raw).replace(/\D/g, '');
+                  if (digits) {
+                    const n = parseInt(digits, 10);
+                    try { return `${n.toLocaleString('pt-BR')} ${M2}`; } catch { return `${n} ${M2}`; }
+                  }
+                }
+                return null;
+              })(),
               // O backend jÃ¡ entrega image_url e gallery com arquivos do storage; usamos o placeholder padrÃ£o sÃ³ se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
               imagePlaceholder:

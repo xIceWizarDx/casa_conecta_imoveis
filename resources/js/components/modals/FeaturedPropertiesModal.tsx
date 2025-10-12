@@ -32,7 +32,7 @@ export type FeaturedProperty = {
     area?: string | null;
     built_area?: string | null;
     type?: string | null;
-    features?: string[];
+    description?: string | null;
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
@@ -74,8 +74,11 @@ export default function FeaturedPropertiesModal({
 }: Props) {
     const [creating, setCreating] = useState(false);
 
-    const [form, setForm] = useState<Partial<FeaturedProperty>>({ features: [] });
-    const [featureInput, setFeatureInput] = useState('');
+    const [form, setForm] = useState<Partial<FeaturedProperty>>({ description: '' });
+    const [_featureInputHidden, set_featureInputHidden] = useState('');
+    
+    const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
+    const [showEmojis, setShowEmojis] = useState(false);
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [images, setImages] = useState<Image[]>([]);
     const [videos, setVideos] = useState<any[]>([]);
@@ -107,14 +110,15 @@ export default function FeaturedPropertiesModal({
     };
 
     const buildAreaWithSuffix = (value?: string | null) => {
-        const digits = (value ?? '').replace(/\\D/g, '');
-        if (!digits) return null;
-        const n = parseInt(digits, 10);
-        const formatted = (() => {
-            try { return n.toLocaleString('pt-BR'); } catch { return String(n); }
-        })();
-        return `${formatted} m²`;
-    };
+    const digits = (value ?? '').replace(/\D/g, '');
+    if (!digits) return null;
+    const n = parseInt(digits, 10);
+    const formatted = (() => {
+        try { return n.toLocaleString('pt-BR'); } catch { return String(n); }
+    })();
+    const M2 = 'm' + String.fromCharCode(178);
+    return `${formatted} ${M2}`;
+};
 
     const setSelectedImageAndForm = (image: Image | null) => {
         setSelectedImage(image);
@@ -163,12 +167,12 @@ export default function FeaturedPropertiesModal({
             area: editing.area ?? undefined,
             built_area: (editing as any).built_area ?? undefined,
             type: editing.type ?? undefined,
-            features: Array.isArray(editing.features) ? editing.features : [],
+            description: (editing as any).description ?? '',
             price_range: editing.price_range ?? undefined,
             is_new: !!editing.is_new,
             is_published: !!editing.is_published,
         });
-        setFeatureInput('');
+        setShowEmojis(false);
     }, [open, editing]);
 
     const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -315,10 +319,7 @@ export default function FeaturedPropertiesModal({
                 area: buildAreaWithSuffix(form.area),
                 built_area: buildAreaWithSuffix((form as any).built_area),
                 type: form.type ?? null,
-                features: [
-                    ...((form.features ?? []) as string[]),
-                    ...(featureInput.trim() ? [featureInput.trim()] : []),
-                ],
+                description: (form as any).description ?? null,
                 price_range: form.price_range ?? null,
                 is_new: !!form.is_new,
                 is_published: editing?.id ? !!form.is_published : true,
@@ -332,8 +333,7 @@ export default function FeaturedPropertiesModal({
                 await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
                 onNotice?.({ type: 'success', title: 'Destaque adicionado' });
             }
-            setForm({ features: [] });
-            setFeatureInput('');
+            setForm({ description: '' });
             setSelectedImageAndForm(null);
             setImages([]);
             await onRefreshFeatured();
@@ -353,6 +353,61 @@ export default function FeaturedPropertiesModal({
                         <DialogTitle>Imóveis em Destaque</DialogTitle>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{`${listCount} itens`}</span>
+                        </div>
+                        {/* Descrição do imóvel */}
+                        <div className="md:col-span-1 lg:col-span-2">
+                            <Label>Descrição do imóvel</Label>
+                            <div className="mt-2 flex items-start gap-2">
+                                <textarea
+                                    ref={descriptionRef}
+                                    className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
+                                    placeholder={"Ex: Casa térrea no Jardim Goiânia 🏡 com 3 quartos, suíte, área gourmet com piscina 🏊 e 2 vagas de garagem. Localização excelente, próxima ao parque."}
+                                    value={(form as any).description ?? ''}
+                                    onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+                                />
+                                <div className="relative">
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        className="w-10 px-0 bg-accent text-white hover:bg-accent/90"
+                                        onClick={() => setShowEmojis((v) => !v)}
+                                        title="Emojis (estilo WhatsApp)"
+                                    >
+                                        🙂
+                                    </Button>
+                                    {showEmojis && (
+                                        <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-white p-2 shadow-lg">
+                                            {['😀','😃','😄','😁','😆','😊','😍','🤩','😉','👍','🏡','🛏️','🛁','🧱','🔑','🌳','🏊‍♂️','🚗','📍','📐','📏','💡','🔥','💎','🎯'].map((emo) => (
+                                                <button
+                                                    key={emo}
+                                                    type="button"
+                                                    className="m-0.5 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
+                                                    onClick={() => {
+                                                        const el = descriptionRef.current;
+                                                        const toInsert = emo;
+                                                        if (el) {
+                                                            const start = el.selectionStart ?? el.value.length;
+                                                            const end = el.selectionEnd ?? el.value.length;
+                                                            const text = el.value;
+                                                            const next = text.slice(0, start) + toInsert + text.slice(end);
+                                                            el.value = next;
+                                                            setForm((s) => ({ ...s, description: next }));
+                                                            const pos = start + toInsert.length;
+                                                            requestAnimationFrame(() => {
+                                                                el.focus();
+                                                                el.setSelectionRange(pos, pos);
+                                                            });
+                                                        }
+                                                    }}
+                                                >
+                                                    {emo}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
                         </div>
                     </div>
                     {false && videos.length > 0 && (
@@ -438,7 +493,7 @@ export default function FeaturedPropertiesModal({
                                     inputMode="numeric"
                                     placeholder="Ex: 300"
                                 />
-                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{'m' + String.fromCharCode(178)}</span>
                             </div>
                         </div>
                         <div>
@@ -451,7 +506,7 @@ export default function FeaturedPropertiesModal({
                                     inputMode="numeric"
                                     placeholder="Ex: 180"
                                 />
-                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">m²</span>
+                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{'m' + String.fromCharCode(178)}</span>
                             </div>
                         </div>
                         <div>
@@ -469,28 +524,28 @@ export default function FeaturedPropertiesModal({
                             </select>
                         </div>
                         {/* CaracterÃ­sticas ao lado do campo de Tipo */}
-                        <div className="md:col-span-1 lg:col-span-2">
+                        <div className="md:col-span-1 lg:col-span-2 hidden">
                             <Label>CaracterÃ­sticas (features)</Label>
                             <div className="mt-2 flex items-center gap-2">
-                                <Input className="flex-1" value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} placeholder="Ex: Piscina" />
+                                <Input className="flex-1" value={_featureInputHidden} onChange={(e) => set_featureInputHidden(e.target.value)} placeholder="Ex: Piscina" />
                                 <Button
                                     type="button"
                                     variant="secondary"
                                     className="w-auto bg-black text-white hover:bg-black/80"
                                     onClick={() => {
-                                        const v = featureInput.trim();
+                                        const v = _featureInputHidden.trim();
                                         if (!v) return;
                                         setForm((s) => ({ ...s, features: [...(s.features ?? []), v] }));
-                                        setFeatureInput('');
+                                        set_featureInputHidden('');
                                     }}
                                     title="Adicionar"
                                 >
                                     +
                                 </Button>
                             </div>
-                            {(form.features ?? []).length > 0 && (
+                            {false && ([]).length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    {(form.features ?? []).map((f, idx) => (
+                                    {([]).map((f, idx) => (
                                         <span key={`${f}-${idx}`} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs">
                                             {f}
                                             <button
@@ -588,11 +643,7 @@ export default function FeaturedPropertiesModal({
                                             bathrooms={form.bathrooms}
                                             area={buildAreaWithSuffix(form.area) ?? undefined}
                                             built_area={buildAreaWithSuffix((form as any).built_area) ?? undefined}
-                                            features={[
-                                                ...((form.features ?? []) as string[]),
-                                                ...(featureInput.trim() ? [featureInput.trim()] : []),
-                                            ]}
-                                            price={form.price}
+                                                                                        price={form.price}
                                         />
                                     </div>
                                 </div>
@@ -683,7 +734,6 @@ export default function FeaturedPropertiesModal({
         </Dialog>
     );
 }
-
 
 
 

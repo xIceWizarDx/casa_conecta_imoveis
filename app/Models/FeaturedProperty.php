@@ -13,7 +13,7 @@ class FeaturedProperty extends Model
     use HasFactory;
 
     protected $fillable = [
-        'image_id', 'title', 'neighborhood', 'price', 'bedrooms', 'bathrooms', 'area', 'built_area', 'type', 'features', 'price_range', 'is_new', 'is_published', 'position',
+        'image_id', 'title', 'neighborhood', 'price', 'bedrooms', 'bathrooms', 'area', 'built_area', 'type', 'description', 'features', 'price_range', 'is_new', 'is_published', 'position',
     ];
 
     protected $casts = [

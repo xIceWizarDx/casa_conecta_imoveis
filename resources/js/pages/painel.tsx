@@ -126,17 +126,18 @@ export default function Painel() {
     };
 
     const formatAreaM2Input = (value: string) => {
-        // Mantém apenas dígitos e formata com separador de milhar (pt-BR)
-        const digits = value.replace(/\D/g, '');
-        if (!digits) return '';
-        const n = parseInt(digits, 10);
-        try {
-            return `${n.toLocaleString('pt-BR')} m²`;
-        } catch {
-            // Fallback simples
-            return `${n} m²`;
-        }
-    };
+    // Mantém apenas dígitos e formata com separador de milhar (pt-BR)
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    const n = parseInt(digits, 10);
+    const M2 = 'm' + String.fromCharCode(178);
+    try {
+        return `${n.toLocaleString('pt-BR')} ${M2}`;
+    } catch {
+        // Fallback simples
+        return `${n} ${M2}`;
+    }
+};
 
     const refreshAll = async () => {
         await Promise.all([refreshSlides(), refreshFeatured()]);

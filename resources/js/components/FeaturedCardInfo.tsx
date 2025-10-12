@@ -1,4 +1,5 @@
-import { Bath, Bed, MapPin, MessageCircle, Square, Ruler } from 'lucide-react';
+﻿import { Bath, Bed, MapPin, MessageCircle } from 'lucide-react';
+import PropertyAreaMetrics from '@/components/PropertyAreaMetrics';
 import { Button } from '@/components/ui/button';
 
 export type FeaturedCardInfoProps = {
@@ -18,7 +19,7 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
 
     return (
         <div className="rounded-b-2xl bg-white p-6 shadow-lg">
-            <h3 className="mb-2 text-xl font-bold text-gray-900">{title || 'Pré-visualização do destaque'}</h3>
+            <h3 className="mb-2 text-xl font-bold text-gray-900">{title || 'PrÃ©-visualizaÃ§Ã£o do destaque'}</h3>
 
             {(neighborhood || '').trim() && (
                 <div className="mb-4 flex items-center text-gray-600">
@@ -42,24 +43,8 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                                 <span>{bathrooms}</span>
                             </div>
                         )}
-                        {(built_area || '').trim() && (
-                            <div className="flex flex-col items-start" title="Área construída">
-                                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Área construída</span>
-                                <div className="flex items-center">
-                                    <Ruler className="mr-1 h-4 w-4" />
-                                    <span>{built_area}</span>
-                                </div>
-                            </div>
-                        )}
-                        {(area || '').trim() && (
-                            <div className="flex flex-col items-start" title="Metragem total do terreno">
-                                <span className="-mb-0.5 text-[10px] leading-none text-gray-500">Metragem total</span>
-                                <div className="flex items-center">
-                                    <Square className="mr-1 h-4 w-4" />
-                                    <span>{area}</span>
-                                </div>
-                            </div>
-                        )}
+                        <PropertyAreaMetrics builtArea={built_area ?? undefined} area={area ?? undefined} />
+                        
                     </div>
                 </div>
             )}
