@@ -355,18 +355,11 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
           </div>
         </div>
 
-        <div className="mb-4 flex flex-wrap gap-2">
-          {property?.features?.slice(0, 2).map((feature) => (
-            <span key={feature} className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-              {feature}
-            </span>
-          ))}
-          {property?.features?.length > 2 && (
-            <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-              +{property?.features?.length - 2} mais
-            </span>
-          )}
-        </div>
+        {property?.description && (
+          <p className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words line-clamp-4">
+            {property.description}
+          </p>
+        )}
 
         <div className="mt-auto flex items-center justify-between">
           <div className="text-2xl font-bold text-primary">{property?.price}</div>
@@ -484,7 +477,7 @@ const FeaturedProperties = () => {
               imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(fallbackImage),
               gallery: galleryEntries,
               galleryEntries,
-              features: Array.isArray(p.features) ? p.features : [],
+              description: typeof p.description === 'string' ? p.description : '',
               isNew: !!p.is_new,
               priceRange: resolvePriceRange(),
             };
@@ -1025,13 +1018,11 @@ const FeaturedProperties = () => {
                   </span>
                   <PropertyAreaMetrics builtArea={activeProperty?.builtAreaText} area={activeProperty?.area} />
                 </div>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {activeProperty.features?.map((feature, index) => (
-                    <span key={index} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
+                {activeProperty.description && (
+                  <p className="mt-6 whitespace-pre-line break-words text-base text-gray-700">
+                    {activeProperty.description}
+                  </p>
+                )}
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                   <span className="text-3xl font-semibold text-primary">{activeProperty.price}</span>
                   <Button
