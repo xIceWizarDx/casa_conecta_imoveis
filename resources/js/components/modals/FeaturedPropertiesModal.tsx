@@ -33,6 +33,7 @@ export type FeaturedProperty = {
     built_area?: string | null;
     type?: string | null;
     description?: string | null;
+    features?: string[] | null;
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
@@ -347,7 +348,10 @@ export default function FeaturedPropertiesModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
+            <DialogContent
+                className="w-full max-h-[85vh] overflow-y-auto sm:max-w-5xl"
+                aria-describedby="featured-desc"
+            >
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <DialogTitle>Imóveis em Destaque</DialogTitle>
@@ -642,8 +646,11 @@ export default function FeaturedPropertiesModal({
                                     🙂
                                 </Button>
                                 {showEmojis && (
-                                    <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-white p-2 shadow-lg">
-                                        {['😀','😃','😄','😁','😆','😊','😍','🤩','😉','👍','🏡','🛏️','🛁','🧱','🔑','🌳','🏊♂️','🚗','📍','📐','📏','💡','🔥','💎','🎯'].map((emo) => (
+                                    <div className="absolute right-0 z-10 mt-2 w-52 rounded-md border bg-white p-2 shadow-lg">
+                                        {[
+                                            '😀','😃','😄','😁','😆','😊','😍','🤩','🥰','😉','😎','🤗','🙌','👍','👏','✅','✨','🌟',
+                                            '🏡','🏠','🏘️','🏢','🏗️','🌇','🌆','🌳','🌴','🌺','🪴','🏊‍♂️','🏋️‍♀️','🚗','🚙','🛵','🅿️','🛏️','🛁','🚿','🧖‍♀️','🍷','🔥','💡','💎','🎯','🧭','📍','📐','📏','📸','🔑','🛠️'
+                                        ].map((emo) => (
                                             <button
                                                 key={emo}
                                                 type="button"

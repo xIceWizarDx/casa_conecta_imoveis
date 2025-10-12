@@ -219,6 +219,32 @@ const buildGalleryEntries = (property) => {
   ];
 };
 
+const DESCRIPTION_CANDIDATE_KEYS = [
+  'description',
+  'descricao',
+  'description_text',
+  'descriptionText',
+  'resumo',
+  'resumo_texto',
+  'resumoTexto',
+  'details',
+  'detalhes'
+];
+
+const extractDescription = (record) => {
+  if (!record || typeof record !== 'object') return '';
+  for (const key of DESCRIPTION_CANDIDATE_KEYS) {
+    const value = record[key];
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed) {
+        return trimmed;
+      }
+    }
+  }
+  return '';
+};
+
 const getPropertyGallery = (property) => {
   if (!property) return [];
   return buildGalleryEntries(property);
@@ -442,6 +468,11 @@ const FeaturedProperties = () => {
               return '';
             };
 
+            const rawDescription = extractDescription(p);
+            const fallbackDescription = Array.isArray(p.features)
+              ? p.features.filter(Boolean).join(' · ')
+              : '';
+
             return {
               id: p.id,
               title: p.title,
@@ -477,7 +508,7 @@ const FeaturedProperties = () => {
               imageSrcSet: primaryImageEntry?.srcSet || buildResponsiveSrcSet(fallbackImage),
               gallery: galleryEntries,
               galleryEntries,
-              description: typeof p.description === 'string' ? p.description : '',
+              description: rawDescription || fallbackDescription,
               isNew: !!p.is_new,
               priceRange: resolvePriceRange(),
             };

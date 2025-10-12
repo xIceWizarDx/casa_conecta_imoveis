@@ -14,6 +14,9 @@ export type FeaturedCardInfoProps = {
 };
 
 export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathrooms, area, built_area, description, price }: FeaturedCardInfoProps) {
+
+    const trimmedDescription = typeof description === 'string' ? description.trim() : '';
+
     return (
         <div className="rounded-b-2xl bg-white p-6 shadow-lg">
             <h3 className="mb-2 text-xl font-bold text-gray-900">{title || 'Pré-visualização do destaque'}</h3>
@@ -44,10 +47,10 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                     </div>
                 </div>
             )}
-
-            {description && (
+            {trimmedDescription && (
                 <p className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
-                    {description}
+                    {trimmedDescription}
+
                 </p>
             )}
 
