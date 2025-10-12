@@ -62,12 +62,39 @@ type FeaturedProperty = {
     area?: string | null;
     built_area?: string | null;
     type?: string | null;
-    features?: string[];
+    description?: string | null;
+    features?: string[] | null;
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
     position?: number;
     images?: Image[];
+};
+
+const DESCRIPTION_CANDIDATE_KEYS = [
+    'description',
+    'descricao',
+    'description_text',
+    'descriptionText',
+    'resumo',
+    'resumo_texto',
+    'resumoTexto',
+    'details',
+    'detalhes',
+];
+
+const extractDescriptionText = (record: unknown): string => {
+    if (!record || typeof record !== 'object') return '';
+    for (const key of DESCRIPTION_CANDIDATE_KEYS) {
+        const value = (record as Record<string, unknown>)[key];
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (trimmed) {
+                return trimmed;
+            }
+        }
+    }
+    return '';
 };
 
 // api helpers moved to '@/lib/api'
@@ -539,9 +566,14 @@ export default function Painel() {
                             {featured.map((f) => {
                                 const bedrooms = typeof f.bedrooms === 'number' ? f.bedrooms : undefined;
                                 const bathrooms = typeof f.bathrooms === 'number' ? f.bathrooms : undefined;
-                                const features = Array.isArray(f.features)
-                                    ? f.features.filter((feature): feature is string => typeof feature === 'string')
-                                    : [];
+                                const description = (() => {
+                                    const raw = extractDescriptionText(f);
+                                    if (raw) return raw;
+                                    if (Array.isArray(f.features) && f.features.length > 0) {
+                                        return f.features.filter(Boolean).join(' · ');
+                                    }
+                                    return '';
+                                })();
 
                                 return (
                                     <div
@@ -645,7 +677,7 @@ export default function Painel() {
                                             bathrooms={bathrooms}
                                             area={f.area ?? undefined}
                                             built_area={f.built_area ?? undefined}
-                                            features={features}
+                                            description={description}
                                             price={f.price}
                                         />
                                     </div>
