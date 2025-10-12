@@ -62,7 +62,7 @@ type FeaturedProperty = {
     area?: string | null;
     built_area?: string | null;
     type?: string | null;
-    features?: string[];
+    description?: string | null;
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
@@ -539,9 +539,7 @@ export default function Painel() {
                             {featured.map((f) => {
                                 const bedrooms = typeof f.bedrooms === 'number' ? f.bedrooms : undefined;
                                 const bathrooms = typeof f.bathrooms === 'number' ? f.bathrooms : undefined;
-                                const features = Array.isArray(f.features)
-                                    ? f.features.filter((feature): feature is string => typeof feature === 'string')
-                                    : [];
+                                const description = typeof f.description === 'string' ? f.description : '';
 
                                 return (
                                     <div
@@ -645,7 +643,7 @@ export default function Painel() {
                                             bathrooms={bathrooms}
                                             area={f.area ?? undefined}
                                             built_area={f.built_area ?? undefined}
-                                            features={features}
+                                            description={description}
                                             price={f.price}
                                         />
                                     </div>

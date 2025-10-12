@@ -354,82 +354,7 @@ export default function FeaturedPropertiesModal({
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{`${listCount} itens`}</span>
                         </div>
-                        {/* Descrição do imóvel */}
-                        <div className="md:col-span-1 lg:col-span-2">
-                            <Label>Descrição do imóvel</Label>
-                            <div className="mt-2 flex items-start gap-2">
-                                <textarea
-                                    ref={descriptionRef}
-                                    className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
-                                    placeholder={"Ex: Casa térrea no Jardim Goiânia 🏡 com 3 quartos, suíte, área gourmet com piscina 🏊 e 2 vagas de garagem. Localização excelente, próxima ao parque."}
-                                    value={(form as any).description ?? ''}
-                                    onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
-                                />
-                                <div className="relative">
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        className="w-10 px-0 bg-accent text-white hover:bg-accent/90"
-                                        onClick={() => setShowEmojis((v) => !v)}
-                                        title="Emojis (estilo WhatsApp)"
-                                    >
-                                        🙂
-                                    </Button>
-                                    {showEmojis && (
-                                        <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-white p-2 shadow-lg">
-                                            {['😀','😃','😄','😁','😆','😊','😍','🤩','😉','👍','🏡','🛏️','🛁','🧱','🔑','🌳','🏊‍♂️','🚗','📍','📐','📏','💡','🔥','💎','🎯'].map((emo) => (
-                                                <button
-                                                    key={emo}
-                                                    type="button"
-                                                    className="m-0.5 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
-                                                    onClick={() => {
-                                                        const el = descriptionRef.current;
-                                                        const toInsert = emo;
-                                                        if (el) {
-                                                            const start = el.selectionStart ?? el.value.length;
-                                                            const end = el.selectionEnd ?? el.value.length;
-                                                            const text = el.value;
-                                                            const next = text.slice(0, start) + toInsert + text.slice(end);
-                                                            el.value = next;
-                                                            setForm((s) => ({ ...s, description: next }));
-                                                            const pos = start + toInsert.length;
-                                                            requestAnimationFrame(() => {
-                                                                el.focus();
-                                                                el.setSelectionRange(pos, pos);
-                                                            });
-                                                        }
-                                                    }}
-                                                >
-                                                    {emo}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
-                        </div>
                     </div>
-                    {false && videos.length > 0 && (
-                        <>
-                            <Label className="mt-6 block">Vídeos</Label>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {videos.map((vid) => (
-                                    <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
-                                        <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
-                                        <button
-                                            type="button"
-                                            className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
-                                            onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                            aria-label="Remover vÃ­deo"
-                                        >
-                                            Ã—
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
                     Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
@@ -643,7 +568,8 @@ export default function FeaturedPropertiesModal({
                                             bathrooms={form.bathrooms}
                                             area={buildAreaWithSuffix(form.area) ?? undefined}
                                             built_area={buildAreaWithSuffix((form as any).built_area) ?? undefined}
-                                                                                        price={form.price}
+                                            description={(form as any).description ?? ''}
+                                            price={form.price}
                                         />
                                     </div>
                                 </div>
@@ -694,6 +620,60 @@ export default function FeaturedPropertiesModal({
                         ) : (
                             <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
                         )}
+                    </div>
+                    <div>
+                        <Label>Descrição do imóvel</Label>
+                        <div className="mt-2 flex items-start gap-2">
+                            <textarea
+                                ref={descriptionRef}
+                                className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
+                                placeholder={"Ex: Casa térrea no Jardim Goiânia 🏡 com 3 quartos, suíte, área gourmet com piscina 🏊 e 2 vagas de garagem. Localização excelente, próxima ao parque."}
+                                value={(form as any).description ?? ''}
+                                onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+                            />
+                            <div className="relative">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="w-10 px-0 bg-accent text-white hover:bg-accent/90"
+                                    onClick={() => setShowEmojis((v) => !v)}
+                                    title="Emojis (estilo WhatsApp)"
+                                >
+                                    🙂
+                                </Button>
+                                {showEmojis && (
+                                    <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-white p-2 shadow-lg">
+                                        {['😀','😃','😄','😁','😆','😊','😍','🤩','😉','👍','🏡','🛏️','🛁','🧱','🔑','🌳','🏊♂️','🚗','📍','📐','📏','💡','🔥','💎','🎯'].map((emo) => (
+                                            <button
+                                                key={emo}
+                                                type="button"
+                                                className="m-0.5 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
+                                                onClick={() => {
+                                                    const el = descriptionRef.current;
+                                                    const toInsert = emo;
+                                                    if (el) {
+                                                        const start = el.selectionStart ?? el.value.length;
+                                                        const end = el.selectionEnd ?? el.value.length;
+                                                        const text = el.value;
+                                                        const next = text.slice(0, start) + toInsert + text.slice(end);
+                                                        el.value = next;
+                                                        setForm((s) => ({ ...s, description: next }));
+                                                        const pos = start + toInsert.length;
+                                                        requestAnimationFrame(() => {
+                                                            el.focus();
+                                                            el.setSelectionRange(pos, pos);
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                {emo}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
                     </div>
                 </div>
                 {false && videos.length > 0 && (
