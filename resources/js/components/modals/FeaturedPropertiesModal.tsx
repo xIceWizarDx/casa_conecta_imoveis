@@ -349,7 +349,8 @@ export default function FeaturedPropertiesModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="w-full max-h-[85vh] overflow-y-auto sm:max-w-5xl"
+                className="flex max-h-[85vh] w-full flex-col overflow-hidden sm:max-w-5xl"
+
                 aria-describedby="featured-desc"
             >
                 <DialogHeader>
@@ -363,8 +364,9 @@ export default function FeaturedPropertiesModal({
                 <DialogDescription id="featured-desc">
                     Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
                 </DialogDescription>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-4 flex-1 overflow-y-auto pr-1">
+                    <div className="space-y-4 pb-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Título</Label>
                             <Input
@@ -683,6 +685,8 @@ export default function FeaturedPropertiesModal({
                         <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
                     </div>
                 </div>
+
+                </div>
                 {false && videos.length > 0 && (
                     <>
                         <Label className="mt-6 block">Vídeos</Label>
@@ -703,7 +707,7 @@ export default function FeaturedPropertiesModal({
                         </div>
                     </>
                 )}
-                <DialogFooter>
+                <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>

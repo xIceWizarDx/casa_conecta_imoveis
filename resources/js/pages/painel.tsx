@@ -65,6 +65,7 @@ type FeaturedProperty = {
     description?: string | null;
     features?: string[] | null;
 
+
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
