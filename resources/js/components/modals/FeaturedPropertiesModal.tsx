@@ -350,6 +350,7 @@ export default function FeaturedPropertiesModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className="flex max-h-[85vh] w-full flex-col overflow-hidden sm:max-w-5xl"
+
                 aria-describedby="featured-desc"
             >
                 <DialogHeader>
@@ -684,6 +685,7 @@ export default function FeaturedPropertiesModal({
                         <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
                     </div>
                 </div>
+
                 </div>
                 {false && videos.length > 0 && (
                     <>

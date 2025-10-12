@@ -64,6 +64,8 @@ type FeaturedProperty = {
     type?: string | null;
     description?: string | null;
     features?: string[] | null;
+
+
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
@@ -574,6 +576,7 @@ export default function Painel() {
                                     }
                                     return '';
                                 })();
+
 
                                 return (
                                     <div
