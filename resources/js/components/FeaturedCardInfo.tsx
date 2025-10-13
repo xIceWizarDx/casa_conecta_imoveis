@@ -54,13 +54,13 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
             {trimmedDescription && (
 
 
-            {trimmedDescription && (
 
+            {trimmedDescription ? (
                 <div className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
                     {trimmedDescription}
                 </div>
+            ) : null}
 
-            )}
 
             <div className="flex items-center justify-between">
                 <div className="text-2xl font-bold text-emerald-600">{price || 'R$ 0,00'}</div>
