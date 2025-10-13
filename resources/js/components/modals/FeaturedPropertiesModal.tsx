@@ -201,6 +201,7 @@ export default function FeaturedPropertiesModal({
 
         selectedFiles.forEach((file) => {
             if (file.type.startsWith('image/')) {
+
                 imageFiles.push(file);
             }
         });
