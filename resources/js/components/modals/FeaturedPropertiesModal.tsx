@@ -41,6 +41,13 @@ export type FeaturedProperty = {
     images?: Image[];
 };
 
+type UploadedVideo = {
+    id: number;
+    url: string;
+    original_name?: string | null;
+    filename?: string | null;
+};
+
 export interface Notice {
     type: 'success' | 'error';
     title: string;
@@ -54,7 +61,7 @@ interface Props {
     onRefreshFeatured: () => Promise<void>;
     onNotice?: (n: Notice) => void;
     onUploadImages: (files: FileList | null) => Promise<Image[]>;
-    onUploadVideos?: (files: FileList | null) => Promise<{ id: number; url: string }[]>;
+    onUploadVideos?: (files: FileList | null) => Promise<UploadedVideo[]>;
     uploadingImages?: boolean;
     uploadingVideos?: boolean;
     editing?: FeaturedProperty | null;
@@ -81,7 +88,7 @@ export default function FeaturedPropertiesModal({
     const [showEmojis, setShowEmojis] = useState(false);
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [images, setImages] = useState<Image[]>([]);
-    const [videos, setVideos] = useState<any[]>([]);
+    const [videos, setVideos] = useState<UploadedVideo[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadMediaRef = useRef<HTMLInputElement | null>(null);
 
@@ -150,8 +157,15 @@ export default function FeaturedPropertiesModal({
             : [];
         const ordered = cover ? [cover, ...gallery] : gallery;
         setImages(ordered);
-        const vids: any[] = Array.isArray((editing as any).videos)
-            ? ((editing as any).videos as any[]).map((v) => ({ id: Number(v?.id), url: String(v?.url ?? v?.video_url ?? ''), filename: String(v?.filename ?? ''), original_name: String(v?.original_name ?? '') })).filter((v) => v.id && v.url)
+        const vids: UploadedVideo[] = Array.isArray((editing as any).videos)
+            ? ((editing as any).videos as any[])
+                  .map((v) => ({
+                      id: Number(v?.id),
+                      url: String(v?.url ?? v?.video_url ?? ''),
+                      filename: typeof v?.filename === 'string' ? v.filename : undefined,
+                      original_name: typeof v?.original_name === 'string' ? v.original_name : undefined,
+                  }))
+                  .filter((v) => v.id && v.url)
             : [];
         setVideos(vids);
         setSelectedImageAndForm(ordered[0] ?? null);
@@ -187,7 +201,7 @@ export default function FeaturedPropertiesModal({
         });
     };
 
-    const mergeUploadedVideos = (uploaded: { id: number; url: string }[]) => {
+    const mergeUploadedVideos = (uploaded: UploadedVideo[]) => {
         if (uploaded.length === 0) return;
         setVideos((prev) => {
             const existingIds = new Set(prev.map((v) => v.id));
@@ -565,6 +579,7 @@ export default function FeaturedPropertiesModal({
                                     price: form.price ?? '',
                                     isNew: !!form.is_new,
                                 }}
+                                primaryVideo={videos[0] ?? null}
                             />
                         </div>
                         {images.length > 0 ? (
