@@ -375,7 +375,8 @@ export default function FeaturedPropertiesModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="!flex max-h-[90vh] w-full flex-col overflow-hidden sm:max-w-5xl"
+                className="flex max-h-[85vh] w-full flex-col overflow-hidden sm:max-w-5xl"
+
                 aria-describedby="featured-desc"
             >
                 <DialogHeader>
@@ -692,7 +693,7 @@ export default function FeaturedPropertiesModal({
                         </div>
                     </>
                 )}
-                <DialogFooter className="mt-4 shrink-0">
+                <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
