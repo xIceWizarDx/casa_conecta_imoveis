@@ -225,14 +225,14 @@ export default function FeaturedPropertiesModal({
     };
 
     const handleMediaUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
+        const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
         event.target.value = '';
-        if (!files || files.length === 0) return;
+        if (selectedFiles.length === 0) return;
 
         const imageFiles: File[] = [];
         const videoFiles: File[] = [];
 
-        Array.from(files).forEach((file) => {
+        selectedFiles.forEach((file) => {
             if (file.type.startsWith('video/')) {
                 videoFiles.push(file);
             } else if (file.type.startsWith('image/')) {
