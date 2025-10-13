@@ -580,6 +580,7 @@ export default function FeaturedPropertiesModal({
                                     isNew: !!form.is_new,
                                 }}
                                 videos={videos}
+
                             />
                         </div>
                         {images.length > 0 ? (

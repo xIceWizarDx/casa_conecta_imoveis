@@ -15,8 +15,10 @@ export type PreviewImage = {
 export type PreviewVideo = {
     id: number;
     url: string;
+
     original_name?: string | null;
     filename?: string | null;
+
 };
 
 export type PreviewProperty = {
@@ -36,6 +38,7 @@ interface Props {
     selectedImageId?: number | null;
     property: PreviewProperty;
     onSelectImage?: (image: PreviewImage | null) => void;
+
     videos?: PreviewVideo[];
 }
 
@@ -45,12 +48,15 @@ type MediaItem =
     | { type: 'image'; key: string; image: PreviewImage }
     | { type: 'video'; key: string; video: PreviewVideo };
 
+
 export default function FeaturedPropertyModalPreview({
     images,
     selectedImageId,
     property,
     onSelectImage,
+
     videos = [],
+
 }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -136,6 +142,7 @@ export default function FeaturedPropertyModalPreview({
     return (
         <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border bg-white shadow-xl">
             <div className="relative bg-black">
+
                 {activeItem ? (
                     activeItem.type === 'image' ? (
                         <img
