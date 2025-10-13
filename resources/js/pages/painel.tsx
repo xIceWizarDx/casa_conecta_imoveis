@@ -3,8 +3,8 @@ import ImagePreviewOverlay from '@/components/ImagePreviewOverlay';
 import FeaturedCardInfo from '@/components/FeaturedCardInfo';
 // import { Heart } from 'lucide-react';
 import FeaturedPropertiesModal from '@/components/modals/FeaturedPropertiesModal';
+import NoticeToaster from '@/components/NoticeToaster';
 import SlideCard, { type Slide as SlideCardSlide } from '@/components/SlideCard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropert
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
 import * as ImageActions from '@/actions/App/Http/Controllers/ImageController';
 import * as VideoActions from '@/actions/App/Http/Controllers/VideoController';
+import type { Notice } from '@/types/notice';
 
 type Image = {
     id: number;
@@ -127,7 +128,7 @@ export default function Painel() {
     const heroUploadInputRef = useRef<HTMLInputElement | null>(null);
 
     // Notices
-    const [notice, setNotice] = useState<{ type: 'success' | 'error'; title: string; message?: string } | null>(null);
+    const [notice, setNotice] = useState<Notice | null>(null);
 
     useEffect(() => {
         refreshAll();
@@ -482,14 +483,9 @@ export default function Painel() {
                 <Header />
 
                 <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
-                    {notice && (
-                        <Alert variant={notice.type === 'error' ? 'destructive' : 'default'}>
-                            <AlertTitle>{notice.title}</AlertTitle>
-                            {notice.message && <AlertDescription>{notice.message}</AlertDescription>}
-                        </Alert>
-                )}
-                {/* Hero Slides */}
-                <>
+                    <NoticeToaster notice={notice} onDismiss={() => setNotice(null)} />
+                    {/* Hero Slides */}
+                    <>
                         {/* Seção: Hero Slides */}
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                             <div className="flex items-center gap-2">

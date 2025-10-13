@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import type { Notice } from '@/types/notice';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
 import FeaturedPropertyModalPreview from '@/components/FeaturedPropertyModalPreview';
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
@@ -47,12 +48,6 @@ type UploadedVideo = {
     original_name?: string | null;
     filename?: string | null;
 };
-
-export interface Notice {
-    type: 'success' | 'error';
-    title: string;
-    message?: string;
-}
 
 interface Props {
     open: boolean;
