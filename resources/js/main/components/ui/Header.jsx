@@ -101,7 +101,7 @@ const Header = () => {
     };
 
     const handleWhatsAppClick = () => {
-        const message = encodeURIComponent('OlÃ¡! Gostaria de saber mais sobre os imÃ³veis disponÃ­veis.');
+        const message = encodeURIComponent('Olá! Gostaria de saber mais sobre os imóveis disponíveis.');
         window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
     };
 

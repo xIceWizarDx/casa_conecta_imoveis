@@ -450,7 +450,7 @@ const FeaturedProperties = () => {
                 }
                 return null;
               })(),
-              // O backend jÃ¡ entrega image_url e gallery com arquivos do storage; usamos o placeholder padrÃ£o sÃ³ se nada estiver cadastrado.
+              // O backend já entrega image_url e gallery com arquivos do storage; usamos o placeholder padrão só se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
               imagePlaceholder:
                 primaryImageEntry?.placeholder ||
@@ -470,7 +470,7 @@ const FeaturedProperties = () => {
     })();
   }, []);
 
-  // Caso a API nÃ£o retorne imÃ³veis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
+  // Caso a API não retorne imóveis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
 
   useEffect(() => {
     if (!isModalOpen || typeof document === 'undefined') {
@@ -525,8 +525,8 @@ const FeaturedProperties = () => {
   const neighborhoods = [
     { value: '', label: 'Todos os Bairros' },
     { value: 'setor-bueno', label: 'Setor Bueno' },
-    { value: 'jardim-goias', label: 'Jardim GoiÃ¡s' },
-    { value: 'alto-da-gloria', label: 'Alto da GlÃ³ria' },
+    { value: 'jardim-goias', label: 'Jardim Goiás' },
+    { value: 'alto-da-gloria', label: 'Alto da Glória' },
     { value: 'setor-marista', label: 'Setor Marista' },
     { value: 'setor-oeste', label: 'Setor Oeste' },
     { value: 'park-lozandes', label: 'Park Lozandes' },
@@ -604,7 +604,7 @@ const FeaturedProperties = () => {
   };
 
   const handleWhatsAppClick = (property) => {
-    const message = encodeURIComponent(`OlÃ¡! Tenho interesse no imÃ³vel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
+    const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
@@ -651,16 +651,16 @@ const FeaturedProperties = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            ImÃ³veis em Destaque
+            Imóveis em Destaque
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            SeleÃ§Ã£o exclusiva de propriedades premium nos melhores bairros de GoiÃ¢nia,
-            prÃ³ximos ao Flamboyant Shopping e principais centros comerciais
+            Seleção exclusiva de propriedades premium nos melhores bairros de Goiânia,
+            próximos ao Flamboyant Shopping e principais centros comerciais
           </p>
           {filteredProperties?.length > 0 && (
             <p className="text-sm text-primary font-medium mt-2">
               {filteredProperties?.length}{' '}
-              {filteredProperties?.length === 1 ? 'imÃ³vel encontrado' : 'imÃ³veis encontrados'}
+              {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
             </p>
           )}
         </div>
@@ -688,7 +688,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="DollarSign" size={16} className="mr-2 inline" />
-                Faixa de PreÃ§o
+                Faixa de Preço
               </label>
               <select
                 value={formFilters.priceRange}
@@ -706,7 +706,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="Home" size={16} className="mr-2 inline" />
-                Tipo de ImÃ³vel
+                Tipo de Imóvel
               </label>
               <select
                 value={formFilters.propertyType}
@@ -723,7 +723,7 @@ const FeaturedProperties = () => {
 
             <div className="flex items-end justify-end">
               <Button className="h-12 px-6" variant="default" iconName="Search" iconPosition="left" onClick={applyFilters}>
-                Buscar ImÃ³veis
+                Buscar Imóveis
               </Button>
             </div>
           </div>
@@ -770,17 +770,17 @@ const FeaturedProperties = () => {
           <div className="py-12 text-center">
             <Icon name="Search" size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="mb-2 text-xl font-semibold text-gray-900">
-              Nenhum imÃ³vel encontrado
+              Nenhum imóvel encontrado
             </h3>
             <p className="mb-6 text-gray-600">
-              Tente ajustar os filtros ou entre em contato conosco para mais opÃ§Ãµes
+              Tente ajustar os filtros ou entre em contato conosco para mais opções
             </p>
             <Button
               variant="default"
               iconName="MessageCircle"
               iconPosition="left"
               onClick={() => {
-                const message = encodeURIComponent('OlÃ¡! NÃ£o encontrei imÃ³veis com os filtros selecionados. Podem me ajudar a encontrar outras opÃ§Ãµes?');
+                const message = encodeURIComponent('Olá! Não encontrei imóveis com os filtros selecionados. Podem me ajudar a encontrar outras opções?');
                 window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
               }}
               className="bg-accent hover:bg-accent/90"
@@ -847,7 +847,7 @@ const FeaturedProperties = () => {
                       type="button"
                       onClick={handleModalNext}
                       className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                      aria-label="PrÃ³xima imagem"
+                      aria-label="Próxima imagem"
                     >
                       <Icon name="ChevronRight" size={22} />
                     </button>

@@ -131,7 +131,7 @@ export default function FeaturedPropertiesModal({
         });
     };
 
-    // Preenche dados quando em modo de ediÃ§Ã£o (capa + galeria)
+    // Preenche dados quando em modo de edição (capa + galeria)
     useEffect(() => {
         if (!open || !editing) return;
         const cover: Image | null = editing.image_id && editing.image_url
@@ -399,7 +399,7 @@ export default function FeaturedPropertiesModal({
                     </div>
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
-                    Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
+                    Configure os campos e escolha uma imagem para publicar um imóvel em destaque.
                 </DialogDescription>
                 <div className="mt-4 flex-1 overflow-y-auto pr-1">
                     <div className="space-y-4 pb-4">
@@ -409,7 +409,7 @@ export default function FeaturedPropertiesModal({
                             <Input
                                 value={form.title ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                                placeholder="Ex: Apartamento premium no Jardim GoiÃ¡s"
+                                placeholder="Ex: Apartamento premium no Jardim Goiás"
                             />
                         </div>
                         <div>
@@ -417,7 +417,7 @@ export default function FeaturedPropertiesModal({
                             <Input
                                 value={form.neighborhood ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
-                                placeholder="Ex: Jardim GoiÃ¡s"
+                                placeholder="Ex: Jardim Goiás"
                             />
                         </div>
                         <div>
@@ -491,9 +491,9 @@ export default function FeaturedPropertiesModal({
                                 <option value="cobertura">Cobertura</option>
                             </select>
                         </div>
-                        {/* CaracterÃ­sticas ao lado do campo de Tipo */}
+                        {/* Características ao lado do campo de Tipo */}
                         <div className="md:col-span-1 lg:col-span-2 hidden">
-                            <Label>CaracterÃ­sticas (features)</Label>
+                            <Label>Características (features)</Label>
                             <div className="mt-2 flex items-center gap-2">
                                 <Input className="flex-1" value={_featureInputHidden} onChange={(e) => set_featureInputHidden(e.target.value)} placeholder="Ex: Piscina" />
                                 <Button
@@ -521,7 +521,7 @@ export default function FeaturedPropertiesModal({
                                                 className="rounded-full bg-black px-1 text-white hover:bg-black/80"
                                                 onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
                                             >
-                                                Ã—
+                                                ×
                                             </button>
                                         </span>
                                     ))}
@@ -534,14 +534,14 @@ export default function FeaturedPropertiesModal({
                             <input type="checkbox" checked={!!form.is_new} onChange={(e) => setForm((s) => ({ ...s, is_new: e.target.checked }))} />
                             Novo
                         </label>
-                        {/* Checkbox "Publicado" removido: novas publicaÃ§Ãµes serÃ£o publicadas automaticamente */}
+                        {/* Checkbox "Publicado" removido: novas publicações serão publicadas automaticamente */}
                     </div>
-                    {/* SeÃ§Ã£o de caracterÃ­sticas movida ao lado do campo de Tipo */}
+                    {/* Seção de características movida ao lado do campo de Tipo */}
                     <div>
-                        <Label>MÃ­dia</Label>
+                        <Label>Mídia</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa. Use o botÃ£o abaixo para
-                            enviar novas imagens ou vÃ­deos.
+                            Arraste para ordenar as imagens. A primeira imagem será usada como capa. Use o botão abaixo para
+                            enviar novas imagens ou vídeos.
                         </p>
                         <Button
                             type="button"
@@ -550,7 +550,7 @@ export default function FeaturedPropertiesModal({
                             onClick={() => uploadMediaRef.current?.click()}
                             disabled={uploadingImages || uploadingVideos}
                         >
-                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher mÃ­dia'}
+                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher mídia'}
                         </Button>
                         <input
                             ref={uploadMediaRef}
@@ -632,7 +632,7 @@ export default function FeaturedPropertiesModal({
                                                     onClick={() => handleRemoveImage(img.id)}
                                                     aria-label="Remover imagem"
                                                 >
-                                                    Ã—
+                                                    ×
                                                 </button>
                                                 {isCover && (
                                                     <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] font-medium text-white">
@@ -719,9 +719,9 @@ export default function FeaturedPropertiesModal({
                                         type="button"
                                         className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
                                         onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                        aria-label="Remover vÃ­deo"
+                                        aria-label="Remover vídeo"
                                     >
-                                        Ã—
+                                        ×
                                     </button>
                                 </div>
                             ))}
