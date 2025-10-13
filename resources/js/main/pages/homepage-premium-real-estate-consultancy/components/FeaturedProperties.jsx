@@ -301,16 +301,34 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
+  const handleOpenModal = useCallback(() => {
+    onOpenModal({ ...property, gallery: propertyGallery });
+  }, [onOpenModal, property, propertyGallery]);
+
   useEffect(() => {
     setIsImageLoaded(false);
   }, [primaryImageEntry?.src]);
 
   return (
-    <div className="property-card flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+    <div
+      className="property-card flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      role="button"
+      tabIndex={0}
+      onClick={handleOpenModal}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleOpenModal();
+        }
+      }}
+    >
       <div className="relative">
         <button
           type="button"
-          onClick={() => onOpenModal({ ...property, gallery: propertyGallery })}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleOpenModal();
+          }}
           className="group relative block h-64 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           <div className="relative h-64 w-full">
@@ -347,7 +365,10 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
 
         <button
           type="button"
-          onClick={() => onToggleFavorite(property?.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(property?.id);
+          }}
           className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
           aria-label={favorites?.has(property?.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
         >
@@ -394,7 +415,10 @@ const PropertyCard = ({ property, favorites, onToggleFavorite, onOpenModal, onWh
             size="sm"
             iconName="MessageCircle"
             iconPosition="left"
-            onClick={() => onWhatsAppClick(property)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onWhatsAppClick(property);
+            }}
             className="bg-accent hover:bg-accent/90"
           >
             Ver Detalhes
