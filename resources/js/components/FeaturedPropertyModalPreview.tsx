@@ -42,7 +42,7 @@ interface Props {
     videos?: PreviewVideo[];
 }
 
-const FALLBACK_MESSAGE = 'Envie imagens ou vídeos para visualizar o modal como seus clientes.';
+const FALLBACK_MESSAGE = 'Envie imagens para visualizar o modal como seus clientes.';
 
 type MediaItem =
     | { type: 'image'; key: string; image: PreviewImage }
