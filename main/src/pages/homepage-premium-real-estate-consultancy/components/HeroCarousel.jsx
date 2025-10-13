@@ -238,6 +238,8 @@ const HeroCarousel = () => {
     );
   }
 
+  const hasMultipleSlides = slides.length > 1;
+
   return (
     <section className="relative w-full hero-carousel bg-gray-900 overflow-hidden">
       <div className="relative w-full h-full">
@@ -350,24 +352,40 @@ const HeroCarousel = () => {
           </div>
         ))}
       </div>
-      
+
+      {/* Edge gradients to keep navigation controls readable */}
+      {hasMultipleSlides && (
+        <>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-black/55 via-black/30 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-black/55 via-black/30 to-transparent z-10" />
+        </>
+      )}
+
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 z-20 border border-white/20 hover:scale-110"
+        className={`absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 z-30 shadow-2xl backdrop-blur-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90 ${
+          hasMultipleSlides
+            ? 'bg-slate-950/70 border border-white/40 hover:bg-slate-950/80 hover:scale-110'
+            : 'opacity-0 pointer-events-none'
+        }`}
         aria-label="Previous slide"
         disabled={slides.length <= 1}
       >
-        <Icon name="ChevronLeft" size={28} />
+        <Icon name="ChevronLeft" size={28} color="white" />
       </button>
 
       <button
         onClick={nextSlide}
-        className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all duration-200 z-20 border border-white/20 hover:scale-110"
+        className={`absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 z-30 shadow-2xl backdrop-blur-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90 ${
+          hasMultipleSlides
+            ? 'bg-slate-950/70 border border-white/40 hover:bg-slate-950/80 hover:scale-110'
+            : 'opacity-0 pointer-events-none'
+        }`}
         aria-label="Next slide"
         disabled={slides.length <= 1}
       >
-        <Icon name="ChevronRight" size={28} />
+        <Icon name="ChevronRight" size={28} color="white" />
       </button>
 
       {/* Slide Indicators */}
