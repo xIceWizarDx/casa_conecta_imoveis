@@ -12,6 +12,13 @@ export type PreviewImage = {
     height?: number | null;
 };
 
+export type PreviewVideo = {
+    id: number;
+    url: string;
+    original_name?: string | null;
+    filename?: string | null;
+};
+
 export type PreviewProperty = {
     title?: string | null;
     neighborhood?: string | null;
@@ -29,35 +36,69 @@ interface Props {
     selectedImageId?: number | null;
     property: PreviewProperty;
     onSelectImage?: (image: PreviewImage | null) => void;
+    videos?: PreviewVideo[];
 }
 
-const FALLBACK_MESSAGE = 'Envie imagens para visualizar o modal como seus clientes.';
+const FALLBACK_MESSAGE = 'Envie imagens ou vídeos para visualizar o modal como seus clientes.';
+
+type MediaItem =
+    | { type: 'image'; key: string; image: PreviewImage }
+    | { type: 'video'; key: string; video: PreviewVideo };
 
 export default function FeaturedPropertyModalPreview({
     images,
     selectedImageId,
     property,
     onSelectImage,
+    videos = [],
 }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const mediaItems = useMemo<MediaItem[]>(() => {
+        const imageItems = images.map<MediaItem>((image) => ({
+            type: 'image',
+            key: `image-${image.id}`,
+            image,
+        }));
+        const videoItems = videos.map<MediaItem>((video) => ({
+            type: 'video',
+            key: `video-${video.id}`,
+            video,
+        }));
+        return [...imageItems, ...videoItems];
+    }, [images, videos]);
+
     useEffect(() => {
-        if (images.length === 0) {
+        if (mediaItems.length === 0) {
             setCurrentIndex(0);
             return;
         }
-        const derivedIndex = (() => {
-            if (typeof selectedImageId !== 'number') return 0;
-            const idx = images.findIndex((img) => img.id === selectedImageId);
-            return idx >= 0 ? idx : 0;
-        })();
-        if (derivedIndex !== currentIndex) {
-            setCurrentIndex(derivedIndex);
-        }
-    }, [images, selectedImageId, currentIndex]);
 
-    const activeImage = images[currentIndex];
-    const hasGalleryNavigation = images.length > 1;
+        setCurrentIndex((prev) => {
+            if (typeof selectedImageId === 'number') {
+                const imageIndex = mediaItems.findIndex(
+                    (item) => item.type === 'image' && item.image.id === selectedImageId,
+                );
+                if (imageIndex >= 0) {
+                    return imageIndex;
+                }
+            }
+
+            const firstImageIndex = mediaItems.findIndex((item) => item.type === 'image');
+            if (firstImageIndex >= 0) {
+                return firstImageIndex;
+            }
+
+            if (prev >= 0 && prev < mediaItems.length) {
+                return prev;
+            }
+
+            return 0;
+        });
+    }, [mediaItems, selectedImageId]);
+
+    const activeItem = mediaItems[currentIndex];
+    const hasGalleryNavigation = mediaItems.length > 1;
 
     const safeBedrooms = useMemo(() => {
         if (property.bedrooms === null || typeof property.bedrooms === 'undefined') return null;
@@ -72,41 +113,59 @@ export default function FeaturedPropertyModalPreview({
     }, [property.bathrooms]);
 
     const handleSelect = (index: number) => {
-        const image = images[index];
+        const item = mediaItems[index];
+        if (!item) return;
         setCurrentIndex(index);
-        if (image) {
-            onSelectImage?.(image);
+        if (item.type === 'image') {
+            onSelectImage?.(item.image);
         }
     };
 
     const handlePrev = () => {
         if (!hasGalleryNavigation) return;
-        const nextIndex = (currentIndex - 1 + images.length) % images.length;
+        const nextIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
         handleSelect(nextIndex);
     };
 
     const handleNext = () => {
         if (!hasGalleryNavigation) return;
-        const nextIndex = (currentIndex + 1) % images.length;
+        const nextIndex = (currentIndex + 1) % mediaItems.length;
         handleSelect(nextIndex);
     };
 
     return (
         <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border bg-white shadow-xl">
             <div className="relative bg-black">
-                {activeImage ? (
-                    <img
-                        src={activeImage.url}
-                        alt={property.title ?? 'Pré-visualização do imóvel'}
-                        className="h-[360px] w-full object-cover"
-                    />
+                {activeItem ? (
+                    activeItem.type === 'image' ? (
+                        <img
+                            src={activeItem.image.url}
+                            alt={activeItem.image.original_name || property.title || 'Pré-visualização do imóvel'}
+                            className="h-[360px] w-full object-cover"
+                        />
+                    ) : (
+                        <div className="relative">
+                            <video
+                                src={activeItem.video.url}
+                                className="h-[360px] w-full object-cover"
+                                controls
+                                playsInline
+                                loop
+                                muted
+                            />
+                            <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white">
+                                <Icon name="Play" size={14} className="mr-1" />
+                                Vídeo
+                            </span>
+                        </div>
+                    )
                 ) : (
                     <div className="flex h-[360px] w-full items-center justify-center bg-gray-100 px-6 text-center text-sm text-gray-500">
                         {FALLBACK_MESSAGE}
                     </div>
                 )}
 
-                {(property.isNew || property.neighborhood) && (
+                {(property.isNew || property.neighborhood) && activeItem && (
                     <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                         {property.isNew && (
                             <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
@@ -141,22 +200,45 @@ export default function FeaturedPropertyModalPreview({
                 )}
             </div>
 
-            {images.length > 1 && (
+            {mediaItems.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto bg-gray-50 px-4 py-3">
-                    {images.map((img, index) => {
+                    {mediaItems.map((item, index) => {
                         const isActive = index === currentIndex;
                         return (
                             <button
                                 type="button"
-                                key={img.id}
+                                key={item.key}
                                 onClick={() => handleSelect(index)}
                                 className={cn(
                                     'relative h-20 w-20 min-w-[5rem] overflow-hidden rounded-md border transition',
                                     isActive ? 'ring-2 ring-primary ring-offset-2 ring-offset-gray-50' : 'hover:border-gray-400'
                                 )}
-                                aria-label={`Selecionar imagem ${index + 1}`}
+                                aria-label={
+                                    item.type === 'image'
+                                        ? `Selecionar imagem ${index + 1}`
+                                        : `Selecionar vídeo ${index + 1}`
+                                }
                             >
-                                <img src={img.url} alt={img.original_name || `Imagem ${index + 1}`} className="h-full w-full object-cover" />
+                                {item.type === 'image' ? (
+                                    <img
+                                        src={item.image.url}
+                                        alt={item.image.original_name || `Imagem ${index + 1}`}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="relative h-full w-full bg-black">
+                                        <video
+                                            src={item.video.url}
+                                            className="h-full w-full object-cover"
+                                            muted
+                                            playsInline
+                                            loop
+                                        />
+                                        <span className="absolute bottom-1 right-1 inline-flex items-center rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
+                                            Vídeo
+                                        </span>
+                                    </div>
+                                )}
                             </button>
                         );
                     })}
