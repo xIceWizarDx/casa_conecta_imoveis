@@ -84,8 +84,7 @@ export default function FeaturedPropertiesModal({
     const [images, setImages] = useState<Image[]>([]);
     const [videos, setVideos] = useState<any[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
-    const uploadInputRef = useRef<HTMLInputElement | null>(null);
-    const uploadVideoRef = useRef<HTMLInputElement | null>(null);
+    const uploadMediaRef = useRef<HTMLInputElement | null>(null);
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -176,32 +175,70 @@ export default function FeaturedPropertiesModal({
         setShowEmojis(false);
     }, [open, editing]);
 
-    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const uploaded = await onUploadImages(event.target.files);
-        event.target.value = '';
-        if (uploaded.length > 0) {
-            setImages((prev) => {
-                const existingIds = new Set(prev.map((img) => img.id));
-                const additions = uploaded.filter((img) => !existingIds.has(img.id));
-                const merged = [...prev, ...additions];
-                if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                    setSelectedImageAndForm(merged[0] ?? null);
-                }
-                return merged;
-            });
-        }
+    const mergeUploadedImages = (uploaded: Image[]) => {
+        if (uploaded.length === 0) return;
+        setImages((prev) => {
+            const existingIds = new Set(prev.map((img) => img.id));
+            const additions = uploaded.filter((img) => !existingIds.has(img.id));
+            const merged = [...prev, ...additions];
+            if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(merged[0] ?? null);
+            }
+            return merged;
+        });
     };
 
-    const handleVideoUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        if (!onUploadVideos) return;
-        const uploaded = await onUploadVideos(event.target.files);
+    const mergeUploadedVideos = (uploaded: { id: number; url: string }[]) => {
+        if (uploaded.length === 0) return;
+        setVideos((prev) => {
+            const existingIds = new Set(prev.map((v) => v.id));
+            const additions = uploaded.filter((v) => !existingIds.has(v.id));
+            return [...prev, ...additions];
+        });
+    };
+
+    const toFileList = (files: File[]) => {
+        if (files.length === 0) return null;
+        if (typeof DataTransfer !== 'undefined') {
+            const dataTransfer = new DataTransfer();
+            files.forEach((file) => dataTransfer.items.add(file));
+            return dataTransfer.files;
+        }
+        const fallback: any = { length: files.length, item: (index: number) => files[index] ?? null };
+        files.forEach((file, index) => {
+            fallback[index] = file;
+        });
+        return fallback as FileList;
+    };
+
+    const handleMediaUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
         event.target.value = '';
-        if (uploaded.length > 0) {
-            setVideos((prev) => {
-                const existingIds = new Set(prev.map((v) => v.id));
-                const additions = uploaded.filter((v) => !existingIds.has(v.id));
-                return [...prev, ...additions];
-            });
+        if (!files || files.length === 0) return;
+
+        const imageFiles: File[] = [];
+        const videoFiles: File[] = [];
+
+        Array.from(files).forEach((file) => {
+            if (file.type.startsWith('video/')) {
+                videoFiles.push(file);
+            } else if (file.type.startsWith('image/')) {
+                imageFiles.push(file);
+            }
+        });
+
+        if (imageFiles.length > 0) {
+            const uploaded = await onUploadImages(toFileList(imageFiles));
+            mergeUploadedImages(uploaded);
+        }
+
+        if (videoFiles.length > 0) {
+            if (!onUploadVideos) {
+                onNotice?.({ type: 'error', title: 'Envio de vídeos não suportado neste painel.' });
+            } else {
+                const uploaded = await onUploadVideos(toFileList(videoFiles));
+                mergeUploadedVideos(uploaded);
+            }
         }
     };
 
@@ -501,43 +538,27 @@ export default function FeaturedPropertiesModal({
                     </div>
                     {/* SeÃ§Ã£o de caracterÃ­sticas movida ao lado do campo de Tipo */}
                     <div>
-                        <Label>Imagens</Label>
+                        <Label>MÃ­dia</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa.
+                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa. Use o botÃ£o abaixo para
+                            enviar novas imagens ou vÃ­deos.
                         </p>
                         <Button
                             type="button"
                             variant="secondary"
                             className="mt-2 w-auto bg-black text-white hover:bg-black/80"
-                            onClick={() => uploadInputRef.current?.click()}
-                            disabled={uploadingImages}
+                            onClick={() => uploadMediaRef.current?.click()}
+                            disabled={uploadingImages || uploadingVideos}
                         >
-                            {uploadingImages ? 'Enviando...' : 'Escolher imagens'}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            className="mt-2 ml-2 w-auto bg-black text-white hover:bg-black/80"
-                            onClick={() => uploadVideoRef.current?.click()}
-                            disabled={uploadingVideos}
-                        >
-                            {uploadingVideos ? 'Enviando...' : 'Escolher vídeos'}
+                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher mÃ­dia'}
                         </Button>
                         <input
-                            ref={uploadInputRef}
+                            ref={uploadMediaRef}
                             type="file"
                             multiple
-                            accept="image/*"
+                            accept="image/*,video/*"
                             className="hidden"
-                            onChange={handleUploadChange}
-                        />
-                        <input
-                            ref={uploadVideoRef}
-                            type="file"
-                            multiple
-                            accept="video/*"
-                            className="hidden"
-                            onChange={handleVideoUploadChange}
+                            onChange={handleMediaUploadChange}
                         />
                         <div
                             className={cn(

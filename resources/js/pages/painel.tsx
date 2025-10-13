@@ -576,7 +576,6 @@ export default function Painel() {
                                     return '';
                                 })();
 
-
                                 return (
                                     <div
                                         key={f.id}
