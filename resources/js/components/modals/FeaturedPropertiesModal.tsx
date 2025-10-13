@@ -673,13 +673,20 @@ export default function FeaturedPropertiesModal({
                 </div>
 
                 </div>
-                {false && videos.length > 0 && (
-                    <>
-                        <Label className="mt-6 block">Vídeos</Label>
+                <div className="mt-6">
+                    <Label className="block">Vídeos</Label>
+                    {videos.length > 0 ? (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {videos.map((vid) => (
-                                <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
-                                    <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
+                                <div key={vid.id} className="relative h-20 w-28 overflow-hidden rounded-md border">
+                                    <video
+                                        src={vid.url}
+                                        className="h-full w-full object-cover"
+                                        muted
+                                        loop
+                                        playsInline
+                                        controls
+                                    />
                                     <button
                                         type="button"
                                         className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
@@ -691,8 +698,16 @@ export default function FeaturedPropertiesModal({
                                 </div>
                             ))}
                         </div>
-                    </>
-                )}
+                    ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Nenhum vídeo selecionado. Use o botão "Escolher mídia" acima para enviar vídeos (formatos MP4, MOV,
+                            etc.).
+                        </p>
+                    )}
+                    {uploadingVideos && (
+                        <p className="mt-2 text-xs text-muted-foreground">Enviando vídeos…</p>
+                    )}
+                </div>
                 <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
