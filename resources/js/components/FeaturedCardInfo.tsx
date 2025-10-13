@@ -48,18 +48,9 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                 </div>
             )}
             {trimmedDescription && (
-                <p className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
-                    {trimmedDescription}
-
-            {trimmedDescription && (
-
-
-            {trimmedDescription && (
-
                 <div className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
                     {trimmedDescription}
                 </div>
-
             )}
 
             <div className="flex items-center justify-between">
