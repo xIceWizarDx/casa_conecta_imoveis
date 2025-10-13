@@ -861,6 +861,7 @@ const FeaturedProperties = () => {
                       type="button"
                       onClick={handleModalPrev}
                       className="absolute left-4 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/75 text-white shadow-2xl ring-1 ring-white/30 backdrop-blur-md transition hover:bg-slate-950/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90"
+
                       aria-label="Imagem anterior"
                     >
                       <Icon name="ChevronLeft" size={22} color="white" />
@@ -869,6 +870,7 @@ const FeaturedProperties = () => {
                       type="button"
                       onClick={handleModalNext}
                       className="absolute right-4 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/75 text-white shadow-2xl ring-1 ring-white/30 backdrop-blur-md transition hover:bg-slate-950/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/90"
+
                       aria-label="Próxima imagem"
                     >
                       <Icon name="ChevronRight" size={22} color="white" />
