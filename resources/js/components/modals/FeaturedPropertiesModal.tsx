@@ -1,6 +1,4 @@
-﻿import ImageEditor from '@/components/ImageEditor';
-import FeaturedCardInfo from '@/components/FeaturedCardInfo';
-// Heart icon removed
+﻿// Heart icon removed
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -8,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import * as FeaturedActions from '@/actions/App/Http/Controllers/FeaturedPropertyController';
-import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import FeaturedPropertyModalPreview from '@/components/FeaturedPropertyModalPreview';
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 type Image = {
     id: number;
@@ -330,16 +329,6 @@ export default function FeaturedPropertiesModal({
         setDraggedImageId(null);
     };
 
-    const previewThemeVariables = {
-        '--color-primary': '#22C55E',
-        '--color-accent': '#25D366',
-        '--color-muted': '#F9FAFB',
-        '--color-muted-foreground': '#6B7280',
-        '--color-foreground': '#111827',
-        '--color-card': '#FFFFFF',
-        '--color-border': '#E5E7EB',
-    } as CSSProperties;
-
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
             alert('Selecione uma imagem, título e preço.');
@@ -560,47 +549,24 @@ export default function FeaturedPropertiesModal({
                             className="hidden"
                             onChange={handleMediaUploadChange}
                         />
-                        <div
-                            className={cn(
-                                'mt-4 w-full max-w-md mx-auto',
-                                !selectedImage && 'border-2 border-dashed'
-                            )}
-                        >
-                            {selectedImage && (
-                                <div className="w-full" style={previewThemeVariables}>
-                                    <div className="relative">
-                                        <ImageEditor
-                                            src={selectedImage.url}
-                                            sizeClass="w-full max-w-[300px]"
-                                            aspect="square"
-                                        >
-                                            <div className="absolute left-4 top-4 flex gap-2">
-                                                {!!form.is_new && (
-                                                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">Novo</span>
-                                                )}
-                                                {(form.neighborhood || '').trim() && (
-                                                    <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 backdrop-blur-sm">
-                                                        {form.neighborhood}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {/* Heart overlay removido */}
-                                        </ImageEditor>
-                                    </div>
-                                    <div className="mx-auto mt-4 w-full max-w-[300px]">
-                                        <FeaturedCardInfo
-                                            title={form.title}
-                                            neighborhood={form.neighborhood}
-                                            bedrooms={form.bedrooms}
-                                            bathrooms={form.bathrooms}
-                                            area={buildAreaWithSuffix(form.area) ?? undefined}
-                                            built_area={buildAreaWithSuffix((form as any).built_area) ?? undefined}
-                                            description={(form as any).description ?? ''}
-                                            price={form.price}
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                        <div className="mt-4 w-full">
+                            <FeaturedPropertyModalPreview
+                                images={images}
+                                selectedImageId={selectedImage?.id ?? null}
+                                onSelectImage={setSelectedImageAndForm}
+                                property={{
+                                    title: form.title ?? '',
+                                    neighborhood: form.neighborhood ?? '',
+                                    bedrooms: form.bedrooms ?? undefined,
+                                    bathrooms: form.bathrooms ?? undefined,
+                                    area: buildAreaWithSuffix(form.area),
+                                    builtArea: buildAreaWithSuffix((form as any).built_area),
+                                    description: (form as any).description ?? '',
+                                    price: form.price ?? '',
+                                    isNew: !!form.is_new,
+                                }}
+                                className="max-h-[70vh] overflow-y-auto"
+                            />
                         </div>
                         {images.length > 0 ? (
                             <>
