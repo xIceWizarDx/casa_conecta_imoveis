@@ -565,6 +565,7 @@ export default function FeaturedPropertiesModal({
                                     price: form.price ?? '',
                                     isNew: !!form.is_new,
                                 }}
+                                className="max-h-[70vh] overflow-y-auto"
                             />
                         </div>
                         {images.length > 0 ? (
