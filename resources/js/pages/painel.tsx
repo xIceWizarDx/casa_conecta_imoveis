@@ -868,7 +868,9 @@ export default function Painel() {
                             onRefreshFeatured={refreshFeatured}
                             onNotice={(n) => setNotice(n)}
                             onUploadImages={uploadImages}
+                            onUploadVideos={uploadVideos}
                             uploadingImages={imagesUploading}
+                            uploadingVideos={imagesUploading}
                             editing={editingFeatured}
                         />
                 </>
