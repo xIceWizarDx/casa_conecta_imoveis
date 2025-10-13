@@ -124,7 +124,7 @@ export default function FeaturedPropertyModalPreview({
                         <button
                             type="button"
                             onClick={handlePrev}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                             aria-label="Imagem anterior"
                         >
                             <Icon name="ChevronLeft" size={20} />
@@ -132,7 +132,7 @@ export default function FeaturedPropertyModalPreview({
                         <button
                             type="button"
                             onClick={handleNext}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 shadow-lg transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                             aria-label="Próxima imagem"
                         >
                             <Icon name="ChevronRight" size={20} />
