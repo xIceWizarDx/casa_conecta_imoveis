@@ -48,7 +48,7 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                 </div>
             )}
             {trimmedDescription && (
-                <div className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words line-clamp-4">
+                <div className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
                     {trimmedDescription}
                 </div>
             )}
