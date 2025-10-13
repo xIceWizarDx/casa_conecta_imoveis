@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type Slide = {
     id: number;
@@ -21,16 +21,73 @@ interface SlideCardProps {
 
 export default function SlideCard({ slide, onEdit, onToggle, onDelete }: SlideCardProps) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const hoverTimerRef = useRef<number | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+    const clearHoverTimer = () => {
+        if (hoverTimerRef.current) {
+            window.clearTimeout(hoverTimerRef.current);
+            hoverTimerRef.current = null;
+        }
+    };
+
+    const stopVideo = () => {
+        const video = videoRef.current;
+        if (video) {
+            video.pause();
+            video.currentTime = 0;
+        }
+        setIsVideoPlaying(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            clearHoverTimer();
+            stopVideo();
+        };
+    }, []);
+
+    const scheduleVideoPlay = () => {
+        if (isVideoPlaying) {
+            return;
+        }
+        clearHoverTimer();
+        hoverTimerRef.current = window.setTimeout(() => {
+            const video = videoRef.current;
+            if (!video) return;
+
+            video
+                .play()
+                .then(() => setIsVideoPlaying(true))
+                .catch(() => {
+                    // Some browsers might block playback; ensure timer resets.
+                    setIsVideoPlaying(false);
+                });
+        }, 400);
+    };
+
+    const handlePointerLeave = () => {
+        clearHoverTimer();
+        stopVideo();
+    };
+
     return (
-        <div className="relative overflow-hidden rounded-md border">
+        <div
+            className="relative overflow-hidden rounded-md border"
+            onMouseEnter={scheduleVideoPlay}
+            onMouseMove={scheduleVideoPlay}
+            onMouseLeave={handlePointerLeave}
+        >
             {slide.video_url ? (
                 <video
+                    ref={videoRef}
                     src={slide.video_url}
                     className="aspect-square w-full object-cover"
-                    autoPlay
                     muted
                     loop
                     playsInline
+                    preload="metadata"
                 />
             ) : slide.image_url ? (
                 <img src={slide.image_url} alt={slide.title} className="aspect-square w-full object-cover" />
