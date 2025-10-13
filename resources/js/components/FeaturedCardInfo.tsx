@@ -1,4 +1,4 @@
-﻿import { Bath, Bed, MapPin, MessageCircle } from 'lucide-react';
+import { Bath, Bed, MapPin, MessageCircle } from 'lucide-react';
 import PropertyAreaMetrics from '@/components/PropertyAreaMetrics';
 import { Button } from '@/components/ui/button';
 
@@ -9,17 +9,15 @@ export type FeaturedCardInfoProps = {
     bathrooms?: number | string | null;
     area?: string | null;
     built_area?: string | null;
-    features?: string[];
+    description?: string | null;
     price?: string | null;
 };
 
-export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathrooms, area, built_area, features, price }: FeaturedCardInfoProps) {
-    const shown = (features ?? []).slice(0, 2);
-    const extra = Math.max((features?.length ?? 0) - shown.length, 0);
-
+export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathrooms, area, built_area, description, price }: FeaturedCardInfoProps) {
+    const trimmedDescription = typeof description === 'string' ? description.trim() : '';
     return (
         <div className="rounded-b-2xl bg-white p-6 shadow-lg">
-            <h3 className="mb-2 text-xl font-bold text-gray-900">{title || 'PrÃ©-visualizaÃ§Ã£o do destaque'}</h3>
+            <h3 className="mb-2 text-xl font-bold text-gray-900">{title || 'Pré-visualização do destaque'}</h3>
 
             {(neighborhood || '').trim() && (
                 <div className="mb-4 flex items-center text-gray-600">
@@ -44,21 +42,15 @@ export default function FeaturedCardInfo({ title, neighborhood, bedrooms, bathro
                             </div>
                         )}
                         <PropertyAreaMetrics builtArea={built_area ?? undefined} area={area ?? undefined} />
-                        
                     </div>
                 </div>
             )}
 
-            {(shown.length > 0 || extra > 0) && (
-                <div className="mb-4 flex flex-wrap gap-1">
-                    {shown.map((f, i) => (
-                        <span key={`${f}-${i}`} className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                            {f}
-                        </span>
-                    ))}
-                    {extra > 0 && <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">+{extra} mais</span>}
+            {trimmedDescription ? (
+                <div className="mb-4 text-sm text-gray-700 whitespace-pre-line break-words">
+                    {trimmedDescription}
                 </div>
-            )}
+            ) : null}
 
             <div className="flex items-center justify-between">
                 <div className="text-2xl font-bold text-emerald-600">{price || 'R$ 0,00'}</div>
