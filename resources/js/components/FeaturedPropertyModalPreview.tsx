@@ -12,6 +12,11 @@ export type PreviewImage = {
     height?: number | null;
 };
 
+export type PreviewVideo = {
+    id: number;
+    url: string;
+};
+
 export type PreviewProperty = {
     title?: string | null;
     neighborhood?: string | null;
@@ -29,15 +34,17 @@ interface Props {
     selectedImageId?: number | null;
     property: PreviewProperty;
     onSelectImage?: (image: PreviewImage | null) => void;
+    primaryVideo?: PreviewVideo | null;
 }
 
-const FALLBACK_MESSAGE = 'Envie imagens para visualizar o modal como seus clientes.';
+const FALLBACK_MESSAGE = 'Envie imagens ou vídeos para visualizar o modal como seus clientes.';
 
 export default function FeaturedPropertyModalPreview({
     images,
     selectedImageId,
     property,
     onSelectImage,
+    primaryVideo,
 }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -99,6 +106,15 @@ export default function FeaturedPropertyModalPreview({
                         src={activeImage.url}
                         alt={property.title ?? 'Pré-visualização do imóvel'}
                         className="h-[360px] w-full object-cover"
+                    />
+                ) : primaryVideo ? (
+                    <video
+                        src={primaryVideo.url}
+                        className="h-[360px] w-full object-cover"
+                        controls
+                        playsInline
+                        loop
+                        muted
                     />
                 ) : (
                     <div className="flex h-[360px] w-full items-center justify-center bg-gray-100 px-6 text-center text-sm text-gray-500">

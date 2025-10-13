@@ -213,13 +213,17 @@ export default function Painel() {
         }
     };
 
-    const uploadVideos = async (fileList: FileList | null): Promise<{ id: number; url: string }[]> => {
+    const uploadVideos = async (
+        fileList: FileList | null,
+    ): Promise<{ id: number; url: string; filename?: string | null; original_name?: string | null }[]> => {
         if (!fileList || fileList.length === 0) return [];
         const fd = new FormData();
         Array.from(fileList).forEach((f) => fd.append('videos[]', f));
         setImagesUploading(true);
         try {
-            const uploaded = await apiFetch<{ id: number; url: string }[]>(VideoActions.store(), { body: fd });
+            const uploaded = await apiFetch<
+                { id: number; url: string; filename?: string | null; original_name?: string | null }[]
+            >(VideoActions.store(), { body: fd });
             setNotice({ type: 'success', title: 'Vídeos enviados com sucesso' });
             return uploaded;
         } catch (e) {

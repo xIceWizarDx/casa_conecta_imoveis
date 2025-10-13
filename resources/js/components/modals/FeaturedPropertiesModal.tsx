@@ -41,6 +41,13 @@ export type FeaturedProperty = {
     images?: Image[];
 };
 
+type UploadedVideo = {
+    id: number;
+    url: string;
+    original_name?: string | null;
+    filename?: string | null;
+};
+
 export interface Notice {
     type: 'success' | 'error';
     title: string;
@@ -54,7 +61,7 @@ interface Props {
     onRefreshFeatured: () => Promise<void>;
     onNotice?: (n: Notice) => void;
     onUploadImages: (files: FileList | null) => Promise<Image[]>;
-    onUploadVideos?: (files: FileList | null) => Promise<{ id: number; url: string }[]>;
+    onUploadVideos?: (files: FileList | null) => Promise<UploadedVideo[]>;
     uploadingImages?: boolean;
     uploadingVideos?: boolean;
     editing?: FeaturedProperty | null;
@@ -81,7 +88,7 @@ export default function FeaturedPropertiesModal({
     const [showEmojis, setShowEmojis] = useState(false);
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
     const [images, setImages] = useState<Image[]>([]);
-    const [videos, setVideos] = useState<any[]>([]);
+    const [videos, setVideos] = useState<UploadedVideo[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadMediaRef = useRef<HTMLInputElement | null>(null);
 
@@ -150,8 +157,15 @@ export default function FeaturedPropertiesModal({
             : [];
         const ordered = cover ? [cover, ...gallery] : gallery;
         setImages(ordered);
-        const vids: any[] = Array.isArray((editing as any).videos)
-            ? ((editing as any).videos as any[]).map((v) => ({ id: Number(v?.id), url: String(v?.url ?? v?.video_url ?? ''), filename: String(v?.filename ?? ''), original_name: String(v?.original_name ?? '') })).filter((v) => v.id && v.url)
+        const vids: UploadedVideo[] = Array.isArray((editing as any).videos)
+            ? ((editing as any).videos as any[])
+                  .map((v) => ({
+                      id: Number(v?.id),
+                      url: String(v?.url ?? v?.video_url ?? ''),
+                      filename: typeof v?.filename === 'string' ? v.filename : undefined,
+                      original_name: typeof v?.original_name === 'string' ? v.original_name : undefined,
+                  }))
+                  .filter((v) => v.id && v.url)
             : [];
         setVideos(vids);
         setSelectedImageAndForm(ordered[0] ?? null);
@@ -187,7 +201,7 @@ export default function FeaturedPropertiesModal({
         });
     };
 
-    const mergeUploadedVideos = (uploaded: { id: number; url: string }[]) => {
+    const mergeUploadedVideos = (uploaded: UploadedVideo[]) => {
         if (uploaded.length === 0) return;
         setVideos((prev) => {
             const existingIds = new Set(prev.map((v) => v.id));
@@ -565,6 +579,7 @@ export default function FeaturedPropertiesModal({
                                     price: form.price ?? '',
                                     isNew: !!form.is_new,
                                 }}
+                                primaryVideo={videos[0] ?? null}
                             />
                         </div>
                         {images.length > 0 ? (
@@ -673,13 +688,20 @@ export default function FeaturedPropertiesModal({
                 </div>
 
                 </div>
-                {false && videos.length > 0 && (
-                    <>
-                        <Label className="mt-6 block">Vídeos</Label>
+                <div className="mt-6">
+                    <Label className="block">Vídeos</Label>
+                    {videos.length > 0 ? (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {videos.map((vid) => (
-                                <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
-                                    <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
+                                <div key={vid.id} className="relative h-20 w-28 overflow-hidden rounded-md border">
+                                    <video
+                                        src={vid.url}
+                                        className="h-full w-full object-cover"
+                                        muted
+                                        loop
+                                        playsInline
+                                        controls
+                                    />
                                     <button
                                         type="button"
                                         className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
@@ -691,8 +713,16 @@ export default function FeaturedPropertiesModal({
                                 </div>
                             ))}
                         </div>
-                    </>
-                )}
+                    ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Nenhum vídeo selecionado. Use o botão "Escolher mídia" acima para enviar vídeos (formatos MP4, MOV,
+                            etc.).
+                        </p>
+                    )}
+                    {uploadingVideos && (
+                        <p className="mt-2 text-xs text-muted-foreground">Enviando vídeos…</p>
+                    )}
+                </div>
                 <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
