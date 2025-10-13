@@ -1,4 +1,4 @@
-﻿import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import PropertyAreaMetrics from '@/components/PropertyAreaMetrics';
 import Image from '../../../components/AppImage';
@@ -442,7 +442,7 @@ const FeaturedProperties = () => {
               normalizeImageValue(p.image_url) ||
               DEFAULT_PLACEHOLDER_IMAGE;
 
-            // Helpers to parse numeric values from strings like "120 mÂ²" or "R$ 1.200.000"
+            // Helpers to parse numeric values from strings like "120 m²" or "R$ 1.200.000"
             const parseArea = (val) => {
               if (val == null) return null;
               const m = String(val).match(/([0-9]+([\.,][0-9]+)?)/);
@@ -499,7 +499,7 @@ const FeaturedProperties = () => {
   lotArea,
               privateArea,
               type: p.type,
-              // O backend jÃ¡ entrega image_url e gallery com arquivos do storage; usamos o placeholder padrÃ£o sÃ³ se nada estiver cadastrado.
+              // O backend já entrega image_url e gallery com arquivos do storage; usamos o placeholder padrão só se nada estiver cadastrado.
               image: primaryImageEntry?.src || fallbackImage,
               imagePlaceholder:
                 primaryImageEntry?.placeholder ||
@@ -519,7 +519,7 @@ const FeaturedProperties = () => {
     })();
   }, []);
 
-  // Caso a API nÃ£o retorne imÃ³veis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
+  // Caso a API não retorne imóveis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
 
   useEffect(() => {
     if (!isModalOpen || typeof document === 'undefined') {
@@ -572,22 +572,22 @@ const FeaturedProperties = () => {
   }, [activeGallery.length]);
 
   const neighborhoods = [
-    { value: '', label: 'Todas as RegiÃµes' },
-    { value: 'regiao-parque-cascavel', label: 'RegiÃ£o â€“ PrÃ³ximo ao Parque Cascavel' },
-    { value: 'aparecida-av-sao-paulo', label: 'Aparecida â€“ PrÃ³ximo Ã  Av. SÃ£o Paulo' },
-    { value: 'aparecida-sitio-santa-luzia', label: 'Aparecida â€“ SÃ­tio Santa Luzia' },
-    { value: 'aparecida-outros', label: 'Aparecida â€“ Outros' },
-    { value: 'noroeste-prox-hugol', label: 'Noroeste â€“ PrÃ³ximo ao Hugol' },
-    { value: 'norte-prox-campus', label: 'Norte â€“ PrÃ³ximo ao Campus' },
-    { value: 'norte-prox-passeio-das-aguas', label: 'Norte â€“ PrÃ³ximo ao Passeio das Ãguas' },
-    { value: 'norte-prox-embrapa', label: 'Norte â€“ PrÃ³ximo Ã  Embrapa' },
-    { value: 'go020-prox-flamboyant', label: 'RegiÃ£o GO 020 â€“ PrÃ³ximo ao Flamboyant' },
-    { value: 'go020-prox-sunset-wake-park', label: 'RegiÃ£o GO 020 â€“ PrÃ³ximo ao Sunset Wake Park' },
-    { value: 'go020-novos-jardins', label: 'RegiÃ£o GO 020 â€“ Novos Jardins' },
-    { value: 'sul-saida-hidrolandia', label: 'RegiÃ£o Sul â€“ SaÃ­da para HidrolÃ¢ndia' },
-    { value: 'sul-saida-aragoiania', label: 'RegiÃ£o Sul â€“ SaÃ­da para AragoiÃ¢nia' },
-    { value: 'oeste-saida-trindade', label: 'RegiÃ£o Oeste â€“ SaÃ­da para Trindade' },
-    { value: 'sudeste-saida-bonfinopolis-leopoldo', label: 'RegiÃ£o Sudeste â€“ SaÃ­da para BonfinÃ³polis/Leopoldo de BulhÃµes' },
+    { value: '', label: 'Todas as Regiões' },
+    { value: 'regiao-parque-cascavel', label: 'Região – Próximo ao Parque Cascavel' },
+    { value: 'aparecida-av-sao-paulo', label: 'Aparecida – Próximo à Av. São Paulo' },
+    { value: 'aparecida-sitio-santa-luzia', label: 'Aparecida – Sítio Santa Luzia' },
+    { value: 'aparecida-outros', label: 'Aparecida – Outros' },
+    { value: 'noroeste-prox-hugol', label: 'Noroeste – Próximo ao Hugol' },
+    { value: 'norte-prox-campus', label: 'Norte – Próximo ao Campus' },
+    { value: 'norte-prox-passeio-das-aguas', label: 'Norte – Próximo ao Passeio das Águas' },
+    { value: 'norte-prox-embrapa', label: 'Norte – Próximo à Embrapa' },
+    { value: 'go020-prox-flamboyant', label: 'Região GO 020 – Próximo ao Flamboyant' },
+    { value: 'go020-prox-sunset-wake-park', label: 'Região GO 020 – Próximo ao Sunset Wake Park' },
+    { value: 'go020-novos-jardins', label: 'Região GO 020 – Novos Jardins' },
+    { value: 'sul-saida-hidrolandia', label: 'Região Sul – Saída para Hidrolândia' },
+    { value: 'sul-saida-aragoiania', label: 'Região Sul – Saída para Aragoiânia' },
+    { value: 'oeste-saida-trindade', label: 'Região Oeste – Saída para Trindade' },
+    { value: 'sudeste-saida-bonfinopolis-leopoldo', label: 'Região Sudeste – Saída para Bonfinópolis/Leopoldo de Bulhões' },
   ];
 
   const priceRanges = [
@@ -601,25 +601,25 @@ const FeaturedProperties = () => {
 
   const propertyTypes = [
     { value: '', label: 'Todos os tipos' },
-    { value: 'condominio-casas-sobrados', label: 'CondomÃ­nio de Casas/Sobrados' },
-    { value: 'condominios-lotes', label: 'CondomÃ­nios de lotes' },
-    { value: 'sitios-lazer', label: 'SÃ­tios de lazer' },
+    { value: 'condominio-casas-sobrados', label: 'Condomínio de Casas/Sobrados' },
+    { value: 'condominios-lotes', label: 'Condomínios de lotes' },
+    { value: 'sitios-lazer', label: 'Sítios de lazer' },
   ];
 
   const lotAreaRanges = [
     { value: '', label: 'Qualquer metragem (terreno)' },
-    { value: '0-200', label: 'AtÃ© 200 mÂ²' },
-    { value: '200-400', label: '200 a 400 mÂ²' },
-    { value: '400-600', label: '400 a 600 mÂ²' },
-    { value: '600+', label: 'Acima de 600 mÂ²' },
+    { value: '0-200', label: 'Até 200 m²' },
+    { value: '200-400', label: '200 a 400 m²' },
+    { value: '400-600', label: '400 a 600 m²' },
+    { value: '600+', label: 'Acima de 600 m²' },
   ];
 
   const privateAreaRanges = [
-    { value: '', label: 'Qualquer metragem (Ã¡rea privativa)' },
-    { value: '0-80', label: 'AtÃ© 80 mÂ²' },
-    { value: '80-120', label: '80 a 120 mÂ²' },
-    { value: '120-200', label: '120 a 200 mÂ²' },
-    { value: '200+', label: 'Acima de 200 mÂ²' },
+    { value: '', label: 'Qualquer metragem (área privativa)' },
+    { value: '0-80', label: 'Até 80 m²' },
+    { value: '80-120', label: '80 a 120 m²' },
+    { value: '120-200', label: '120 a 200 m²' },
+    { value: '200+', label: 'Acima de 200 m²' },
   ];
 
   const handleFilterChange = (type, value) => {
@@ -720,7 +720,7 @@ const FeaturedProperties = () => {
   };
 
   const handleWhatsAppClick = (property) => {
-    const message = encodeURIComponent(`OlÃ¡! Tenho interesse no imÃ³vel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
+    const message = encodeURIComponent(`Olá! Tenho interesse no imóvel: ${property?.title} - ${property?.price}. Gostaria de agendar uma visita.`);
     window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
   };
 
@@ -770,15 +770,15 @@ const FeaturedProperties = () => {
             Diferenciais de cada imovel
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            SeleÃ§Ã£o exclusiva de imÃ³veis por regiÃ£o, com detalhes que vÃ£o alÃ©m do bÃ¡sico.
+            Seleção exclusiva de imóveis por região, com detalhes que vão além do básico.
             <span className="block mt-2 font-semibold italic text-gray-900">
-              Quer descobrir o que ninguÃ©m te conta ou receber um filtro personalizado para as necessidades da sua famÃ­lia? Fale conosco.
+              Quer descobrir o que ninguém te conta ou receber um filtro personalizado para as necessidades da sua família? Fale conosco.
             </span>
           </p>
           {filteredProperties?.length > 0 && (
             <p className="text-sm text-primary font-medium mt-2">
               {filteredProperties?.length}{' '}
-              {filteredProperties?.length === 1 ? 'imÃ³vel encontrado' : 'imÃ³veis encontrados'}
+              {filteredProperties?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
             </p>
           )}
         </div>
@@ -788,7 +788,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="MapPin" size={16} className="mr-2 inline" />
-                RegiÃ£o
+                Região
               </label>
               <select
                 value={formFilters.neighborhood}
@@ -824,7 +824,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="Home" size={16} className="mr-2 inline" />
-                Tipo de ImÃ³vel
+                Tipo de Imóvel
               </label>
               <select
                 value={formFilters.propertyType}
@@ -860,7 +860,7 @@ const FeaturedProperties = () => {
             <div className="space-y-2 md:self-end min-w-0">
               <label className="block text-sm font-medium text-gray-700">
                 <Icon name="Ruler" size={16} className="mr-2 inline" />
-                Ãrea privativa
+                Área privativa
               </label>
               <select
                 value={formFilters.privateAreaRange}
@@ -938,17 +938,17 @@ const FeaturedProperties = () => {
           <div className="py-12 text-center">
             <Icon name="Search" size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="mb-2 text-xl font-semibold text-gray-900">
-              Nenhum imÃ³vel encontrado
+              Nenhum imóvel encontrado
             </h3>
             <p className="mb-6 text-gray-600">
-              Tente ajustar os filtros ou entre em contato conosco para mais opÃ§Ãµes
+              Tente ajustar os filtros ou entre em contato conosco para mais opções
             </p>
             <Button
               variant="default"
               iconName="MessageCircle"
               iconPosition="left"
               onClick={() => {
-                const message = encodeURIComponent('OlÃ¡! NÃ£o encontrei imÃ³veis com os filtros selecionados. Podem me ajudar a encontrar outras opÃ§Ãµes?');
+                const message = encodeURIComponent('Olá! Não encontrei imóveis com os filtros selecionados. Podem me ajudar a encontrar outras opções?');
                 window.open(`https://wa.me/5562999999999?text=${message}`, '_blank');
               }}
               className="bg-accent hover:bg-accent/90"
@@ -1015,7 +1015,7 @@ const FeaturedProperties = () => {
                       type="button"
                       onClick={handleModalNext}
                       className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-3 text-gray-900 transition hover:bg-primary hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                      aria-label="PrÃ³xima imagem"
+                      aria-label="Próxima imagem"
                     >
                       <Icon name="ChevronRight" size={22} />
                     </button>
