@@ -29,8 +29,6 @@ interface Props {
     selectedImageId?: number | null;
     property: PreviewProperty;
     onSelectImage?: (image: PreviewImage | null) => void;
-    className?: string;
-
 }
 
 const FALLBACK_MESSAGE = 'Envie imagens para visualizar o modal como seus clientes.';
@@ -40,8 +38,6 @@ export default function FeaturedPropertyModalPreview({
     selectedImageId,
     property,
     onSelectImage,
-    className,
-
 }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -96,8 +92,7 @@ export default function FeaturedPropertyModalPreview({
     };
 
     return (
-        <div className={cn('mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border bg-white shadow-xl', className)}>
-
+        <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl border bg-white shadow-xl">
             <div className="relative bg-black">
                 {activeImage ? (
                     <img
