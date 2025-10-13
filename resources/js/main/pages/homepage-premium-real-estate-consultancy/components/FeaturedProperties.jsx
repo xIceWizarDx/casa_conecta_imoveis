@@ -975,10 +975,10 @@ const FeaturedProperties = () => {
       </div>
 
       {isModalOpen && activeProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-6 sm:items-center">
           <div className="absolute inset-0 bg-black/80" onClick={closeModal} aria-hidden="true" />
-          <div className="relative z-10 w-full max-w-5xl">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
+          <div className="relative z-10 w-full max-w-4xl">
+            <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
               <button
                 type="button"
                 onClick={closeModal}
@@ -988,12 +988,12 @@ const FeaturedProperties = () => {
                 <Icon name="X" size={20} />
               </button>
 
-              <div className="relative bg-black">
+              <div className="relative flex-shrink-0 bg-black">
                 <Image
                   src={activeImageEntry?.src}
                   alt={`${activeProperty.title} - imagem ${activeImageIndex + 1}`}
                   wrapperClassName="block w-full"
-                  imgClassName="h-[60vh] w-full object-cover"
+                  imgClassName="h-[45vh] min-h-[280px] w-full object-cover sm:h-[55vh]"
                   placeholderSrc={activeImageEntry?.placeholder || buildPlaceholderSrc(activeImageEntry?.src)}
                   srcSet={activeImageEntry?.srcSet}
                   sizes={MODAL_IMAGE_SIZES}
@@ -1024,15 +1024,17 @@ const FeaturedProperties = () => {
               </div>
 
               {hasGalleryNavigation && (
-                <GalleryThumbnails
-                  gallery={activeGallery}
-                  activeIndex={activeImageIndex}
-                  onSelect={setActiveImageIndex}
-                  title={activeProperty.title}
-                />
+                <div className="flex-shrink-0">
+                  <GalleryThumbnails
+                    gallery={activeGallery}
+                    activeIndex={activeImageIndex}
+                    onSelect={setActiveImageIndex}
+                    title={activeProperty.title}
+                  />
+                </div>
               )}
 
-              <div className="px-6 pb-6 pt-4">
+              <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-4">
                 <h3 className="text-2xl font-bold text-gray-900">{activeProperty.title}</h3>
                 <p className="mt-2 flex items-center text-gray-600">
                   <Icon name="MapPin" size={18} className="mr-2" />
