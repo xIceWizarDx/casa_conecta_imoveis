@@ -49,6 +49,10 @@ type UploadedVideo = {
     filename?: string | null;
 };
 
+type MediaItem =
+    | { type: 'image'; item: Image }
+    | { type: 'video'; item: UploadedVideo };
+
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -86,6 +90,12 @@ export default function FeaturedPropertiesModal({
     const [videos, setVideos] = useState<UploadedVideo[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
     const uploadMediaRef = useRef<HTMLInputElement | null>(null);
+
+    const mediaItems = useMemo<MediaItem[]>(() => {
+        const imageItems: MediaItem[] = images.map((image) => ({ type: 'image', item: image }));
+        const videoItems: MediaItem[] = videos.map((video) => ({ type: 'video', item: video }));
+        return [...imageItems, ...videoItems];
+    }, [images, videos]);
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -578,19 +588,21 @@ export default function FeaturedPropertiesModal({
 
                             />
                         </div>
-                        {images.length > 0 ? (
-                            <>
-                                <div
-                                    className="mt-2 flex flex-wrap gap-2"
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleContainerDrop}
-                                >
-                                    {images.map((img, index) => {
+                        {mediaItems.length > 0 ? (
+                            <div
+                                className="mt-2 flex flex-wrap gap-2"
+                                onDragOver={handleDragOver}
+                                onDrop={handleContainerDrop}
+                            >
+                                {mediaItems.map((media) => {
+                                    if (media.type === 'image') {
+                                        const img = media.item;
+                                        const imageIndex = images.findIndex((image) => image.id === img.id);
                                         const isDragged = draggedImageId === img.id;
-                                        const isCover = index === 0;
+                                        const isCover = imageIndex === 0;
                                         return (
                                             <div
-                                                key={img.id}
+                                                key={`image-${img.id}`}
                                                 className={cn(
                                                     'relative h-20 w-20 cursor-move overflow-hidden rounded-md border',
                                                     isDragged && 'opacity-60'
@@ -617,11 +629,38 @@ export default function FeaturedPropertiesModal({
                                                 )}
                                             </div>
                                         );
-                                    })}
-                                </div>
-                            </>
+                                    }
+
+                                    const vid = media.item;
+                                    return (
+                                        <div
+                                            key={`video-${vid.id}`}
+                                            className="relative h-20 w-20 overflow-hidden rounded-md border"
+                                        >
+                                            <video
+                                                src={vid.url}
+                                                className="h-full w-full object-cover"
+                                                muted
+                                                loop
+                                                playsInline
+                                            />
+                                            <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 text-[10px] font-medium uppercase tracking-wide text-white">
+                                                Vídeo
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                                onClick={() => setVideos((prev) => prev.filter((video) => video.id !== vid.id))}
+                                                aria-label="Remover vídeo"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         ) : (
-                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
+                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma mídia selecionada.</p>
                         )}
                     </div>
                     <div>
@@ -684,41 +723,9 @@ export default function FeaturedPropertiesModal({
                 </div>
 
                 </div>
-                <div className="mt-6">
-                    <Label className="block">Vídeos</Label>
-                    {videos.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {videos.map((vid) => (
-                                <div key={vid.id} className="relative h-20 w-28 overflow-hidden rounded-md border">
-                                    <video
-                                        src={vid.url}
-                                        className="h-full w-full object-cover"
-                                        muted
-                                        loop
-                                        playsInline
-                                        controls
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
-                                        onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                        aria-label="Remover vídeo"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Nenhum vídeo selecionado. Use o botão "Escolher mídia" acima para enviar vídeos (formatos MP4, MOV,
-                            etc.).
-                        </p>
-                    )}
-                    {uploadingVideos && (
-                        <p className="mt-2 text-xs text-muted-foreground">Enviando vídeos…</p>
-                    )}
-                </div>
+                {uploadingVideos && (
+                    <p className="mt-6 text-xs text-muted-foreground">Enviando vídeos…</p>
+                )}
                 <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
