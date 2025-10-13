@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import type { Notice } from '@/types/notice';
 import * as HeroActions from '@/actions/App/Http/Controllers/HeroSlideController';
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -35,12 +36,6 @@ export type HeroSlide = {
     is_published?: boolean;
     position?: number;
 };
-
-export interface Notice {
-    type: 'success' | 'error';
-    title: string;
-    message?: string;
-}
 
 interface Props {
     open: boolean;
