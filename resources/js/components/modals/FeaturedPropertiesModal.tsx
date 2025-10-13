@@ -33,6 +33,7 @@ export type FeaturedProperty = {
     built_area?: string | null;
     type?: string | null;
     description?: string | null;
+    features?: string[] | null;
     price_range?: string | null;
     is_new?: boolean;
     is_published?: boolean;
@@ -83,8 +84,7 @@ export default function FeaturedPropertiesModal({
     const [images, setImages] = useState<Image[]>([]);
     const [videos, setVideos] = useState<any[]>([]);
     const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
-    const uploadInputRef = useRef<HTMLInputElement | null>(null);
-    const uploadVideoRef = useRef<HTMLInputElement | null>(null);
+    const uploadMediaRef = useRef<HTMLInputElement | null>(null);
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -175,32 +175,70 @@ export default function FeaturedPropertiesModal({
         setShowEmojis(false);
     }, [open, editing]);
 
-    const handleUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const uploaded = await onUploadImages(event.target.files);
-        event.target.value = '';
-        if (uploaded.length > 0) {
-            setImages((prev) => {
-                const existingIds = new Set(prev.map((img) => img.id));
-                const additions = uploaded.filter((img) => !existingIds.has(img.id));
-                const merged = [...prev, ...additions];
-                if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                    setSelectedImageAndForm(merged[0] ?? null);
-                }
-                return merged;
-            });
-        }
+    const mergeUploadedImages = (uploaded: Image[]) => {
+        if (uploaded.length === 0) return;
+        setImages((prev) => {
+            const existingIds = new Set(prev.map((img) => img.id));
+            const additions = uploaded.filter((img) => !existingIds.has(img.id));
+            const merged = [...prev, ...additions];
+            if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(merged[0] ?? null);
+            }
+            return merged;
+        });
     };
 
-    const handleVideoUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        if (!onUploadVideos) return;
-        const uploaded = await onUploadVideos(event.target.files);
+    const mergeUploadedVideos = (uploaded: { id: number; url: string }[]) => {
+        if (uploaded.length === 0) return;
+        setVideos((prev) => {
+            const existingIds = new Set(prev.map((v) => v.id));
+            const additions = uploaded.filter((v) => !existingIds.has(v.id));
+            return [...prev, ...additions];
+        });
+    };
+
+    const toFileList = (files: File[]) => {
+        if (files.length === 0) return null;
+        if (typeof DataTransfer !== 'undefined') {
+            const dataTransfer = new DataTransfer();
+            files.forEach((file) => dataTransfer.items.add(file));
+            return dataTransfer.files;
+        }
+        const fallback: any = { length: files.length, item: (index: number) => files[index] ?? null };
+        files.forEach((file, index) => {
+            fallback[index] = file;
+        });
+        return fallback as FileList;
+    };
+
+    const handleMediaUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
         event.target.value = '';
-        if (uploaded.length > 0) {
-            setVideos((prev) => {
-                const existingIds = new Set(prev.map((v) => v.id));
-                const additions = uploaded.filter((v) => !existingIds.has(v.id));
-                return [...prev, ...additions];
-            });
+        if (!files || files.length === 0) return;
+
+        const imageFiles: File[] = [];
+        const videoFiles: File[] = [];
+
+        Array.from(files).forEach((file) => {
+            if (file.type.startsWith('video/')) {
+                videoFiles.push(file);
+            } else if (file.type.startsWith('image/')) {
+                imageFiles.push(file);
+            }
+        });
+
+        if (imageFiles.length > 0) {
+            const uploaded = await onUploadImages(toFileList(imageFiles));
+            mergeUploadedImages(uploaded);
+        }
+
+        if (videoFiles.length > 0) {
+            if (!onUploadVideos) {
+                onNotice?.({ type: 'error', title: 'Envio de vídeos não suportado neste painel.' });
+            } else {
+                const uploaded = await onUploadVideos(toFileList(videoFiles));
+                mergeUploadedVideos(uploaded);
+            }
         }
     };
 
@@ -347,95 +385,24 @@ export default function FeaturedPropertiesModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-full sm:max-w-5xl" aria-describedby="featured-desc">
+            <DialogContent
+                className="flex max-h-[85vh] w-full flex-col overflow-hidden sm:max-w-5xl"
+                aria-describedby="featured-desc"
+            >
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <DialogTitle>Imóveis em Destaque</DialogTitle>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{`${listCount} itens`}</span>
                         </div>
-                        {/* Descrição do imóvel */}
-                        <div className="md:col-span-1 lg:col-span-2">
-                            <Label>Descrição do imóvel</Label>
-                            <div className="mt-2 flex items-start gap-2">
-                                <textarea
-                                    ref={descriptionRef}
-                                    className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
-                                    placeholder={"Ex: Casa térrea no Jardim Goiânia 🏡 com 3 quartos, suíte, área gourmet com piscina 🏊 e 2 vagas de garagem. Localização excelente, próxima ao parque."}
-                                    value={(form as any).description ?? ''}
-                                    onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
-                                />
-                                <div className="relative">
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        className="w-10 px-0 bg-accent text-white hover:bg-accent/90"
-                                        onClick={() => setShowEmojis((v) => !v)}
-                                        title="Emojis (estilo WhatsApp)"
-                                    >
-                                        🙂
-                                    </Button>
-                                    {showEmojis && (
-                                        <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border bg-white p-2 shadow-lg">
-                                            {['😀','😃','😄','😁','😆','😊','😍','🤩','😉','👍','🏡','🛏️','🛁','🧱','🔑','🌳','🏊‍♂️','🚗','📍','📐','📏','💡','🔥','💎','🎯'].map((emo) => (
-                                                <button
-                                                    key={emo}
-                                                    type="button"
-                                                    className="m-0.5 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
-                                                    onClick={() => {
-                                                        const el = descriptionRef.current;
-                                                        const toInsert = emo;
-                                                        if (el) {
-                                                            const start = el.selectionStart ?? el.value.length;
-                                                            const end = el.selectionEnd ?? el.value.length;
-                                                            const text = el.value;
-                                                            const next = text.slice(0, start) + toInsert + text.slice(end);
-                                                            el.value = next;
-                                                            setForm((s) => ({ ...s, description: next }));
-                                                            const pos = start + toInsert.length;
-                                                            requestAnimationFrame(() => {
-                                                                el.focus();
-                                                                el.setSelectionRange(pos, pos);
-                                                            });
-                                                        }
-                                                    }}
-                                                >
-                                                    {emo}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
-                        </div>
                     </div>
-                    {false && videos.length > 0 && (
-                        <>
-                            <Label className="mt-6 block">Vídeos</Label>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {videos.map((vid) => (
-                                    <div key={vid.id} className="relative h-20 w-20 overflow-hidden rounded-md border">
-                                        <video src={vid.url} className="h-full w-full object-cover" muted loop playsInline />
-                                        <button
-                                            type="button"
-                                            className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
-                                            onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                            aria-label="Remover vÃ­deo"
-                                        >
-                                            Ã—
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
                     Configure os campos e escolha uma imagem para publicar um imÃ³vel em destaque.
                 </DialogDescription>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-4 flex-1 overflow-y-auto pr-1">
+                    <div className="space-y-4 pb-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <Label>Título</Label>
                             <Input
@@ -570,43 +537,27 @@ export default function FeaturedPropertiesModal({
                     </div>
                     {/* SeÃ§Ã£o de caracterÃ­sticas movida ao lado do campo de Tipo */}
                     <div>
-                        <Label>Imagens</Label>
+                        <Label>MÃ­dia</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa.
+                            Arraste para ordenar as imagens. A primeira imagem serÃ¡ usada como capa. Use o botÃ£o abaixo para
+                            enviar novas imagens ou vÃ­deos.
                         </p>
                         <Button
                             type="button"
                             variant="secondary"
                             className="mt-2 w-auto bg-black text-white hover:bg-black/80"
-                            onClick={() => uploadInputRef.current?.click()}
-                            disabled={uploadingImages}
+                            onClick={() => uploadMediaRef.current?.click()}
+                            disabled={uploadingImages || uploadingVideos}
                         >
-                            {uploadingImages ? 'Enviando...' : 'Escolher imagens'}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            className="mt-2 ml-2 w-auto bg-black text-white hover:bg-black/80"
-                            onClick={() => uploadVideoRef.current?.click()}
-                            disabled={uploadingVideos}
-                        >
-                            {uploadingVideos ? 'Enviando...' : 'Escolher vídeos'}
+                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher mÃ­dia'}
                         </Button>
                         <input
-                            ref={uploadInputRef}
+                            ref={uploadMediaRef}
                             type="file"
                             multiple
-                            accept="image/*"
+                            accept="image/*,video/*"
                             className="hidden"
-                            onChange={handleUploadChange}
-                        />
-                        <input
-                            ref={uploadVideoRef}
-                            type="file"
-                            multiple
-                            accept="video/*"
-                            className="hidden"
-                            onChange={handleVideoUploadChange}
+                            onChange={handleMediaUploadChange}
                         />
                         <div
                             className={cn(
@@ -643,7 +594,8 @@ export default function FeaturedPropertiesModal({
                                             bathrooms={form.bathrooms}
                                             area={buildAreaWithSuffix(form.area) ?? undefined}
                                             built_area={buildAreaWithSuffix((form as any).built_area) ?? undefined}
-                                                                                        price={form.price}
+                                            description={(form as any).description ?? ''}
+                                            price={form.price}
                                         />
                                     </div>
                                 </div>
@@ -695,6 +647,64 @@ export default function FeaturedPropertiesModal({
                             <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
                         )}
                     </div>
+                    <div>
+                        <Label>Descrição do imóvel</Label>
+                        <div className="mt-2 flex items-start gap-2">
+                            <textarea
+                                ref={descriptionRef}
+                                className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
+                                placeholder={"Ex: Casa térrea no Jardim Goiânia 🏡 com 3 quartos, suíte, área gourmet com piscina 🏊 e 2 vagas de garagem. Localização excelente, próxima ao parque."}
+                                value={(form as any).description ?? ''}
+                                onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+                            />
+                            <div className="relative">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="w-10 px-0 bg-accent text-white hover:bg-accent/90"
+                                    onClick={() => setShowEmojis((v) => !v)}
+                                    title="Emojis (estilo WhatsApp)"
+                                >
+                                    🙂
+                                </Button>
+                                {showEmojis && (
+                                    <div className="absolute right-0 z-10 mt-2 w-52 rounded-md border bg-white p-2 shadow-lg">
+                                        {[
+                                            '😀','😃','😄','😁','😆','😊','😍','🤩','🥰','😉','😎','🤗','🙌','👍','👏','✅','✨','🌟',
+                                            '🏡','🏠','🏘️','🏢','🏗️','🌇','🌆','🌳','🌴','🌺','🪴','🏊‍♂️','🏋️‍♀️','🚗','🚙','🛵','🅿️','🛏️','🛁','🚿','🧖‍♀️','🍷','🔥','💡','💎','🎯','🧭','📍','📐','📏','📸','🔑','🛠️'
+                                        ].map((emo) => (
+                                            <button
+                                                key={emo}
+                                                type="button"
+                                                className="m-0.5 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
+                                                onClick={() => {
+                                                    const el = descriptionRef.current;
+                                                    const toInsert = emo;
+                                                    if (el) {
+                                                        const start = el.selectionStart ?? el.value.length;
+                                                        const end = el.selectionEnd ?? el.value.length;
+                                                        const text = el.value;
+                                                        const next = text.slice(0, start) + toInsert + text.slice(end);
+                                                        el.value = next;
+                                                        setForm((s) => ({ ...s, description: next }));
+                                                        const pos = start + toInsert.length;
+                                                        requestAnimationFrame(() => {
+                                                            el.focus();
+                                                            el.setSelectionRange(pos, pos);
+                                                        });
+                                                    }
+                                                }}
+                                            >
+                                                {emo}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">Escreva à vontade e use emojis. O botão 🙂 abre um painel rápido (estilo WhatsApp).</p>
+                    </div>
+                </div>
                 </div>
                 {false && videos.length > 0 && (
                     <>
@@ -716,7 +726,7 @@ export default function FeaturedPropertiesModal({
                         </div>
                     </>
                 )}
-                <DialogFooter>
+                <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
                     </Button>
