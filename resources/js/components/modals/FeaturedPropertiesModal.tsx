@@ -579,7 +579,8 @@ export default function FeaturedPropertiesModal({
                                     price: form.price ?? '',
                                     isNew: !!form.is_new,
                                 }}
-                                primaryVideo={videos[0] ?? null}
+                                videos={videos}
+
                             />
                         </div>
                         {images.length > 0 ? (
