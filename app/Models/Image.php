@@ -29,21 +29,25 @@ class Image extends Model
             return '';
         }
 
+        $normalised = ltrim($path, '/');
+
+        if ($disk === 'public' && str_starts_with($normalised, 'public/')) {
+            $normalised = substr($normalised, strlen('public/')) ?: '';
+        }
+
+        if ($disk === 'public' && $normalised !== '') {
+            return route('storage.asset', ['path' => $normalised], false);
+        }
+
         try {
             return Storage::disk($disk)->url($path);
         } catch (\Throwable $e) {
-            $normalised = ltrim($path, '/');
-
-            if ($disk === 'public' && str_starts_with($normalised, 'public/')) {
-                $normalised = substr($normalised, strlen('public/')) ?: '';
-            }
-
             if ($normalised === '') {
                 return '';
             }
 
             if ($disk === 'public') {
-                return '/storage/' . $normalised;
+                return route('storage.asset', ['path' => $normalised], false);
             }
 
             return '/' . $normalised;
