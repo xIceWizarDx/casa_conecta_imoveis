@@ -49,6 +49,10 @@ type UploadedVideo = {
     filename?: string | null;
 };
 
+type MediaItem =
+    | { type: 'image'; item: Image }
+    | { type: 'video'; item: UploadedVideo };
+
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -82,10 +86,23 @@ export default function FeaturedPropertiesModal({
     const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
     const [showEmojis, setShowEmojis] = useState(false);
     const [selectedImage, setSelectedImage] = useState<Image | null>(null);
-    const [images, setImages] = useState<Image[]>([]);
-    const [videos, setVideos] = useState<UploadedVideo[]>([]);
-    const [draggedImageId, setDraggedImageId] = useState<number | null>(null);
+    const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+    const [draggedMediaKey, setDraggedMediaKey] = useState<string | null>(null);
     const uploadMediaRef = useRef<HTMLInputElement | null>(null);
+
+    const images = useMemo(() => {
+        return mediaItems
+            .filter((media): media is { type: 'image'; item: Image } => media.type === 'image')
+            .map((media) => media.item);
+    }, [mediaItems]);
+
+    const videos = useMemo(() => {
+        return mediaItems
+            .filter((media): media is { type: 'video'; item: UploadedVideo } => media.type === 'video')
+            .map((media) => media.item);
+    }, [mediaItems]);
+
+    const buildMediaKey = (type: MediaItem['type'], id: number) => `${type}:${id}`;
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -150,8 +167,6 @@ export default function FeaturedPropertiesModal({
                 }))
                 .filter((i) => i.id && i.url)
             : [];
-        const ordered = cover ? [cover, ...gallery] : gallery;
-        setImages(ordered);
         const vids: UploadedVideo[] = Array.isArray((editing as any).videos)
             ? ((editing as any).videos as any[])
                   .map((v) => ({
@@ -162,7 +177,12 @@ export default function FeaturedPropertiesModal({
                   }))
                   .filter((v) => v.id && v.url)
             : [];
-        setVideos(vids);
+        const ordered = cover ? [cover, ...gallery] : gallery;
+        const initialMedia: MediaItem[] = [
+            ...ordered.map<MediaItem>((image) => ({ type: 'image', item: image })),
+            ...vids.map<MediaItem>((video) => ({ type: 'video', item: video })),
+        ];
+        setMediaItems(initialMedia);
         setSelectedImageAndForm(ordered[0] ?? null);
         setForm({
             id: editing.id,
@@ -185,22 +205,39 @@ export default function FeaturedPropertiesModal({
 
     const mergeUploadedImages = (uploaded: Image[]) => {
         if (uploaded.length === 0) return;
-        setImages((prev) => {
-            const existingIds = new Set(prev.map((img) => img.id));
-            const additions = uploaded.filter((img) => !existingIds.has(img.id));
-            const merged = [...prev, ...additions];
-            if ((merged[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                setSelectedImageAndForm(merged[0] ?? null);
+        setMediaItems((prev) => {
+            const existingIds = new Set(
+                prev.filter((media) => media.type === 'image').map((media) => media.item.id)
+            );
+            const additions = uploaded
+                .filter((img) => !existingIds.has(img.id))
+                .map<MediaItem>((img) => ({ type: 'image', item: img }));
+            if (additions.length === 0) {
+                return prev;
             }
-            return merged;
+            const next = [...prev, ...additions];
+            const nextImages = next
+                .filter((media) => media.type === 'image')
+                .map((media) => media.item);
+            if ((nextImages[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(nextImages[0] ?? null);
+            }
+            return next;
         });
     };
 
     const mergeUploadedVideos = (uploaded: UploadedVideo[]) => {
         if (uploaded.length === 0) return;
-        setVideos((prev) => {
-            const existingIds = new Set(prev.map((v) => v.id));
-            const additions = uploaded.filter((v) => !existingIds.has(v.id));
+        setMediaItems((prev) => {
+            const existingIds = new Set(
+                prev.filter((media) => media.type === 'video').map((media) => media.item.id)
+            );
+            const additions = uploaded
+                .filter((video) => !existingIds.has(video.id))
+                .map<MediaItem>((video) => ({ type: 'video', item: video }));
+            if (additions.length === 0) {
+                return prev;
+            }
             return [...prev, ...additions];
         });
     };
@@ -250,20 +287,46 @@ export default function FeaturedPropertiesModal({
         }
     };
 
+    const parseMediaKey = (
+        value: string
+    ): { type: MediaItem['type']; id: number } | null => {
+        const [type, rawId] = value.split(':');
+        if ((type !== 'image' && type !== 'video') || !rawId) {
+            return null;
+        }
+        const id = Number.parseInt(rawId, 10);
+        if (!Number.isFinite(id)) {
+            return null;
+        }
+        return { type: type as MediaItem['type'], id };
+    };
+
     const handleRemoveImage = (id: number) => {
-        setImages((prev) => {
-            const filtered = prev.filter((img) => img.id !== id);
-            if ((filtered[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                setSelectedImageAndForm(filtered[0] ?? null);
+        setMediaItems((prev) => {
+            const filtered = prev.filter(
+                (media) => !(media.type === 'image' && media.item.id === id)
+            );
+            const nextImages = filtered
+                .filter((media) => media.type === 'image')
+                .map((media) => media.item);
+            if ((nextImages[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(nextImages[0] ?? null);
             }
             return filtered;
         });
     };
 
-    const handleDragStart = (image: Image) => (event: DragEvent<HTMLDivElement>) => {
+    const handleRemoveVideo = (id: number) => {
+        setMediaItems((prev) =>
+            prev.filter((media) => !(media.type === 'video' && media.item.id === id))
+        );
+    };
+
+    const handleDragStart = (media: MediaItem) => (event: DragEvent<HTMLDivElement>) => {
         event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('text/plain', image.id.toString());
-        setDraggedImageId(image.id);
+        const key = buildMediaKey(media.type, media.item.id);
+        event.dataTransfer.setData('text/plain', key);
+        setDraggedMediaKey(key);
     };
 
     const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -271,55 +334,68 @@ export default function FeaturedPropertiesModal({
         event.dataTransfer.dropEffect = 'move';
     };
 
-    const handleDrop = (targetImage: Image) => (event: DragEvent<HTMLDivElement>) => {
+    const handleDrop = (target: MediaItem) => (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
         const data = event.dataTransfer.getData('text/plain');
-        const sourceId = Number.parseInt(data || '', 10);
-        if (!Number.isFinite(sourceId) || sourceId === targetImage.id) {
-            setDraggedImageId(null);
+        const parsed = parseMediaKey(data);
+        if (!parsed) {
+            setDraggedMediaKey(null);
+            return;
+        }
+        const targetKey = buildMediaKey(target.type, target.item.id);
+        const sourceKey = buildMediaKey(parsed.type, parsed.id);
+        if (sourceKey === targetKey) {
+            setDraggedMediaKey(null);
             return;
         }
 
-        setImages((prev) => {
+        setMediaItems((prev) => {
             const next = [...prev];
-            const fromIndex = next.findIndex((img) => img.id === sourceId);
-            const toIndex = next.findIndex((img) => img.id === targetImage.id);
+            const fromIndex = next.findIndex(
+                (media) => media.type === parsed.type && media.item.id === parsed.id
+            );
+            const toIndex = next.findIndex((media) => buildMediaKey(media.type, media.item.id) === targetKey);
 
-            if (fromIndex === -1 || toIndex === -1) {
+            if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
                 return next;
             }
 
             const [moved] = next.splice(fromIndex, 1);
             next.splice(toIndex, 0, moved);
 
-            if ((next[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                setSelectedImageAndForm(next[0] ?? null);
+            const nextImages = next
+                .filter((media) => media.type === 'image')
+                .map((media) => media.item);
+            if ((nextImages[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(nextImages[0] ?? null);
             }
 
             return next;
         });
 
-        setDraggedImageId(null);
+        setDraggedMediaKey(null);
     };
 
     const handleDragEnd = () => {
-        setDraggedImageId(null);
+        setDraggedMediaKey(null);
     };
 
     const handleContainerDrop = (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         const data = event.dataTransfer.getData('text/plain');
-        const sourceId = Number.parseInt(data || '', 10);
+        const parsed = parseMediaKey(data);
 
-        if (!Number.isFinite(sourceId)) {
-            setDraggedImageId(null);
+        if (!parsed) {
+            setDraggedMediaKey(null);
             return;
         }
 
-        setImages((prev) => {
+        setMediaItems((prev) => {
             const next = [...prev];
-            const fromIndex = next.findIndex((img) => img.id === sourceId);
+            const fromIndex = next.findIndex(
+                (media) => media.type === parsed.type && media.item.id === parsed.id
+            );
 
             if (fromIndex === -1) {
                 return next;
@@ -328,14 +404,17 @@ export default function FeaturedPropertiesModal({
             const [moved] = next.splice(fromIndex, 1);
             next.push(moved);
 
-            if ((next[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
-                setSelectedImageAndForm(next[0] ?? null);
+            const nextImages = next
+                .filter((media) => media.type === 'image')
+                .map((media) => media.item);
+            if ((nextImages[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+                setSelectedImageAndForm(nextImages[0] ?? null);
             }
 
             return next;
         });
 
-        setDraggedImageId(null);
+        setDraggedMediaKey(null);
     };
 
     const submit = async () => {
@@ -371,7 +450,7 @@ export default function FeaturedPropertiesModal({
             }
             setForm({ description: '' });
             setSelectedImageAndForm(null);
-            setImages([]);
+            setMediaItems([]);
             await onRefreshFeatured();
             onOpenChange(false);
         } finally {
@@ -578,27 +657,30 @@ export default function FeaturedPropertiesModal({
 
                             />
                         </div>
-                        {images.length > 0 ? (
-                            <>
-                                <div
-                                    className="mt-2 flex flex-wrap gap-2"
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleContainerDrop}
-                                >
-                                    {images.map((img, index) => {
-                                        const isDragged = draggedImageId === img.id;
-                                        const isCover = index === 0;
+                        {mediaItems.length > 0 ? (
+                            <div
+                                className="mt-2 flex flex-wrap gap-2"
+                                onDragOver={handleDragOver}
+                                onDrop={handleContainerDrop}
+                            >
+                                {mediaItems.map((media) => {
+                                    if (media.type === 'image') {
+                                        const img = media.item;
+                                        const imageIndex = images.findIndex((image) => image.id === img.id);
+                                        const mediaKey = buildMediaKey('image', img.id);
+                                        const isDragged = draggedMediaKey === mediaKey;
+                                        const isCover = imageIndex === 0;
                                         return (
                                             <div
-                                                key={img.id}
+                                                key={`image-${img.id}`}
                                                 className={cn(
                                                     'relative h-20 w-20 cursor-move overflow-hidden rounded-md border',
                                                     isDragged && 'opacity-60'
                                                 )}
                                                 draggable
-                                                onDragStart={handleDragStart(img)}
+                                                onDragStart={handleDragStart(media)}
                                                 onDragOver={handleDragOver}
-                                                onDrop={handleDrop(img)}
+                                                onDrop={handleDrop(media)}
                                                 onDragEnd={handleDragEnd}
                                             >
                                                 <img src={img.url} alt={img.original_name} className="h-full w-full object-cover" />
@@ -617,11 +699,48 @@ export default function FeaturedPropertiesModal({
                                                 )}
                                             </div>
                                         );
-                                    })}
-                                </div>
-                            </>
+                                    }
+
+                                    const vid = media.item;
+                                    const mediaKey = buildMediaKey('video', vid.id);
+                                    const isDragged = draggedMediaKey === mediaKey;
+                                    return (
+                                        <div
+                                            key={`video-${vid.id}`}
+                                            className={cn(
+                                                'relative h-20 w-20 cursor-move overflow-hidden rounded-md border',
+                                                isDragged && 'opacity-60'
+                                            )}
+                                            draggable
+                                            onDragStart={handleDragStart(media)}
+                                            onDragOver={handleDragOver}
+                                            onDrop={handleDrop(media)}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            <video
+                                                src={vid.url}
+                                                className="h-full w-full object-cover"
+                                                muted
+                                                loop
+                                                playsInline
+                                            />
+                                            <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 text-[10px] font-medium uppercase tracking-wide text-white">
+                                                Vídeo
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+                                                onClick={() => handleRemoveVideo(vid.id)}
+                                                aria-label="Remover vídeo"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         ) : (
-                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma imagem selecionada.</p>
+                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma mídia selecionada.</p>
                         )}
                     </div>
                     <div>
@@ -684,41 +803,9 @@ export default function FeaturedPropertiesModal({
                 </div>
 
                 </div>
-                <div className="mt-6">
-                    <Label className="block">Vídeos</Label>
-                    {videos.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {videos.map((vid) => (
-                                <div key={vid.id} className="relative h-20 w-28 overflow-hidden rounded-md border">
-                                    <video
-                                        src={vid.url}
-                                        className="h-full w-full object-cover"
-                                        muted
-                                        loop
-                                        playsInline
-                                        controls
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
-                                        onClick={() => setVideos((prev) => prev.filter((v) => v.id !== vid.id))}
-                                        aria-label="Remover vídeo"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Nenhum vídeo selecionado. Use o botão "Escolher mídia" acima para enviar vídeos (formatos MP4, MOV,
-                            etc.).
-                        </p>
-                    )}
-                    {uploadingVideos && (
-                        <p className="mt-2 text-xs text-muted-foreground">Enviando vídeos…</p>
-                    )}
-                </div>
+                {uploadingVideos && (
+                    <p className="mt-6 text-xs text-muted-foreground">Enviando vídeos…</p>
+                )}
                 <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>
                         Fechar
