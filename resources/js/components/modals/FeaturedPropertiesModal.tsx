@@ -90,6 +90,7 @@ export default function FeaturedPropertiesModal({
     const [draggedMediaKey, setDraggedMediaKey] = useState<string | null>(null);
     const uploadMediaRef = useRef<HTMLInputElement | null>(null);
 
+
     const images = useMemo(() => {
         return mediaItems
             .filter((media): media is { type: 'image'; item: Image } => media.type === 'image')
@@ -103,6 +104,7 @@ export default function FeaturedPropertiesModal({
     }, [mediaItems]);
 
     const buildMediaKey = (type: MediaItem['type'], id: number) => `${type}:${id}`;
+
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
@@ -667,8 +669,10 @@ export default function FeaturedPropertiesModal({
                                     if (media.type === 'image') {
                                         const img = media.item;
                                         const imageIndex = images.findIndex((image) => image.id === img.id);
+
                                         const mediaKey = buildMediaKey('image', img.id);
                                         const isDragged = draggedMediaKey === mediaKey;
+
                                         const isCover = imageIndex === 0;
                                         return (
                                             <div
@@ -702,6 +706,7 @@ export default function FeaturedPropertiesModal({
                                     }
 
                                     const vid = media.item;
+
                                     const mediaKey = buildMediaKey('video', vid.id);
                                     const isDragged = draggedMediaKey === mediaKey;
                                     return (
@@ -716,6 +721,7 @@ export default function FeaturedPropertiesModal({
                                             onDragOver={handleDragOver}
                                             onDrop={handleDrop(media)}
                                             onDragEnd={handleDragEnd}
+
                                         >
                                             <video
                                                 src={vid.url}
@@ -730,7 +736,9 @@ export default function FeaturedPropertiesModal({
                                             <button
                                                 type="button"
                                                 className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white hover:bg-black"
+
                                                 onClick={() => handleRemoveVideo(vid.id)}
+
                                                 aria-label="Remover vídeo"
                                             >
                                                 ×
