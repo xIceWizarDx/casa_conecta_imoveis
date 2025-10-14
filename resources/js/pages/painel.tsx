@@ -355,6 +355,13 @@ export default function Painel() {
             setSelectedSlideImage(null);
             setSelectedSlideVideo(null);
             await refreshSlides();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setNotice({
+                type: 'error',
+                title: 'Falha ao salvar slide',
+                message,
+            });
         } finally {
             setCreatingSlide(false);
         }
