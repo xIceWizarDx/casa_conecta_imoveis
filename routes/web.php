@@ -7,11 +7,16 @@ use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Settings\ContactController;
 use App\Http\Controllers\Settings\AuthSettingsController;
+use App\Http\Controllers\StorageAssetController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('site');
 })->name('home');
+
+Route::get('storage/{path}', StorageAssetController::class)
+    ->where('path', '.*')
+    ->name('storage.asset');
 
 // Rotas públicas do SPA antigo para suportar navegação direta
 Route::get('/FAQ-comprehensive-buyer-education', function () {

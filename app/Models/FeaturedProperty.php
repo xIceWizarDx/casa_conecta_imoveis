@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Storage;
 
 class FeaturedProperty extends Model
 {
@@ -40,8 +39,12 @@ class FeaturedProperty extends Model
             $this->load('image');
         }
         $image = $this->getRelation('image');
-        if (!$image) return null;
-        return Storage::disk($image->disk)->url($image->path);
+
+        if (! $image) {
+            return null;
+        }
+
+        return '/storage/' . ltrim($image->path, '/');
     }
 
     public function images(): BelongsToMany
@@ -69,10 +72,11 @@ class FeaturedProperty extends Model
         $rest = $this->images;
         $urls = [];
         if ($cover) {
-            $urls[] = Storage::disk($cover->disk)->url($cover->path);
+            $urls[] = '/storage/' . ltrim($cover->path, '/');
         }
+
         foreach ($rest as $img) {
-            $urls[] = Storage::disk($img->disk)->url($img->path);
+            $urls[] = '/storage/' . ltrim($img->path, '/');
         }
         return $urls;
     }
