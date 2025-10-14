@@ -4,7 +4,6 @@ import Header from '../../components/ui/Header';
 import HeroCarousel from './components/HeroCarousel';
 import FeaturedProperties from './components/FeaturedProperties';
 import ExpertiseSection from './components/ExpertiseSection';
-import NeighborhoodMap from './components/NeighborhoodMap';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import ProcessTransparencySection from '../about-brand-story-credentials/components/ProcessTransparencySection';
 import Footer from '../../components/Footer';
@@ -51,13 +50,6 @@ const HomepagePremiumRealEstateConsultancy = () => {
         <section className="section-spacing">
           <div className="container-responsive">
             <FeaturedProperties />
-          </div>
-        </section>
-
-        {/* Neighborhood Map - Interactive section */}
-        <section className="section-spacing">
-          <div className="container-responsive">
-            <NeighborhoodMap />
           </div>
         </section>
 
