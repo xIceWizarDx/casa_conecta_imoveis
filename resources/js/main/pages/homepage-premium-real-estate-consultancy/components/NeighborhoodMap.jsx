@@ -86,15 +86,15 @@ const NeighborhoodMap = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* <div className="text-center mb-12">
+        <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Conheça os Melhores Bairros
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Nossa expertise em Goiânia nos permite oferecer insights únicos sobre cada região,
+            Nossa expertise em Goiânia nos permite oferecer insights únicos sobre cada região, 
             ajudando você a escolher o bairro ideal para sua família
           </p>
-        </div> */}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Map Section */}
