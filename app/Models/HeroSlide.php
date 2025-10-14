@@ -45,29 +45,34 @@ class HeroSlide extends Model
         return $this->belongsTo(Video::class);
     }
 
-
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->relationLoaded('image')) {
-            $this->load('image');
-        }
-        $image = $this->getRelation('image');
-        if (!$image) return null;
-        $path = ltrim($image->path, '/');
+        $this->loadMissing('image');
 
-        return '/storage/' . $path;
+        $image = $this->getRelation('image');
+
+        if (! $image) {
+            return null;
+        }
+
+        $url = $image->url;
+
+        return $url !== '' ? $url : null;
     }
 
     public function getVideoUrlAttribute(): ?string
     {
-        if (!$this->relationLoaded('video')) {
-            $this->load('video');
-        }
-        $video = $this->getRelation('video');
-        if (!$video) return null;
-        $path = ltrim($video->path, '/');
+        $this->loadMissing('video');
 
-        return '/storage/' . $path;
+        $video = $this->getRelation('video');
+
+        if (! $video) {
+            return null;
+        }
+
+        $url = $video->url;
+
+        return $url !== '' ? $url : null;
     }
 
 }

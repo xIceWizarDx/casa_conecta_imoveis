@@ -35,16 +35,17 @@ class FeaturedProperty extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->relationLoaded('image')) {
-            $this->load('image');
-        }
+        $this->loadMissing('image');
+
         $image = $this->getRelation('image');
 
         if (! $image) {
             return null;
         }
 
-        return '/storage/' . ltrim($image->path, '/');
+        $url = $image->url;
+
+        return $url !== '' ? $url : null;
     }
 
     public function images(): BelongsToMany
@@ -65,19 +66,25 @@ class FeaturedProperty extends Model
 
     public function getGalleryAttribute(): array
     {
-        if (!$this->relationLoaded('image') || !$this->relationLoaded('images')) {
-            $this->loadMissing('image', 'images');
-        }
-        $cover = $this->image;
-        $rest = $this->images;
+        $this->loadMissing('image', 'images');
+
         $urls = [];
-        if ($cover) {
-            $urls[] = '/storage/' . ltrim($cover->path, '/');
+
+        $cover = $this->getRelation('image');
+        if ($cover && $cover->url !== '') {
+            $urls[] = $cover->url;
         }
 
-        foreach ($rest as $img) {
-            $urls[] = '/storage/' . ltrim($img->path, '/');
+        foreach ($this->getRelation('images') as $image) {
+            if ($cover && $image->getKey() === $cover->getKey()) {
+                continue;
+            }
+
+            if ($image->url !== '') {
+                $urls[] = $image->url;
+            }
         }
-        return $urls;
+
+        return array_values(array_unique($urls));
     }
 }
