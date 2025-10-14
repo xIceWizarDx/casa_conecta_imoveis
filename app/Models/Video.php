@@ -30,21 +30,29 @@ class Video extends Model
             return '';
         }
 
+        $normalised = ltrim($path, '/');
+
+        if (str_starts_with($normalised, 'storage/')) {
+            $normalised = substr($normalised, strlen('storage/')) ?: '';
+        }
+
+        if ($disk === 'public' && str_starts_with($normalised, 'public/')) {
+            $normalised = substr($normalised, strlen('public/')) ?: '';
+        }
+
+        if ($disk === 'public' && $normalised !== '') {
+            return '/storage/' . ltrim($normalised, '/');
+        }
+
         try {
             return Storage::disk($disk)->url($path);
         } catch (\Throwable $e) {
-            $normalised = ltrim($path, '/');
-
-            if ($disk === 'public' && str_starts_with($normalised, 'public/')) {
-                $normalised = substr($normalised, strlen('public/')) ?: '';
-            }
-
             if ($normalised === '') {
                 return '';
             }
 
             if ($disk === 'public') {
-                return '/storage/' . $normalised;
+                return '/storage/' . ltrim($normalised, '/');
             }
 
             return '/' . $normalised;
