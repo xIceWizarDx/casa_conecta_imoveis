@@ -32,12 +32,20 @@ class Video extends Model
 
         $normalised = ltrim($path, '/');
 
+
+        if (str_starts_with($normalised, 'storage/')) {
+            $normalised = substr($normalised, strlen('storage/')) ?: '';
+        }
+
+
         if ($disk === 'public' && str_starts_with($normalised, 'public/')) {
             $normalised = substr($normalised, strlen('public/')) ?: '';
         }
 
         if ($disk === 'public' && $normalised !== '') {
-            return route('storage.asset', ['path' => $normalised], false);
+
+            return '/storage/' . ltrim($normalised, '/');
+
         }
 
         try {
@@ -48,7 +56,9 @@ class Video extends Model
             }
 
             if ($disk === 'public') {
-                return route('storage.asset', ['path' => $normalised], false);
+
+                return '/storage/' . ltrim($normalised, '/');
+
             }
 
             return '/' . $normalised;
