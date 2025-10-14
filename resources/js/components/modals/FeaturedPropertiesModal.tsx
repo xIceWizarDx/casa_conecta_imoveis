@@ -108,7 +108,7 @@ export default function FeaturedPropertiesModal({
 
     // Masks
     const formatCurrencyBRLInput = (value: string) => {
-        const digits = value.replace(/\\D/g, '');
+        const digits = value.replace(/\D/g, '');
         if (!digits) return '';
         const number = Number(digits) / 100;
         try {
@@ -119,7 +119,7 @@ export default function FeaturedPropertiesModal({
     };
 
     const formatAreaNumber = (value: string) => {
-        const digits = value.replace(/\\D/g, '');
+        const digits = value.replace(/\D/g, '');
         if (!digits) return '';
         const n = parseInt(digits, 10);
         try {
