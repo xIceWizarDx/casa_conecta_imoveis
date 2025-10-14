@@ -128,6 +128,9 @@ export default function HeroSlidesModal({
             setSelectedImage(null);
             await onRefreshSlides();
             onOpenChange(false);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            onNotice?.({ type: 'error', title: 'Falha ao salvar slide', message });
         } finally {
             setCreating(false);
         }
