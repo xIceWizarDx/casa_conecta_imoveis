@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class HeroSlide extends Model
 {
@@ -54,7 +53,9 @@ class HeroSlide extends Model
         }
         $image = $this->getRelation('image');
         if (!$image) return null;
-        return Storage::disk($image->disk)->url($image->path);
+        $path = ltrim($image->path, '/');
+
+        return '/storage/' . $path;
     }
 
     public function getVideoUrlAttribute(): ?string
@@ -64,7 +65,9 @@ class HeroSlide extends Model
         }
         $video = $this->getRelation('video');
         if (!$video) return null;
-        return Storage::disk($video->disk)->url($video->path);
+        $path = ltrim($video->path, '/');
+
+        return '/storage/' . $path;
     }
 
 }
