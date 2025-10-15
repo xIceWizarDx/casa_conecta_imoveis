@@ -1,0 +1,149 @@
+-- Seleciona o banco de dados
+USE `gabr2831_casa_conecta_imoveis`;
+
+SET NAMES utf8;
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS `settings` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `key` VARCHAR(191) NOT NULL UNIQUE,
+  `value` LONGTEXT NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `images` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `disk` VARCHAR(50) NOT NULL DEFAULT 'public',
+  `path` VARCHAR(255) NOT NULL,
+  `filename` VARCHAR(191) NOT NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `size` BIGINT UNSIGNED NOT NULL,
+  `mime_type` VARCHAR(100) NULL,
+  `width` INT UNSIGNED NULL,
+  `height` INT UNSIGNED NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `images_filename_unique` (`filename`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `videos` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `disk` VARCHAR(50) NOT NULL,
+  `path` VARCHAR(255) NOT NULL,
+  `filename` VARCHAR(191) NOT NULL,
+  `original_name` VARCHAR(255) NULL,
+  `size` BIGINT UNSIGNED NULL,
+  `mime_type` VARCHAR(100) NULL,
+  `width` INT UNSIGNED NULL,
+  `height` INT UNSIGNED NULL,
+  `duration` INT UNSIGNED NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `hero_slides` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `image_id` BIGINT UNSIGNED NULL,
+  `video_id` BIGINT UNSIGNED NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `subtitle` VARCHAR(255) NULL,
+  `price` VARCHAR(100) NOT NULL,
+  `bedrooms` INT UNSIGNED NULL,
+  `bathrooms` INT UNSIGNED NULL,
+  `area` VARCHAR(50) NULL,
+  `neighborhood` VARCHAR(100) NULL,
+  `is_new` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_published` TINYINT(1) NOT NULL DEFAULT 0,
+  `position` INT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  KEY `hero_slides_image_id_index` (`image_id`),
+  KEY `hero_slides_video_id_index` (`video_id`),
+  KEY `hero_slides_published_position_index` (`is_published`, `position`),
+  CONSTRAINT `hero_slides_image_id_foreign`
+    FOREIGN KEY (`image_id`) REFERENCES `images` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `hero_slides_video_id_foreign`
+    FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `featured_properties` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `image_id` BIGINT UNSIGNED NOT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `neighborhood` VARCHAR(100) NULL,
+  `price` VARCHAR(100) NOT NULL,
+  `bedrooms` INT UNSIGNED NULL,
+  `bathrooms` INT UNSIGNED NULL,
+  `area` VARCHAR(50) NULL,
+  `built_area` VARCHAR(50) NULL,
+  `type` VARCHAR(30) NULL,
+  `description` TEXT NULL,
+  `features` TEXT NULL,
+  `price_range` VARCHAR(50) NULL,
+  `is_new` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_published` TINYINT(1) NOT NULL DEFAULT 0,
+  `position` INT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  KEY `featured_properties_image_id_index` (`image_id`),
+  KEY `featured_properties_published_position_index` (`is_published`, `position`),
+  CONSTRAINT `featured_properties_image_id_foreign`
+    FOREIGN KEY (`image_id`) REFERENCES `images` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `featured_property_images` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `featured_property_id` BIGINT UNSIGNED NOT NULL,
+  `image_id` BIGINT UNSIGNED NOT NULL,
+  `position` INT UNSIGNED NOT NULL DEFAULT 1,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `featured_property_images_unique` (`featured_property_id`, `image_id`),
+  KEY `featured_property_images_position_index` (`featured_property_id`, `position`),
+  CONSTRAINT `featured_property_images_property_foreign`
+    FOREIGN KEY (`featured_property_id`) REFERENCES `featured_properties` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `featured_property_images_image_foreign`
+    FOREIGN KEY (`image_id`) REFERENCES `images` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `featured_property_videos` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `featured_property_id` BIGINT UNSIGNED NOT NULL,
+  `video_id` BIGINT UNSIGNED NOT NULL,
+  `position` INT UNSIGNED NOT NULL DEFAULT 1,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `featured_property_videos_unique` (`featured_property_id`, `video_id`),
+  CONSTRAINT `featured_property_videos_property_foreign`
+    FOREIGN KEY (`featured_property_id`) REFERENCES `featured_properties` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `featured_property_videos_video_foreign`
+    FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Usuário administrador padrão (ajuste se já existir):
+INSERT INTO `users`
+    (`name`, `email`, `password`, `email_verified_at`, `created_at`, `updated_at`)
+VALUES
+    ('Admin Casa Conecta',
+     'admin@casaconecta.com',
+     '$2y$10$b/N9xGB1yO6KkkQifOI71.RUsDoIVcQnU/KK88b6iaCMdrjdGtAAS',
+     NOW(), NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+    `updated_at` = VALUES(`updated_at`);
