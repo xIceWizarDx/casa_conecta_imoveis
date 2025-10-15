@@ -184,6 +184,26 @@ const HeroCarousel = ({ onFirstSlideReady }) => {
     };
   }, []);
 
+  // Refresh hero slides when page regains focus/visibility to reflect recent changes
+  useEffect(() => {
+    const onFocus = () => {
+      fetchHeroSlides()
+        .then((slides) => {
+          heroSlidesCache.data = slides;
+          heroSlidesCache.fetchedAt = Date.now();
+          setHeroProperties(slides);
+        })
+        .catch(() => {});
+    };
+    const onVisible = () => { if (typeof document !== 'undefined' && !document.hidden) onFocus(); };
+    window.addEventListener('focus', onFocus);
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, []);
+
   const slides = useMemo(() => {
     // Quando a API não retorna slides publicados não devemos recorrer à antiga
     // lista heroPropertiesStatic com URLs do Unsplash, pois isso reintroduz

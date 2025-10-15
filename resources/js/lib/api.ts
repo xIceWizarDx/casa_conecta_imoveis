@@ -30,11 +30,16 @@ export async function apiFetch<T = unknown>(def: { url: string; method?: string 
     const method = (def.method ?? 'get').toUpperCase();
     const headers = new Headers(init?.headers);
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        if (!headers.has('X-CSRF-TOKEN')) headers.set('X-CSRF-TOKEN', getCsrf());
+        // Send CSRF token for Laravel (supports both header styles)
+        const csrfToken = getCsrf();
+        if (csrfToken && !headers.has('X-CSRF-TOKEN')) headers.set('X-CSRF-TOKEN', csrfToken);
+        const xsrfCookie = getCookie('XSRF-TOKEN');
+        if (xsrfCookie && !headers.has('X-XSRF-TOKEN')) headers.set('X-XSRF-TOKEN', xsrfCookie);
     }
     const res = await fetch(def.url, {
         method,
-        credentials: 'same-origin',
+        // include cookies even when hitting a different subdomain or absolute URL
+        credentials: 'include',
         ...init,
         headers,
     });

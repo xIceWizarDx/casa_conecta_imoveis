@@ -452,19 +452,19 @@ const FeaturedProperties = () => {
 
   const activeGallery = useMemo(() => getPropertyGallery(activeProperty), [activeProperty]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/featured-properties');
-        if (res.ok) {
-          const data = await res.json();
-          const mapped = (data || []).map((p) => {
-            const galleryEntries = buildGalleryEntries(p);
-            const primaryImageEntry = galleryEntries[0] || null;
-            const fallbackImage =
-              normalizeImageValue(p.image) ||
-              normalizeImageValue(p.image_url) ||
-              DEFAULT_PLACEHOLDER_IMAGE;
+  // Fetch and map featured properties from API
+  const loadFeatured = useCallback(async () => {
+    try {
+      const res = await fetch('/api/featured-properties', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = (data || []).map((p) => {
+           const galleryEntries = buildGalleryEntries(p);
+           const primaryImageEntry = galleryEntries[0] || null;
+           const fallbackImage =
+             normalizeImageValue(p.image) ||
+             normalizeImageValue(p.image_url) ||
+             DEFAULT_PLACEHOLDER_IMAGE;
 
             // Helpers to parse numeric values from strings like "120 m²" or "R$ 1.200.000"
             const parseArea = (val) => {
@@ -537,11 +537,26 @@ const FeaturedProperties = () => {
               priceRange: resolvePriceRange(),
             };
           });
-          setRemote(mapped);
-        }
-      } catch {}
-    })();
+        setRemote(mapped);
+      }
+    } catch {}
   }, []);
+
+  // Initial load + refresh on focus/visibility and periodic revalidation
+  useEffect(() => {
+    loadFeatured();
+
+    const onFocus = () => loadFeatured();
+    const onVisible = () => { if (typeof document !== 'undefined' && !document.hidden) loadFeatured(); };
+    window.addEventListener('focus', onFocus);
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisible);
+    const intervalId = setInterval(loadFeatured, 30000);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisible);
+      clearInterval(intervalId);
+    };
+  }, [loadFeatured]);
 
   // Caso a API não retorne imóveis, preferimos exibir o estado vazio em vez de recorrer ao mock com imagens do Unsplash.
 
