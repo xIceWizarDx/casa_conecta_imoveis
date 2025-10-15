@@ -137,7 +137,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
  * @see app/Http/Controllers/FeaturedPropertyController.php:85
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-export const update = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -152,7 +152,7 @@ update.definition = {
  * @see app/Http/Controllers/FeaturedPropertyController.php:85
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-update.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+update.url = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { featuredProperty: args }
     }
@@ -185,7 +185,7 @@ update.url = (args: { featuredProperty: number | { id: number } } | [featuredPro
  * @see app/Http/Controllers/FeaturedPropertyController.php:85
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-update.put = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -195,7 +195,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
  * @see app/Http/Controllers/FeaturedPropertyController.php:85
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-    const updateForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateForm = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -210,7 +210,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
  * @see app/Http/Controllers/FeaturedPropertyController.php:85
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-        updateForm.put = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.put = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -226,7 +226,7 @@ update.put = (args: { featuredProperty: number | { id: number } } | [featuredPro
  * @see app/Http/Controllers/FeaturedPropertyController.php:138
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-export const destroy = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -241,7 +241,7 @@ destroy.definition = {
  * @see app/Http/Controllers/FeaturedPropertyController.php:138
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-destroy.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { featuredProperty: args }
     }
@@ -274,7 +274,7 @@ destroy.url = (args: { featuredProperty: number | { id: number } } | [featuredPr
  * @see app/Http/Controllers/FeaturedPropertyController.php:138
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-destroy.delete = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -284,7 +284,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
  * @see app/Http/Controllers/FeaturedPropertyController.php:138
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-    const destroyForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -299,7 +299,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
  * @see app/Http/Controllers/FeaturedPropertyController.php:138
  * @route '/api/admin/featured-properties/{featuredProperty}'
  */
-        destroyForm.delete = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
@@ -315,7 +315,7 @@ destroy.delete = (args: { featuredProperty: number | { id: number } } | [feature
  * @see app/Http/Controllers/FeaturedPropertyController.php:144
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
-export const togglePublish = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const togglePublish = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: togglePublish.url(args, options),
     method: 'patch',
 })
@@ -330,7 +330,7 @@ togglePublish.definition = {
  * @see app/Http/Controllers/FeaturedPropertyController.php:144
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
-togglePublish.url = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+togglePublish.url = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { featuredProperty: args }
     }
@@ -363,7 +363,7 @@ togglePublish.url = (args: { featuredProperty: number | { id: number } } | [feat
  * @see app/Http/Controllers/FeaturedPropertyController.php:144
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
-togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+togglePublish.patch = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: togglePublish.url(args, options),
     method: 'patch',
 })
@@ -373,7 +373,7 @@ togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [fe
  * @see app/Http/Controllers/FeaturedPropertyController.php:144
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
-    const togglePublishForm = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const togglePublishForm = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: togglePublish.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -388,7 +388,7 @@ togglePublish.patch = (args: { featuredProperty: number | { id: number } } | [fe
  * @see app/Http/Controllers/FeaturedPropertyController.php:144
  * @route '/api/admin/featured-properties/{featuredProperty}/publish'
  */
-        togglePublishForm.patch = (args: { featuredProperty: number | { id: number } } | [featuredProperty: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        togglePublishForm.patch = (args: { featuredProperty: string | number | { id: string | number } } | [featuredProperty: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: togglePublish.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',

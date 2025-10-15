@@ -1,5 +1,5 @@
 -- Seleciona o banco de dados
-USE `gabr2831_casa_conecta_imoveis`;
+USE `gabr2831_casa_conecta`;
 
 SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -135,15 +135,29 @@ CREATE TABLE IF NOT EXISTS `featured_property_videos` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+-- >>> FALTAVA ESTA TABELA <<<
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(191) NOT NULL,
+  `email` VARCHAR(191) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `email_verified_at` DATETIME NULL,
+  `remember_token` VARCHAR(100) NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Usuário administrador padrão (ajuste se já existir):
 INSERT INTO `users`
-    (`name`, `email`, `password`, `email_verified_at`, `created_at`, `updated_at`)
+  (`name`, `email`, `password`, `email_verified_at`, `created_at`, `updated_at`)
 VALUES
-    ('Admin Casa Conecta',
-     'admin@casaconecta.com',
-     '$2y$10$b/N9xGB1yO6KkkQifOI71.RUsDoIVcQnU/KK88b6iaCMdrjdGtAAS',
-     NOW(), NOW(), NOW())
+  ('Admin Casa Conecta',
+   'admin@casaconecta.com',
+   '$2y$10$b/N9xGB1yO6KkkQifOI71.RUsDoIVcQnU/KK88b6iaCMdrjdGtAAS',
+   NOW(), NOW(), NOW())
 ON DUPLICATE KEY UPDATE
-    `updated_at` = VALUES(`updated_at`);
+  `updated_at` = VALUES(`updated_at`);
