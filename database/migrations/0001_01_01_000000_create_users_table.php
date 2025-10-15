@@ -112,8 +112,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('subtitle')->nullable();
             $table->string('price');
-            $table->unsignedInteger('bedrooms')->default(0);
-            $table->unsignedInteger('bathrooms')->default(0);
+            $table->unsignedInteger('bedrooms')->nullable();
+            $table->unsignedInteger('bathrooms')->nullable();
             $table->string('area')->nullable();
             $table->string('neighborhood')->nullable();
             $table->boolean('is_new')->default(false);
@@ -130,8 +130,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('neighborhood')->nullable();
             $table->string('price');
-            $table->unsignedInteger('bedrooms')->default(0);
-            $table->unsignedInteger('bathrooms')->default(0);
+            $table->unsignedInteger('bedrooms')->nullable();
+            $table->unsignedInteger('bathrooms')->nullable();
             $table->string('area')->nullable();
             $table->string('built_area')->nullable();
             $table->string('type', 30)->nullable();

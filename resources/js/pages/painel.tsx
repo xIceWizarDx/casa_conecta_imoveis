@@ -127,6 +127,50 @@ export default function Painel() {
     const [editingFeatured, setEditingFeatured] = useState<FeaturedProperty | null>(null);
     const heroUploadInputRef = useRef<HTMLInputElement | null>(null);
 
+    const sortSlides = (a: HeroSlide, b: HeroSlide) => {
+        const posA = a.position ?? Number.MAX_SAFE_INTEGER;
+        const posB = b.position ?? Number.MAX_SAFE_INTEGER;
+        if (posA !== posB) return posA - posB;
+        return a.id - b.id;
+    };
+
+    const upsertSlideState = (incoming: HeroSlide) => {
+        setSlides((prev) => {
+            const existingIndex = prev.findIndex((item) => item.id === incoming.id);
+            if (existingIndex >= 0) {
+                const next = prev.slice();
+                next[existingIndex] = { ...next[existingIndex], ...incoming };
+                next.sort(sortSlides);
+                return next;
+            }
+            const next = [...prev, incoming];
+            next.sort(sortSlides);
+            return next;
+        });
+    };
+
+    const sortFeatured = (a: FeaturedProperty, b: FeaturedProperty) => {
+        const posA = a.position ?? Number.MAX_SAFE_INTEGER;
+        const posB = b.position ?? Number.MAX_SAFE_INTEGER;
+        if (posA !== posB) return posA - posB;
+        return a.id - b.id;
+    };
+
+    const upsertFeaturedState = (incoming: FeaturedProperty) => {
+        setFeatured((prev) => {
+            const index = prev.findIndex((item) => item.id === incoming.id);
+            if (index >= 0) {
+                const next = prev.slice();
+                next[index] = { ...next[index], ...incoming };
+                next.sort(sortFeatured);
+                return next;
+            }
+            const next = [...prev, incoming];
+            next.sort(sortFeatured);
+            return next;
+        });
+    };
+
     // Notices
     const [notice, setNotice] = useState<Notice | null>(null);
 
@@ -176,7 +220,7 @@ export default function Painel() {
         setSlidesLoading(true);
         try {
             const data = await apiFetch<HeroSlide[]>(HeroActions.index());
-            setSlides(data);
+            setSlides(data.slice().sort(sortSlides));
         } catch (e) {
             setNotice({ type: 'error', title: 'Falha ao carregar slides', message: e instanceof Error ? e.message : String(e) });
         } finally {
@@ -187,7 +231,7 @@ export default function Painel() {
     const refreshFeatured = async () => {
         try {
             const data = await apiFetch<FeaturedProperty[]>(FeaturedActions.index());
-            setFeatured(data);
+            setFeatured(data.slice().sort(sortFeatured));
         } catch (e) {
             setNotice({ type: 'error', title: 'Falha ao carregar destaques', message: e instanceof Error ? e.message : String(e) });
         }
@@ -283,7 +327,8 @@ export default function Painel() {
         }
         setCreatingSlide(true);
         try {
-            const body = JSON.stringify({
+            let successNotice: Notice | null = null;
+            const payload = {
                 image_id: selectedSlideImage.id,
                 title: newSlide.title,
                 subtitle: newSlide.subtitle ?? null,
@@ -292,25 +337,32 @@ export default function Painel() {
                 bathrooms: newSlide.bathrooms ?? null,
                 area: newSlide.area ?? null,
                 neighborhood: newSlide.neighborhood ?? null,
-                is_new: !!newSlide.is_new,
                 is_published: newSlide.id ? !!newSlide.is_published : true,
-            });
+            };
+            const body = JSON.stringify(payload);
             if (newSlide.id) {
-                await apiFetch(HeroActions.update({ heroSlide: newSlide.id }), {
+                const updated = await apiFetch<HeroSlide>(HeroActions.update({ heroSlide: newSlide.id }), {
                     body,
                     headers: { 'Content-Type': 'application/json' },
                 });
-                setNotice({ type: 'success', title: 'Slide atualizado' });
+                upsertSlideState(updated);
+                successNotice = { type: 'success', title: 'Slide atualizado' };
             } else {
-                await apiFetch(HeroActions.store(), {
+                const created = await apiFetch<HeroSlide>(HeroActions.store(), {
                     body,
                     headers: { 'Content-Type': 'application/json' },
                 });
-                setNotice({ type: 'success', title: 'Slide adicionado' });
+                upsertSlideState(created);
+                successNotice = { type: 'success', title: 'Slide adicionado' };
             }
             setNewSlide({});
             setSelectedSlideImage(null);
+            setHeroModalOpen(false);
             await refreshSlides();
+            const noticeToShow = successNotice;
+            if (noticeToShow) {
+                setTimeout(() => setNotice(noticeToShow), 200);
+            }
         } finally {
             setCreatingSlide(false);
         }
@@ -324,8 +376,9 @@ export default function Painel() {
             return;
         }
         setCreatingSlide(true);
+        let successNotice: Notice | null = null;
         try {
-            const body = JSON.stringify({
+            const payload = {
                 image_id: selectedSlideImage?.id ?? null,
                 video_id: selectedSlideVideo?.id ?? null,
                 title: newSlide.title,
@@ -335,26 +388,33 @@ export default function Painel() {
                 bathrooms: newSlide.bathrooms ?? null,
                 area: newSlide.area ?? null,
                 neighborhood: newSlide.neighborhood ?? null,
-                is_new: !!newSlide.is_new,
                 is_published: newSlide.id ? !!newSlide.is_published : true,
-            });
+            };
+            const body = JSON.stringify(payload);
             if (newSlide.id) {
-                await apiFetch(HeroActions.update({ heroSlide: newSlide.id }), {
+                const updated = await apiFetch<HeroSlide>(HeroActions.update({ heroSlide: newSlide.id }), {
                     body,
                     headers: { 'Content-Type': 'application/json' },
                 });
-                setNotice({ type: 'success', title: 'Slide atualizado' });
+                upsertSlideState(updated);
+                successNotice = { type: 'success', title: 'Slide atualizado' };
             } else {
-                await apiFetch(HeroActions.store(), {
+                const created = await apiFetch<HeroSlide>(HeroActions.store(), {
                     body,
                     headers: { 'Content-Type': 'application/json' },
                 });
-                setNotice({ type: 'success', title: 'Slide adicionado' });
+                upsertSlideState(created);
+                successNotice = { type: 'success', title: 'Slide adicionado' };
             }
             setNewSlide({});
             setSelectedSlideImage(null);
             setSelectedSlideVideo(null);
+            setHeroModalOpen(false);
             await refreshSlides();
+            const noticeToShow = successNotice;
+            if (noticeToShow) {
+                setTimeout(() => setNotice(noticeToShow), 200);
+            }
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             setNotice({
@@ -460,8 +520,19 @@ export default function Painel() {
 
     const deleteFeatured = async (id: number) => {
         if (!confirm('Excluir este destaque?')) return;
-        await apiFetch(FeaturedActions.destroy({ featuredProperty: id }));
-        await refreshFeatured();
+        const snapshot = featured.slice();
+        setFeatured((prev) => prev.filter((item) => item.id !== id));
+        try {
+            await apiFetch(FeaturedActions.destroy({ featuredProperty: id }));
+            await refreshFeatured();
+        } catch (e) {
+            setFeatured(snapshot);
+            setNotice({
+                type: 'error',
+                title: 'Falha ao excluir destaque',
+                message: e instanceof Error ? e.message : String(e),
+            });
+        }
     };
 
     const editFeatured = (item: FeaturedProperty) => {
@@ -784,17 +855,6 @@ export default function Painel() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-6">
-                                        <label className="flex items-center gap-2 text-sm">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!newSlide.is_new}
-                                                onChange={(e) => setNewSlide((s) => ({ ...s, is_new: e.target.checked }))}
-                                            />
-                                            Novo
-                                        </label>
-                                        {/* Checkbox "Publicado" removido: novos slides serão publicados automaticamente */}
-                                    </div>
                                     <div>
                                         <Label>Mídia (Imagem ou Vídeo)</Label>
                                         <p className="mt-2 text-sm text-muted-foreground">Envie uma imagem (inclui GIF) ou um vídeo.</p>
@@ -868,6 +928,7 @@ export default function Painel() {
                                 if (!open) setEditingFeatured(null);
                             }}
                             featured={featured}
+                            onUpsertFeatured={upsertFeaturedState}
                             onRefreshFeatured={refreshFeatured}
                             onNotice={(n) => setNotice(n)}
                             onUploadImages={uploadImages}
@@ -882,4 +943,3 @@ export default function Painel() {
         </>
     );
 }
-

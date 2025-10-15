@@ -58,6 +58,7 @@ interface Props {
     onOpenChange: (open: boolean) => void;
     featured: FeaturedProperty[];
     onRefreshFeatured: () => Promise<void>;
+    onUpsertFeatured?: (property: FeaturedProperty) => void;
     onNotice?: (n: Notice) => void;
     onUploadImages: (files: FileList | null) => Promise<Image[]>;
     onUploadVideos?: (files: FileList | null) => Promise<UploadedVideo[]>;
@@ -71,6 +72,7 @@ export default function FeaturedPropertiesModal({
     onOpenChange,
     featured,
     onRefreshFeatured,
+    onUpsertFeatured,
     onNotice,
     onUploadImages,
     onUploadVideos,
@@ -425,8 +427,9 @@ export default function FeaturedPropertiesModal({
             return;
         }
         setCreating(true);
+        let successNotice: Notice | null = null;
         try {
-            const body = JSON.stringify({
+            const payload = {
                 image_id: selectedImage.id,
                 title: form.title,
                 neighborhood: form.neighborhood ?? null,
@@ -442,19 +445,41 @@ export default function FeaturedPropertiesModal({
                 is_published: editing?.id ? !!form.is_published : true,
                 gallery_image_ids: images.slice(1).map((img) => img.id),
                 gallery_video_ids: videos.map((v) => v.id),
-            });
+            };
+            const body = JSON.stringify(payload);
+            let response: FeaturedProperty;
             if (editing?.id) {
-                await apiFetch(FeaturedActions.update({ featuredProperty: editing.id }), { body, headers: { 'Content-Type': 'application/json' } });
-                onNotice?.({ type: 'success', title: 'Destaque atualizado' });
+                response = await apiFetch<FeaturedProperty>(FeaturedActions.update({ featuredProperty: editing.id }), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                successNotice = { type: 'success', title: 'Destaque atualizado' };
             } else {
-                await apiFetch(FeaturedActions.store(), { body, headers: { 'Content-Type': 'application/json' } });
-                onNotice?.({ type: 'success', title: 'Destaque adicionado' });
+                response = await apiFetch<FeaturedProperty>(FeaturedActions.store(), {
+                    body,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                successNotice = { type: 'success', title: 'Destaque adicionado' };
             }
+            onUpsertFeatured?.(response);
             setForm({ description: '' });
+            set_featureInputHidden('');
             setSelectedImageAndForm(null);
             setMediaItems([]);
-            await onRefreshFeatured();
+            setDraggedMediaKey(null);
             onOpenChange(false);
+            await onRefreshFeatured();
+            if (successNotice) {
+                const notice = successNotice;
+                setTimeout(() => onNotice?.(notice), 200);
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            onNotice?.({
+                type: 'error',
+                title: editing?.id ? 'Falha ao atualizar destaque' : 'Falha ao publicar destaque',
+                message,
+            });
         } finally {
             setCreating(false);
         }
@@ -832,8 +857,6 @@ export default function FeaturedPropertiesModal({
         </Dialog>
     );
 }
-
-
 
 
 
