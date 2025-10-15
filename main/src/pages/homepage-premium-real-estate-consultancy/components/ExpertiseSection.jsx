@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
@@ -18,9 +18,9 @@ const ExpertiseSection = () => {
     },
     {
       icon: "Home",
-      title: "Filtro Personalizado � ",
-      description: "Não escolhemos imoveis por comissão, mas o que realmente atende às necessidades da sua família.Assim você economiza tempo, evita frustrações e garante que sua decisão seja justa e inteligente.",
-      highlight: "escolha e inteligente"
+      title: "Filtro Personalizado •",
+      description: "Não escolhemos imóveis por comissão, mas o que realmente atende às necessidades da sua família. Assim você economiza tempo, evita frustrações e garante que sua decisão seja justa e inteligente.",
+      highlight: "escolha justa e inteligente"
     },
     {
       icon: "MapPin",
@@ -140,3 +140,4 @@ const ExpertiseSection = () => {
 };
 
 export default ExpertiseSection;
+

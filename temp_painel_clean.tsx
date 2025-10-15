@@ -369,7 +369,7 @@ export default function Painel() {
                                     }}
                                     title="Novo Slide"
                                 >
-                                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black text-white">+</span>
+                                    <span className="inline-flex h-7 cursor-pointer w-7 items-center justify-center rounded-full bg-black text-white">+</span>
                                     <span>Hero Slides</span>
                                 </button>
                             </div>

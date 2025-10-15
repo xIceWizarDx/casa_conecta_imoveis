@@ -1,0 +1,23 @@
+{
+    "name": "Casa Conecta Imóveis",
+    "short_name": "Casa Conecta",
+    "description": "Consultoria imobiliária premium da Casa Conecta Imóveis.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#111827",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

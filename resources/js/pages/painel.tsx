@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Helmet } from 'react-helmet';
 import { apiFetch } from '@/lib/api';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { MoreVertical } from 'lucide-react';
 import Header from '@/main/components/ui/Header';
 // Removido CSS legado para manter aparência consistente com as demais views
 // import '../../css/oldsite.css';
@@ -113,6 +114,8 @@ export default function Painel() {
     const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({});
     const [selectedSlideImage, setSelectedSlideImage] = useState<Image | null>(null);
     const [selectedSlideVideo, setSelectedSlideVideo] = useState<{ id: number; url: string } | null>(null);
+    const [pendingSlideDelete, setPendingSlideDelete] = useState<HeroSlide | null>(null);
+    const [deletingSlide, setDeletingSlide] = useState(false);
 
     // Destaques
     const [featured, setFeatured] = useState<FeaturedProperty[]>([]);
@@ -126,6 +129,8 @@ export default function Painel() {
     const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
     const [editingFeatured, setEditingFeatured] = useState<FeaturedProperty | null>(null);
     const heroUploadInputRef = useRef<HTMLInputElement | null>(null);
+    const [pendingFeaturedDelete, setPendingFeaturedDelete] = useState<FeaturedProperty | null>(null);
+    const [deletingFeatured, setDeletingFeatured] = useState(false);
 
     const sortSlides = (a: HeroSlide, b: HeroSlide) => {
         const posA = a.position ?? Number.MAX_SAFE_INTEGER;
@@ -432,10 +437,32 @@ export default function Painel() {
         await refreshSlides();
     };
 
-    const deleteSlide = async (id: number) => {
-        if (!confirm('Excluir este slide?')) return;
-        await apiFetch(HeroActions.destroy({ heroSlide: id }));
-        await refreshSlides();
+    const requestDeleteSlide = (id: number) => {
+        const slide = slides.find((item) => item.id === id) ?? null;
+        if (slide) setPendingSlideDelete(slide);
+    };
+
+    const confirmDeleteSlide = async () => {
+        if (!pendingSlideDelete) return;
+        const target = pendingSlideDelete;
+        setDeletingSlide(true);
+        const snapshot = slides.slice();
+        setSlides((prev) => prev.filter((item) => item.id !== target.id));
+        try {
+            await apiFetch(HeroActions.destroy({ heroSlide: target.id }));
+            await refreshSlides();
+            setNotice({ type: 'success', title: 'Slide excluído' });
+        } catch (e) {
+            setSlides(snapshot);
+            setNotice({
+                type: 'error',
+                title: 'Falha ao excluir slide',
+                message: e instanceof Error ? e.message : String(e),
+            });
+        } finally {
+            setDeletingSlide(false);
+            setPendingSlideDelete(null);
+        }
     };
 
     const editSlide = (slide: SlideCardSlide) => {
@@ -518,13 +545,20 @@ export default function Painel() {
         }
     };
 
-    const deleteFeatured = async (id: number) => {
-        if (!confirm('Excluir este destaque?')) return;
+    const requestDeleteFeatured = (item: FeaturedProperty) => {
+        setPendingFeaturedDelete(item);
+    };
+
+    const confirmDeleteFeatured = async () => {
+        if (!pendingFeaturedDelete) return;
+        const target = pendingFeaturedDelete;
+        setDeletingFeatured(true);
         const snapshot = featured.slice();
-        setFeatured((prev) => prev.filter((item) => item.id !== id));
+        setFeatured((prev) => prev.filter((item) => item.id !== target.id));
         try {
-            await apiFetch(FeaturedActions.destroy({ featuredProperty: id }));
+            await apiFetch(FeaturedActions.destroy({ featuredProperty: target.id }));
             await refreshFeatured();
+            setNotice({ type: 'success', title: 'Destaque excluído' });
         } catch (e) {
             setFeatured(snapshot);
             setNotice({
@@ -532,6 +566,9 @@ export default function Painel() {
                 title: 'Falha ao excluir destaque',
                 message: e instanceof Error ? e.message : String(e),
             });
+        } finally {
+            setDeletingFeatured(false);
+            setPendingFeaturedDelete(null);
         }
     };
 
@@ -569,7 +606,7 @@ export default function Painel() {
                             <div className="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 text-lg font-semibold hover:underline"
+                                    className="flex cursor-pointer items-center gap-2 text-lg font-semibold hover:underline"
                                     onClick={() => {
                                         setNewSlide({});
                                         setSelectedSlideImage(null);
@@ -618,7 +655,7 @@ export default function Painel() {
                                         dragging?.type === 'slide' && dragging.id === s.id ? 'ring-2 ring-primary ring-offset-2' : '',
                                     )}
                                 >
-                                    <SlideCard slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={deleteSlide} />
+                                    <SlideCard slide={s} onEdit={editSlide} onToggle={toggleSlidePublish} onDelete={requestDeleteSlide} />
                                 </div>
                             ))}
                         </div>
@@ -653,6 +690,8 @@ export default function Painel() {
                                     }
                                     return '';
                                 })();
+
+                                const isMenuOpen = openFeaturedMenu === f.id;
 
                                 return (
                                     <div
@@ -714,16 +753,19 @@ export default function Painel() {
                                             {/* Botão de menu (canto superior direito) */}
                                             <button
                                                 type="button"
-                                                className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black"
+                                                className={cn(
+                                                    'absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-sm shadow-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
+                                                    isMenuOpen ? 'bg-primary text-white hover:bg-primary' : 'bg-white/90 text-gray-800 hover:bg-white'
+                                                )}
                                                 aria-label="Menu"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setOpenFeaturedMenu((v) => (v === f.id ? null : f.id));
                                                 }}
                                             >
-                                                ?
+                                                <MoreVertical className="h-5 w-5" />
                                             </button>
-                                            {openFeaturedMenu === f.id && (
+                                            {isMenuOpen && (
                                                 <div className="absolute right-4 top-14 z-20 w-36 overflow-hidden rounded-lg border bg-white shadow-lg">
                                                     <button
                                                         type="button"
@@ -740,7 +782,7 @@ export default function Painel() {
                                                         className="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-muted"
                                                         onClick={() => {
                                                             setOpenFeaturedMenu(null);
-                                                            deleteFeatured(f.id);
+                                                            requestDeleteFeatured(f);
                                                         }}
                                                     >
                                                         Excluir
@@ -865,7 +907,7 @@ export default function Painel() {
                                             onClick={() => heroUploadInputRef.current?.click()}
                                             disabled={imagesUploading}
                                         >
-                                            {imagesUploading ? 'Enviando…' : 'Enviar imagem'}
+                                            {imagesUploading ? 'Enviando…' : 'Enviar mídia'}
                                         </Button>
                                         <input
                                             ref={heroUploadInputRef}
@@ -920,8 +962,39 @@ export default function Painel() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-
-                        <FeaturedPropertiesModal
+                        <Dialog
+                            open={pendingSlideDelete !== null}
+                            onOpenChange={(open) => {
+                                if (!open && !deletingSlide) {
+                                    setPendingSlideDelete(null);
+                                }
+                            }}
+                        >
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Excluir slide</DialogTitle>
+                                    <DialogDescription>
+                                        Tem certeza que deseja excluir o slide {pendingSlideDelete?.title ? `"${pendingSlideDelete.title}"` : 'selecionado'}? Essa ação não pode ser desfeita.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => setPendingSlideDelete(null)}
+                                        disabled={deletingSlide}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        className="bg-red-600 text-white hover:bg-red-700"
+                                        onClick={confirmDeleteSlide}
+                                        disabled={deletingSlide}
+                                    >
+                                        {deletingSlide ? 'Excluindo...' : 'Excluir'}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>    <FeaturedPropertiesModal
                             open={featuredModalOpen}
                             onOpenChange={(open) => {
                                 setFeaturedModalOpen(open);
@@ -937,9 +1010,50 @@ export default function Painel() {
                             uploadingVideos={imagesUploading}
                             editing={editingFeatured}
                         />
+                        <Dialog
+                            open={pendingFeaturedDelete !== null}
+                            onOpenChange={(open) => {
+                                if (!open && !deletingFeatured) {
+                                    setPendingFeaturedDelete(null);
+                                }
+                            }}
+                        >
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Excluir destaque</DialogTitle>
+                                    <DialogDescription>
+                                        Tem certeza que deseja excluir o destaque{' '}
+                                        {pendingFeaturedDelete?.title ? `"${pendingFeaturedDelete.title}"` : 'selecionado'}? Essa ação não pode ser desfeita.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => setPendingFeaturedDelete(null)}
+                                        disabled={deletingFeatured}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        className="bg-red-600 text-white hover:bg-red-700"
+                                        onClick={confirmDeleteFeatured}
+                                        disabled={deletingFeatured}
+                                    >
+                                        {deletingFeatured ? 'Excluindo...' : 'Excluir'}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                 </>
                 </main>
             </div>
         </>
     );
 }
+
+
+
+
+
+
+

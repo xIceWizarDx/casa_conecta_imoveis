@@ -213,19 +213,25 @@ export default function FeaturedPropertiesModal({
             const existingIds = new Set(
                 prev.filter((media) => media.type === 'image').map((media) => media.item.id)
             );
-            const additions = uploaded
-                .filter((img) => !existingIds.has(img.id))
-                .map<MediaItem>((img) => ({ type: 'image', item: img }));
+            const additions = uploaded.filter((img) => !existingIds.has(img.id));
             if (additions.length === 0) {
                 return prev;
             }
-            const next = [...prev, ...additions];
+            const additionMedia: MediaItem[] = additions.map((img) => ({ type: 'image', item: img }));
+            const next = [...prev, ...additionMedia];
             const nextImages = next
                 .filter((media) => media.type === 'image')
                 .map((media) => media.item);
-            if ((nextImages[0]?.id ?? null) !== (selectedImage?.id ?? null)) {
+
+            const selectedId = selectedImage?.id ?? null;
+            const stillExists = selectedId !== null && nextImages.some((img) => img.id === selectedId);
+
+            if (selectedId === null) {
+                setSelectedImageAndForm(additions[0] ?? null);
+            } else if (!stillExists) {
                 setSelectedImageAndForm(nextImages[0] ?? null);
             }
+
             return next;
         });
     };
@@ -857,7 +863,6 @@ export default function FeaturedPropertiesModal({
         </Dialog>
     );
 }
-
 
 
 
