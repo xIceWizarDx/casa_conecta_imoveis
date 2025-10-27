@@ -157,7 +157,7 @@ export default function FeaturedPropertiesModal({
         });
     };
 
-    // Preenche dados quando em modo de ediÁ„o (capa + galeria)
+    // Preenche dados quando em modo de edi√ß√£o (capa + galeria)
     useEffect(() => {
         if (!open || !editing) return;
         const cover: Image | null = editing.image_id && editing.image_url
@@ -292,8 +292,8 @@ export default function FeaturedPropertiesModal({
         if (invalidFiles.length > 0) {
             onNotice?.({
                 type: 'error',
-                title: 'Arquivo n„o suportado',
-                message: 'Formatos aceitos: JPG, PNG, WEBP, GIF (imagens) e MP4, MOV, WEBM (vÌdeos).',
+                title: 'Arquivo n√£o suportado',
+                message: 'Formatos aceitos: JPG, PNG, WEBP, GIF (imagens) e MP4, MOV, WEBM (v√≠deos).',
             });
         }
 
@@ -304,7 +304,7 @@ export default function FeaturedPropertiesModal({
 
         if (videoFiles.length > 0) {
             if (!onUploadVideos) {
-                onNotice?.({ type: 'error', title: 'Envio de vÌdeos n„o suportado neste painel.' });
+                onNotice?.({ type: 'error', title: 'Envio de v√≠deos n√£o suportado neste painel.' });
             } else {
                 const uploaded = await onUploadVideos(toFileList(videoFiles));
                 mergeUploadedVideos(uploaded);
@@ -444,7 +444,7 @@ export default function FeaturedPropertiesModal({
 
     const submit = async () => {
         if (!selectedImage?.id || !form.title || !form.price) {
-            alert('Selecione uma imagem, tÌtulo e preÁo.');
+            alert('Selecione uma imagem, t√≠tulo e pre√ßo.');
             return;
         }
         setCreating(true);
@@ -517,24 +517,24 @@ export default function FeaturedPropertiesModal({
             >
                 <DialogHeader>
                     <div className="flex items-center justify-between">
-                        <DialogTitle>ImÛveis em Destaque</DialogTitle>
+                        <DialogTitle>Im√≥veis em Destaque</DialogTitle>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{`${listCount} itens`}</span>
                         </div>
                     </div>
                 </DialogHeader>
                 <DialogDescription id="featured-desc">
-                    Configure os campos e escolha uma imagem para publicar um imÛvel em destaque.
+                    Configure os campos e escolha uma imagem para publicar um im√≥vel em destaque.
                 </DialogDescription>
                 <div className="mt-4 flex-1 overflow-y-auto pr-1">
                     <div className="space-y-4 pb-4">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
-                            <Label>TÌtulo</Label>
+                            <Label>T√≠tulo</Label>
                             <Input
                                 value={form.title ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                                placeholder="Ex: Apartamento premium no Jardim Goi·s"
+                                placeholder="Ex: Apartamento premium no Jardim Goi√°s"
                             />
                         </div>
                         <div>
@@ -542,11 +542,11 @@ export default function FeaturedPropertiesModal({
                             <Input
                                 value={form.neighborhood ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
-                                placeholder="Ex: Jardim Goi·s"
+                                placeholder="Ex: Jardim Goi√°s"
                             />
                         </div>
                         <div>
-                            <Label>PreÁo</Label>
+                            <Label>Pre√ßo</Label>
                             <Input
                                 value={form.price ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, price: formatCurrencyBRLInput(e.target.value) }))}
@@ -590,7 +590,7 @@ export default function FeaturedPropertiesModal({
                             </div>
                         </div>
                         <div>
-                            <Label>¡rea construÌda</Label>
+                            <Label>√Årea constru√≠da</Label>
                             <div className="relative">
                                 <Input
                                     className="pr-10"
@@ -616,9 +616,9 @@ export default function FeaturedPropertiesModal({
                                 <option value="cobertura">Cobertura</option>
                             </select>
                         </div>
-                        {/* CaracterÌsticas ao lado do campo de Tipo */}
+                        {/* Caracter√≠sticas ao lado do campo de Tipo */}
                         <div className="md:col-span-1 lg:col-span-2 hidden">
-                            <Label>CaracterÌsticas (features)</Label>
+                            <Label>Caracter√≠sticas (features)</Label>
                             <div className="mt-2 flex items-center gap-2">
                                 <Input className="flex-1" value={_featureInputHidden} onChange={(e) => set_featureInputHidden(e.target.value)} placeholder="Ex: Piscina" />
                                 <Button
@@ -646,7 +646,7 @@ export default function FeaturedPropertiesModal({
                                                 className="rounded-full bg-black px-1 text-white hover:bg-black/80"
                                                 onClick={() => setForm((s) => ({ ...s, features: (s.features ?? []).filter((_, i) => i !== idx) }))}
                                             >
-                                                ◊
+                                                √ó
                                             </button>
                                         </span>
                                     ))}
@@ -659,14 +659,14 @@ export default function FeaturedPropertiesModal({
                             <input type="checkbox" checked={!!form.is_new} onChange={(e) => setForm((s) => ({ ...s, is_new: e.target.checked }))} />
                             Novo
                         </label>
-                        {/* Checkbox "Publicado" removido: novas publicaÁıes ser„o publicadas automaticamente */}
+                        {/* Checkbox "Publicado" removido: novas publica√ß√µes ser√£o publicadas automaticamente */}
                     </div>
-                    {/* SeÁ„o de caracterÌsticas movida ao lado do campo de Tipo */}
+                    {/* Se√ß√£o de caracter√≠sticas movida ao lado do campo de Tipo */}
                     <div>
-                        <Label>MÌdia (ideal: 1200x800)</Label>
+                        <Label>M√≠dia (ideal: 1200x800)</Label>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Arraste para ordenar as imagens. A primeira imagem ser· usada como capa. Use o bot„o abaixo para
-                            enviar novas imagens ou vÌdeos.
+                            Arraste para ordenar as imagens. A primeira imagem ser√° usada como capa. Use o bot√£o abaixo para
+                            enviar novas imagens ou v√≠deos.
                         </p>
                         <Button
                             type="button"
@@ -675,7 +675,7 @@ export default function FeaturedPropertiesModal({
                             onClick={() => uploadMediaRef.current?.click()}
                             disabled={uploadingImages || uploadingVideos}
                         >
-                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher mÌdia'}
+                            {uploadingImages || uploadingVideos ? 'Enviando...' : 'Escolher m√≠dia'}
                         </Button>
                         <input
                             ref={uploadMediaRef}
@@ -752,7 +752,7 @@ export default function FeaturedPropertiesModal({
                                                     onClick={() => handleRemoveImage(img.id)}
                                                     aria-label="Remover imagem"
                                                 >
-                                                    ◊
+                                                    √ó
                                                 </button>
                                                 {isCover && (
                                                     <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] font-medium text-white">
@@ -789,7 +789,7 @@ export default function FeaturedPropertiesModal({
                                                 playsInline
                                             />
                                             <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 text-[10px] font-medium uppercase tracking-wide text-white">
-                                                VÌdeo
+                                                V√≠deo
                                             </span>
                                             <button
                                                 type="button"
@@ -797,25 +797,25 @@ export default function FeaturedPropertiesModal({
 
                                                 onClick={() => handleRemoveVideo(vid.id)}
 
-                                                aria-label="Remover vÌdeo"
+                                                aria-label="Remover v√≠deo"
                                             >
-                                                ◊
+                                                √ó
                                             </button>
                                         </div>
                                     );
                                 })}
                             </div>
                         ) : (
-                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma mÌdia selecionada.</p>
+                            <p className="mt-4 text-sm text-muted-foreground">Nenhuma m√≠dia selecionada.</p>
                         )}
                     </div>
                     <div>
-                        <Label>DescriÁ„o do imÛvel</Label>
+                        <Label>Descri√ß√£o do im√≥vel</Label>
                         <div className="mt-2 flex items-start gap-2">
                             <textarea
                                 ref={descriptionRef}
                                 className="min-h-[110px] w-full resize-y rounded-md border bg-background p-2 text-sm"
-                                placeholder={"Ex: Casa tÈrrea no Jardim Goi‚nia ?? com 3 quartos, suÌte, ·rea gourmet com piscina ?? e 2 vagas de garagem. LocalizaÁ„o excelente, prÛxima ao parque."}
+                                placeholder={"Ex: Casa t√©rrea no Jardim Goi√¢nia ?? com 3 quartos, su√≠te, √°rea gourmet com piscina ?? e 2 vagas de garagem. Localiza√ß√£o excelente, pr√≥xima ao parque."}
                                 value={(form as any).description ?? ''}
                                 onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
                             />
@@ -864,13 +864,13 @@ export default function FeaturedPropertiesModal({
                                 )}
                             </div>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">Escreva ‡ vontade e use emojis. O bot„o ?? abre um painel r·pido (estilo WhatsApp).</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Escreva √† vontade e use emojis. O bot√£o ?? abre um painel r√°pido (estilo WhatsApp).</p>
                     </div>
                 </div>
 
                 </div>
                 {uploadingVideos && (
-                    <p className="mt-6 text-xs text-muted-foreground">Enviando vÌdeosÖ</p>
+                    <p className="mt-6 text-xs text-muted-foreground">Enviando v√≠deos‚Ä¶</p>
                 )}
                 <DialogFooter className="mt-4">
                     <Button className="w-auto bg-black text-white hover:bg-black/80" variant="secondary" onClick={() => onOpenChange(false)}>

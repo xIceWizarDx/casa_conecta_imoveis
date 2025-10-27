@@ -1,0 +1,39 @@
+﻿INFORMACOES DA EMPRESA PARCEIRA
+
+Identificacao
+- Razao social: [preencher]
+- Nome fantasia: [preencher]
+- CNPJ: [preencher]
+- Inscricao estadual/municipal: [preencher]
+- CNAE principal: [preencher]
+- CNAE secundarios: [preencher]
+
+Localizacao e contatos
+- Endereco: [logradouro, numero, complemento, bairro, municipio, UF, CEP]
+- Telefone/WhatsApp: [preencher]
+- E-mail institucional: [preencher]
+- Site ou redes sociais: [preencher]
+
+Responsaveis
+- Representante legal: [nome completo, CPF, cargo]
+- Responsavel pelo acompanhamento do projeto: [nome, cargo, contato]
+
+Situacao cadastral
+- Data de abertura: [preencher]
+- Porte: [preencher]
+- Natureza juridica: [preencher]
+- Situacao cadastral atual: [preencher]
+- Observacoes sobre regularidade: [preencher]
+
+Contexto do projeto
+- Descricao das atividades principais da empresa: [preencher]
+- Necessidades identificadas para o projeto de extensao: [preencher]
+- Objetivos do parceiro com a iniciativa: [preencher]
+
+Documentacao
+- Carta de apresentacao recebida: [sim/nao]
+- Termo de autorizacao assinado: [sim/nao]
+- Outras evidencias (contratos, comprovantes): [listar]
+
+Observacoes adicionais
+- [Use este espaco para registrar informacoes complementares ou pendencias.]

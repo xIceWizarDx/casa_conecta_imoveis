@@ -1,0 +1,38 @@
+﻿PORTFOLIO - BASE DE INFORMACOES
+
+Documentos auxiliares
+- Dados da empresa: info_empresa_parceira.txt
+- Dados do estudante: info_gabriel_moraes.txt
+
+Campos faltantes da empresa (detalhar no arquivo auxiliar)
+- Dados cadastrais completos
+- Contatos e canais de comunicacao
+- Responsaveis e situacao juridica atual
+- Necessidades da empresa para o projeto
+- Documentacao de autorizacao
+
+Campos faltantes do estudante (detalhar no arquivo auxiliar)
+- Documentos e contatos atualizados
+- Competencias tecnicas e soft skills
+- Experiencias relevantes e portfolio
+- Disponibilidade de horarios
+
+Projeto de extensao (pre-planejamento)
+- Titulo provisorio: [definir]
+- Programa institucional: Inovacao e Empreendedorismo
+- Problema ou oportunidade identificada: [descrever]
+- Publico-alvo ou beneficiarios: [definir]
+- Metas ODS aderentes: [selecionar]
+- Solucao proposta / escopo do projeto: [resumir]
+- Resultados esperados e metricas: [listar]
+- Cronograma resumido (Plan/Do/Check/Act): [esbocar]
+- Recursos necessarios (humanos, tecnologicos, financeiros): [mapear]
+- Riscos e estrategias de mitigacao: [avaliar]
+
+Documentos e evidencias pendentes
+- Carta de apresentacao assinada com dados da organizacao parceira: [pendente]
+- Termo de autorizacao (1722363022721.docx) preenchido e assinado: [pendente]
+- Template PDCA (1722363066062.docx) completo com todas as etapas: [pendente]
+- Relatorio final / autoavaliacao (1744827722966.docx ou 1721666353902.pdf) preenchido apos execucao: [pendente]
+- Evidencias da execucao (fotos, capturas, depoimentos, metricas): [pendente]
+- Depoimento do representante da instituicao beneficiada: [pendente]

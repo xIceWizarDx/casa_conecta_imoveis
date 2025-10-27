@@ -556,7 +556,7 @@ export default function Painel() {
                                     <div className="flex items-center justify-between">
                                         <DialogTitle>Hero Slides</DialogTitle>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <span>{slidesLoading ? 'Carregando…' : `${slides.length} itens`}</span>
+                                            <span>{slidesLoading ? 'Carregando...' : `${slides.length} itens`}</span>
                                             <Button
                                                 className="hidden w-auto bg-black text-white hover:bg-black/80"
                                                 variant="secondary"
@@ -662,7 +662,7 @@ export default function Painel() {
                                             onClick={() => heroUploadInputRef.current?.click()}
                                             disabled={imagesUploading}
                                         >
-                                            {imagesUploading ? 'Enviando…' : 'Enviar imagem'}
+                                            {imagesUploading ? 'Enviando...' : 'Enviar imagem'}
                                         </Button>
                                         <input
                                             ref={heroUploadInputRef}

@@ -137,7 +137,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
  * @see app/Http/Controllers/VideoController.php:56
  * @route '/api/videos/{video}'
  */
-export const destroy = (args: { video: number | { id: number } } | [video: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { video: string | number | { id: string | number } } | [video: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -152,7 +152,7 @@ destroy.definition = {
  * @see app/Http/Controllers/VideoController.php:56
  * @route '/api/videos/{video}'
  */
-destroy.url = (args: { video: number | { id: number } } | [video: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { video: string | number | { id: string | number } } | [video: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { video: args }
     }
@@ -185,7 +185,7 @@ destroy.url = (args: { video: number | { id: number } } | [video: number | { id:
  * @see app/Http/Controllers/VideoController.php:56
  * @route '/api/videos/{video}'
  */
-destroy.delete = (args: { video: number | { id: number } } | [video: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { video: string | number | { id: string | number } } | [video: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -195,7 +195,7 @@ destroy.delete = (args: { video: number | { id: number } } | [video: number | { 
  * @see app/Http/Controllers/VideoController.php:56
  * @route '/api/videos/{video}'
  */
-    const destroyForm = (args: { video: number | { id: number } } | [video: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { video: string | number | { id: string | number } } | [video: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -210,7 +210,7 @@ destroy.delete = (args: { video: number | { id: number } } | [video: number | { 
  * @see app/Http/Controllers/VideoController.php:56
  * @route '/api/videos/{video}'
  */
-        destroyForm.delete = (args: { video: number | { id: number } } | [video: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { video: string | number | { id: string | number } } | [video: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

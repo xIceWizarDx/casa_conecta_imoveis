@@ -5,12 +5,12 @@ import { cn } from '@/lib/utils';
 import type { Notice } from '@/types/notice';
 
 const variantStyles: Record<Notice['type'], string> = {
-    success: 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-100',
-    error: 'border border-destructive/40 bg-destructive/10 text-destructive-foreground dark:bg-destructive/20',
+    success: 'border border-emerald-500/70 bg-emerald-600 text-white dark:border-emerald-400/70 dark:bg-emerald-500 dark:text-emerald-50',
+    error: 'border border-destructive/70 bg-destructive text-destructive-foreground dark:border-destructive/70 dark:bg-destructive dark:text-destructive-foreground',
 };
 
 const descriptionStyles: Record<Notice['type'], string> = {
-    success: 'text-emerald-900/80 dark:text-emerald-100/80',
+    success: 'text-white/80 dark:text-emerald-50/80',
     error: 'text-destructive-foreground/80 dark:text-destructive-foreground/80',
 };
 
@@ -64,7 +64,7 @@ export default function NoticeToaster({ notice, onDismiss, duration = 5000 }: No
         <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4 sm:justify-end sm:px-8">
             <div
                 className={cn(
-                    'pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-lg shadow-lg transition-all duration-200 ease-out',
+                    'pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-xl shadow-xl transition-all duration-200 ease-out',
                     isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0',
                     variantStyles[notice.type],
                 )}
