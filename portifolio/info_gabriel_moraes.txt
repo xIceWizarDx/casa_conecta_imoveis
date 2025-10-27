@@ -3,20 +3,20 @@
 Dados academicos
 - Curso: Engenharia de Software - Bacharelado
 - Unidade: Rondonopolis/MT - Ary Coelho
-- Periodo atual: 2o semestre / 2025
+- Periodo atual: 7 semestre / 2025
 - RA: 3230883008
 - Situacao: Formando
 
 Dados pessoais
 - Nome completo: Gabriel Ferreira de Moraes
-- Documento (CPF/RG): Nao informado
-- Data de nascimento: Nao informado
-- Endereco residencial: Nao informado
+- Documento (CPF/RG): 05889393154
+- Data de nascimento: 16/12/1997
+- Endereco residencial: Rua Sabiá 2771
 
 Contatos
 - E-mail institucional: Nao informado
-- E-mail pessoal: Nao informado
-- Telefone/WhatsApp: Nao informado
+- E-mail pessoal: gabrielmoraes102roo@gmail.com
+- Telefone/WhatsApp: 66992520969
 - LinkedIn ou portfolio online: Nao informado
 
 Competencias e experiencia
