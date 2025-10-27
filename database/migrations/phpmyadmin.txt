@@ -1,8 +1,91 @@
+<<<<<<< HEAD
 -- Seleciona o banco de dados
 USE `gabr2831_casa_conecta`;
+=======
+USE `gabr2831_casa_conecta_imoveis`;
+>>>>>>> 1db78fcc70801aa026c092194296a99e12d513dd
 
 SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- Tabela: users
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(191) NOT NULL,
+  `email_verified_at` DATETIME NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `remember_token` VARCHAR(100) NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: password_reset_tokens
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `email` VARCHAR(191) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `created_at` DATETIME NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: sessions (Laravel Session Driver: database)
+CREATE TABLE IF NOT EXISTS `sessions` (
+  `id` VARCHAR(191) NOT NULL,
+  `user_id` BIGINT UNSIGNED NULL,
+  `ip_address` VARCHAR(45) NULL,
+  `user_agent` TEXT NULL,
+  `payload` LONGTEXT NOT NULL,
+  `last_activity` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: cache (Laravel Cache Store: database)
+CREATE TABLE IF NOT EXISTS `cache` (
+  `key` VARCHAR(191) NOT NULL,
+  `value` MEDIUMTEXT NOT NULL,
+  `expiration` INT NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: cache_locks (Laravel Cache Locks)
+CREATE TABLE IF NOT EXISTS `cache_locks` (
+  `key` VARCHAR(191) NOT NULL,
+  `owner` VARCHAR(191) NOT NULL,
+  `expiration` INT NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: jobs (Laravel Queue: database)
+CREATE TABLE IF NOT EXISTS `jobs` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `queue` VARCHAR(191) NOT NULL,
+  `payload` LONGTEXT NOT NULL,
+  `attempts` TINYINT UNSIGNED NOT NULL,
+  `reserved_at` INT UNSIGNED NULL,
+  `available_at` INT UNSIGNED NOT NULL,
+  `created_at` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Tabela: job_batches (Laravel Batches)
+CREATE TABLE IF NOT EXISTS `job_batches` (
+  `id` VARCHAR(191) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `total_jobs` INT NOT NULL,
+  `pending_jobs` INT NOT NULL,
+  `failed_jobs` INT NOT NULL,
+  `failed_job_ids` LONGTEXT NOT NULL,
+  `options` MEDIUMTEXT NULL,
+  `cancelled_at` INT NULL,
+  `created_at` INT NOT NULL,
+  `finished_at` INT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `settings` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -85,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `featured_properties` (
   `built_area` VARCHAR(50) NULL,
   `type` VARCHAR(30) NULL,
   `description` TEXT NULL,
-  `features` TEXT NULL,
+  `features` JSON NULL,
   `price_range` VARCHAR(50) NULL,
   `is_new` TINYINT(1) NOT NULL DEFAULT 0,
   `is_published` TINYINT(1) NOT NULL DEFAULT 0,

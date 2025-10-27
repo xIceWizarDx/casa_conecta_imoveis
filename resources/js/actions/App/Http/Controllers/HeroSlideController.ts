@@ -137,7 +137,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
  * @see app/Http/Controllers/HeroSlideController.php:84
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-export const update = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -152,7 +152,7 @@ update.definition = {
  * @see app/Http/Controllers/HeroSlideController.php:84
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-update.url = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { heroSlide: args }
     }
@@ -185,7 +185,7 @@ update.url = (args: { heroSlide: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/HeroSlideController.php:84
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-update.put = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -195,7 +195,7 @@ update.put = (args: { heroSlide: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/HeroSlideController.php:84
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-    const updateForm = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateForm = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -210,7 +210,7 @@ update.put = (args: { heroSlide: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/HeroSlideController.php:84
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-        updateForm.put = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.put = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -226,7 +226,7 @@ update.put = (args: { heroSlide: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/HeroSlideController.php:110
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-export const destroy = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -241,7 +241,7 @@ destroy.definition = {
  * @see app/Http/Controllers/HeroSlideController.php:110
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-destroy.url = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { heroSlide: args }
     }
@@ -274,7 +274,7 @@ destroy.url = (args: { heroSlide: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/HeroSlideController.php:110
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-destroy.delete = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -284,7 +284,7 @@ destroy.delete = (args: { heroSlide: string | number | { id: string | number } }
  * @see app/Http/Controllers/HeroSlideController.php:110
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-    const destroyForm = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -299,7 +299,7 @@ destroy.delete = (args: { heroSlide: string | number | { id: string | number } }
  * @see app/Http/Controllers/HeroSlideController.php:110
  * @route '/api/admin/hero-slides/{heroSlide}'
  */
-        destroyForm.delete = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
@@ -315,7 +315,7 @@ destroy.delete = (args: { heroSlide: string | number | { id: string | number } }
  * @see app/Http/Controllers/HeroSlideController.php:116
  * @route '/api/admin/hero-slides/{heroSlide}/publish'
  */
-export const togglePublish = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const togglePublish = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: togglePublish.url(args, options),
     method: 'patch',
 })
@@ -330,7 +330,7 @@ togglePublish.definition = {
  * @see app/Http/Controllers/HeroSlideController.php:116
  * @route '/api/admin/hero-slides/{heroSlide}/publish'
  */
-togglePublish.url = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+togglePublish.url = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { heroSlide: args }
     }
@@ -363,7 +363,7 @@ togglePublish.url = (args: { heroSlide: string | number | { id: string | number 
  * @see app/Http/Controllers/HeroSlideController.php:116
  * @route '/api/admin/hero-slides/{heroSlide}/publish'
  */
-togglePublish.patch = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+togglePublish.patch = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: togglePublish.url(args, options),
     method: 'patch',
 })
@@ -373,7 +373,7 @@ togglePublish.patch = (args: { heroSlide: string | number | { id: string | numbe
  * @see app/Http/Controllers/HeroSlideController.php:116
  * @route '/api/admin/hero-slides/{heroSlide}/publish'
  */
-    const togglePublishForm = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const togglePublishForm = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: togglePublish.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -388,7 +388,7 @@ togglePublish.patch = (args: { heroSlide: string | number | { id: string | numbe
  * @see app/Http/Controllers/HeroSlideController.php:116
  * @route '/api/admin/hero-slides/{heroSlide}/publish'
  */
-        togglePublishForm.patch = (args: { heroSlide: string | number | { id: string | number } } | [heroSlide: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        togglePublishForm.patch = (args: { heroSlide: number | { id: number } } | [heroSlide: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: togglePublish.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Helmet } from 'react-helmet';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, apiUploadWithProgress } from '@/lib/api';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { MoreVertical } from 'lucide-react';
 import Header from '@/main/components/ui/Header';
@@ -102,9 +102,34 @@ const extractDescriptionText = (record: unknown): string => {
 
 // api helpers moved to '@/lib/api'
 
+// Area input helpers (keep suffix out of the input)
+const formatAreaNumber = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    const n = parseInt(digits, 10);
+    try {
+        return n.toLocaleString('pt-BR');
+    } catch {
+        return String(n);
+    }
+};
+
+const buildAreaWithSuffix = (value?: string | null) => {
+    const digits = (value ?? '').replace(/\D/g, '');
+    if (!digits) return null;
+    const n = parseInt(digits, 10);
+    const formatted = (() => {
+        try { return n.toLocaleString('pt-BR'); } catch { return String(n); }
+    })();
+    const M2 = 'm' + String.fromCharCode(178);
+    return `${formatted} ${M2}`;
+};
+
 export default function Painel() {
     // Imagens
     const [imagesUploading, setImagesUploading] = useState(false);
+    const [imagesUploadProgress, setImagesUploadProgress] = useState<number>(0);
+    const [videosUploadProgress, setVideosUploadProgress] = useState<number>(0);
 
     // Slides
     const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -247,8 +272,10 @@ export default function Painel() {
         const fd = new FormData();
         Array.from(fileList).forEach((f) => fd.append('images[]', f));
         setImagesUploading(true);
+        setVideosUploadProgress(0);
+        setImagesUploadProgress(0);
         try {
-            const uploaded = await apiFetch<Image[]>(ImageActions.store(), { body: fd });
+            const uploaded = await apiUploadWithProgress<Image[]>(ImageActions.store(), fd, (p) => setImagesUploadProgress(p));
             setNotice({ type: 'success', title: 'Imagens enviadas com sucesso' });
             return uploaded;
         } catch (e) {
@@ -260,6 +287,7 @@ export default function Painel() {
             return [];
         } finally {
             setImagesUploading(false);
+            setTimeout(() => setImagesUploadProgress(0), 500);
         }
     };
 
@@ -271,9 +299,9 @@ export default function Painel() {
         Array.from(fileList).forEach((f) => fd.append('videos[]', f));
         setImagesUploading(true);
         try {
-            const uploaded = await apiFetch<
+            const uploaded = await apiUploadWithProgress<
                 { id: number; url: string; filename?: string | null; original_name?: string | null }[]
-            >(VideoActions.store(), { body: fd });
+            >(VideoActions.store(), fd, (p) => setVideosUploadProgress(p));
             setNotice({ type: 'success', title: 'Vídeos enviados com sucesso' });
             return uploaded;
         } catch (e) {
@@ -285,6 +313,7 @@ export default function Painel() {
             return [];
         } finally {
             setImagesUploading(false);
+            setTimeout(() => setVideosUploadProgress(0), 500);
         }
     };
 
@@ -293,10 +322,20 @@ export default function Painel() {
         if (!files || files.length === 0) return;
         const imageFiles: File[] = [];
         const videoFiles: File[] = [];
+        const invalidFiles: File[] = [];
         Array.from(files).forEach((f) => {
             if (f.type.startsWith('video/')) videoFiles.push(f);
             else if (f.type.startsWith('image/')) imageFiles.push(f);
+            else invalidFiles.push(f);
         });
+
+        if (invalidFiles.length > 0) {
+            setNotice({
+                type: 'error',
+                title: 'Formato nao suportado',
+                message: 'Escolha imagens (JPG, PNG, WEBP, GIF) ou videos (MP4, MOV, WEBM).',
+            });
+        }
 
         let selected = false;
         if (videoFiles.length > 0) {
@@ -340,7 +379,7 @@ export default function Painel() {
                 price: newSlide.price,
                 bedrooms: newSlide.bedrooms ?? null,
                 bathrooms: newSlide.bathrooms ?? null,
-                area: newSlide.area ?? null,
+                area: buildAreaWithSuffix(newSlide.area),
                 neighborhood: newSlide.neighborhood ?? null,
                 is_published: newSlide.id ? !!newSlide.is_published : true,
             };
@@ -391,7 +430,7 @@ export default function Painel() {
                 price: newSlide.price,
                 bedrooms: newSlide.bedrooms ?? null,
                 bathrooms: newSlide.bathrooms ?? null,
-                area: newSlide.area ?? null,
+                area: buildAreaWithSuffix(newSlide.area),
                 neighborhood: newSlide.neighborhood ?? null,
                 is_published: newSlide.id ? !!newSlide.is_published : true,
             };
@@ -891,7 +930,7 @@ export default function Painel() {
                                             <Label>Área</Label>
                                             <Input
                                                 value={newSlide.area ?? ''}
-                                                onChange={(e) => setNewSlide((s) => ({ ...s, area: formatAreaM2Input(e.target.value) }))}
+                                                onChange={(e) => setNewSlide((s) => ({ ...s, area: formatAreaNumber(e.target.value) }))}
                                                 inputMode="numeric"
                                                 placeholder="Ex: 120 m²"
                                             />
@@ -909,6 +948,18 @@ export default function Painel() {
                                         >
                                             {imagesUploading ? 'Enviando…' : 'Enviar mídia'}
                                         </Button>
+                                        <span className="ml-3 align-middle text-xs text-muted-foreground">Formatos aceitos: JPG, PNG, WEBP, GIF; MP4, MOV, WEBM</span>
+                                        {imagesUploading && (
+                                            <div className="mt-3 h-2 w-full overflow-hidden rounded bg-muted">
+                                                <div
+                                                    className="h-2 bg-primary transition-all"
+                                                    style={{ width: `${Math.max(imagesUploadProgress, videosUploadProgress)}%` }}
+                                                />
+                                                <div className="mt-1 text-right text-xs text-muted-foreground">
+                                                    {Math.max(imagesUploadProgress, videosUploadProgress)}%
+                                                </div>
+                                            </div>
+                                        )}
                                         <input
                                             ref={heroUploadInputRef}
                                             type="file"
@@ -932,7 +983,7 @@ export default function Painel() {
                                                         preco={newSlide.price}
                                                         quartos={newSlide.bedrooms}
                                                         banheiros={newSlide.bathrooms}
-                                                        area={newSlide.area}
+                                                        area={buildAreaWithSuffix(newSlide.area)}
                                                         bairro={newSlide.neighborhood}
                                                     />
                                                 </div>
@@ -944,7 +995,7 @@ export default function Painel() {
                                                         preco={newSlide.price}
                                                         quartos={newSlide.bedrooms}
                                                         banheiros={newSlide.bathrooms}
-                                                        area={newSlide.area}
+                                                        area={buildAreaWithSuffix(newSlide.area)}
                                                         bairro={newSlide.neighborhood}
                                                     />
                                                 </ImageEditor>
@@ -1008,6 +1059,8 @@ export default function Painel() {
                             onUploadVideos={uploadVideos}
                             uploadingImages={imagesUploading}
                             uploadingVideos={imagesUploading}
+                            uploadProgressImages={imagesUploadProgress}
+                            uploadProgressVideos={videosUploadProgress}
                             editing={editingFeatured}
                         />
                         <Dialog
@@ -1050,10 +1103,3 @@ export default function Painel() {
         </>
     );
 }
-
-
-
-
-
-
-

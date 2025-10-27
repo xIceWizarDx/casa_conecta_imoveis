@@ -64,6 +64,8 @@ interface Props {
     onUploadVideos?: (files: FileList | null) => Promise<UploadedVideo[]>;
     uploadingImages?: boolean;
     uploadingVideos?: boolean;
+    uploadProgressImages?: number;
+    uploadProgressVideos?: number;
     editing?: FeaturedProperty | null;
 }
 
@@ -78,6 +80,8 @@ export default function FeaturedPropertiesModal({
     onUploadVideos,
     uploadingImages = false,
     uploadingVideos = false,
+    uploadProgressImages = 0,
+    uploadProgressVideos = 0,
     editing = null,
 }: Props) {
     const [creating, setCreating] = useState(false);
@@ -273,14 +277,25 @@ export default function FeaturedPropertiesModal({
 
         const imageFiles: File[] = [];
         const videoFiles: File[] = [];
+        const invalidFiles: File[] = [];
 
         selectedFiles.forEach((file) => {
             if (file.type.startsWith('video/')) {
                 videoFiles.push(file);
             } else if (file.type.startsWith('image/')) {
                 imageFiles.push(file);
+            } else {
+                invalidFiles.push(file);
             }
         });
+
+        if (invalidFiles.length > 0) {
+            onNotice?.({
+                type: 'error',
+                title: 'Formato nao suportado',
+                message: 'Escolha imagens (JPG, PNG, WEBP, GIF) ou videos (MP4, MOV, WEBM).',
+            });
+        }
 
         if (imageFiles.length > 0) {
             const uploaded = await onUploadImages(toFileList(imageFiles));
@@ -670,6 +685,18 @@ export default function FeaturedPropertiesModal({
                             className="hidden"
                             onChange={handleMediaUploadChange}
                         />
+                        <span className="ml-3 align-middle text-xs text-muted-foreground">Formatos aceitos: JPG, PNG, WEBP, GIF; MP4, MOV, WEBM</span>
+                        {(uploadingImages || uploadingVideos) && (
+                            <div className="mt-3 h-2 w-full overflow-hidden rounded bg-muted">
+                                <div
+                                    className="h-2 bg-primary transition-all"
+                                    style={{ width: `${Math.max(uploadProgressImages ?? 0, uploadProgressVideos ?? 0)}%` }}
+                                />
+                                <div className="mt-1 text-right text-xs text-muted-foreground">
+                                    {Math.max(uploadProgressImages ?? 0, uploadProgressVideos ?? 0)}%
+                                </div>
+                            </div>
+                        )}
                         <div className="mt-4 w-full">
                             <FeaturedPropertyModalPreview
                                 images={images}
@@ -863,9 +890,6 @@ export default function FeaturedPropertiesModal({
         </Dialog>
     );
 }
-
-
-
 
 
 

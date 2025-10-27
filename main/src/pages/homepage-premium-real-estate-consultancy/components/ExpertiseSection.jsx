@@ -63,7 +63,7 @@ const ExpertiseSection = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Seis motivos para escolher a Casa Conecta
+            Quatro motivos para escolher a Casa Conecta
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Mais que uma imobiliária, somos consultores especializados em conectar você ao imóvel dos seus sonhos 
